@@ -732,8 +732,7 @@ function saveConfig() {
 
 function initSupabase(url, key) {
     try {
-        // FIXED: Changed window._db.createClient to window.supabase.createClient to map to the loaded CDN module
-        // Added explicit auth config parameters so it correctly recognizes modern publishable tokens
+        // FIXED: Assign client explicitly to _db without redeclaring 'supabase' variable to avoid identification conflicts
         _db = window.supabase.createClient(url, key, {
             auth: {
                 persistSession: true,
