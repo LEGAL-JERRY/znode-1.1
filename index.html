@@ -192,9 +192,6 @@
 </head>
 <body>
 
-<!-- ════════════════════════════════════════════════
-     SUPABASE CONFIG MODAL (first launch only)
-════════════════════════════════════════════════ -->
 <div id="config-modal">
     <div class="config-panel animate-scale-in">
         <div class="flex items-center gap-2 mb-1">
@@ -210,7 +207,7 @@
             </div>
             <div>
                 <label class="text-white/60 text-[10px] font-semibold uppercase tracking-wide block mb-1.5">Anon Public Key</label>
-                <input id="cfg-key" type="text" class="config-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." />
+                <input id="cfg-key" type="text" class="config-input" placeholder="sb_publishable_... or eyJ..." />
             </div>
         </div>
 
@@ -222,19 +219,14 @@
 </div>
 
 
-<!-- ════════════════════════════════════════════════
-     ONBOARDING / SIGNUP SCREEN
-════════════════════════════════════════════════ -->
 <div id="screen-onboard" class="hidden">
     <div class="w-full max-w-sm">
-        <!-- Brand -->
         <div class="text-center mb-8">
             <div class="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-white font-black text-xl mx-auto mb-3 animate-float">Z</div>
             <h1 class="text-white font-extrabold text-2xl tracking-tight">Z-Node</h1>
             <p class="text-white/50 text-xs mt-1 font-medium">Financial & Identity Ecosystem for African Students</p>
         </div>
 
-        <!-- Form -->
         <div class="space-y-3">
             <div>
                 <input id="ob-fullname" type="text" class="onboard-input" placeholder="Full Name (as on admission letter)">
@@ -264,7 +256,6 @@
             </div>
         </div>
 
-        <!-- Status display during verification -->
         <div id="ob-status-bar" class="hidden mt-4 p-3 rounded-xl bg-white/10 border border-white/15">
             <div class="flex items-center gap-2.5">
                 <div class="spinner text-white/70 flex-shrink-0"></div>
@@ -282,12 +273,8 @@
 </div>
 
 
-<!-- ════════════════════════════════════════════════
-     MAIN APP (shown after onboarding)
-════════════════════════════════════════════════ -->
 <div id="screen-app" class="hidden">
 
-    <!-- HEADER -->
     <header class="glass-panel sticky top-0 z-50 safe-top">
         <div class="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -298,13 +285,10 @@
         </div>
     </header>
 
-    <!-- MAIN CONTENT AREA -->
     <main class="max-w-md mx-auto px-4 py-4 pb-20">
         
-        <!-- ========== HOME VIEW ========== -->
         <section id="view-home" class="view-section active space-y-4">
             
-            <!-- STUDENT CARD -->
             <div class="relative overflow-hidden rounded-3xl p-0 animate-scale-in glass-panel">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -translate-y-10 translate-x-10 blur-2xl"></div>
                 <div class="absolute bottom-0 left-0 w-24 h-24 bg-emerald/5 rounded-full translate-y-8 -translate-x-8 blur-xl"></div>
@@ -347,7 +331,6 @@
                 </div>
             </div>
 
-            <!-- PASSPORT CARD (shown only for verified users) -->
             <div id="passport-card" class="hidden glass-panel rounded-2xl p-4 animate-scale-in border-l-4 border-emerald-500">
                 <div class="flex items-center justify-between mb-2">
                     <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Z-Node Passport</p>
@@ -361,7 +344,6 @@
                 </div>
             </div>
 
-            <!-- PENDING NOTICE (shown only for pending users) -->
             <div id="pending-notice" class="hidden glass-panel rounded-2xl p-4 animate-scale-in border-l-4 border-amber-400">
                 <div class="flex items-start gap-3">
                     <span class="text-lg">⏳</span>
@@ -372,7 +354,6 @@
                 </div>
             </div>
 
-            <!-- QUICK ACTIONS -->
             <div class="grid grid-cols-4 gap-3 animate-slide-in">
                 <button class="glass-card rounded-2xl p-3 flex flex-col items-center gap-2">
                     <div class="w-10 h-10 rounded-xl bg-brand/5 flex items-center justify-center p-1.5">
@@ -400,7 +381,6 @@
                 </button>
             </div>
 
-            <!-- TUITION PROGRESS -->
             <div class="glass-card rounded-2xl p-4 animate-scale-in">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="text-[10px] font-bold text-brand uppercase tracking-wider">Tuition Progress</h3>
@@ -422,7 +402,6 @@
                 </div>
             </div>
 
-            <!-- RECENT ACTIVITY -->
             <div class="glass-card rounded-2xl p-4 animate-slide-in">
                 <h3 class="text-[10px] font-bold text-brand uppercase tracking-wider mb-4">Recent Activity</h3>
                 <div class="space-y-3">
@@ -466,7 +445,6 @@
             </div>
         </section>
 
-        <!-- ========== PAYMENTS VIEW ========== -->
         <section id="view-payments" class="view-section space-y-4">
             <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm animate-scale-in">
                 <h3 class="text-[10px] font-bold text-brand uppercase mb-3">Wallet</h3>
@@ -506,7 +484,6 @@
             </div>
         </section>
 
-        <!-- ========== IDENTITY VIEW ========== -->
         <section id="view-identity" class="view-section space-y-4">
             <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm animate-scale-in">
                 <h3 class="text-[10px] font-bold text-brand uppercase mb-3">Z-Node Student ID</h3>
@@ -524,7 +501,6 @@
                 </div>
             </div>
 
-            <!-- Passport Number block -->
             <div id="id-passport-block" class="hidden bg-white rounded-2xl border border-gray-100 p-4 shadow-sm animate-slide-in">
                 <h3 class="text-[10px] font-bold text-brand uppercase mb-2">Z-Node Passport</h3>
                 <p id="id-passport-num" class="text-sm font-mono font-black text-brand"></p>
@@ -554,7 +530,6 @@
             </div>
         </section>
 
-        <!-- ========== SERVICES VIEW ========== -->
         <section id="view-services" class="view-section space-y-3">
             <p class="text-[10px] text-gray-400 px-1">Connected student platforms</p>
             
@@ -625,42 +600,40 @@
             </div>
         </section>
 
-        <!-- ========== SETTINGS VIEW ========== -->
         <section id="view-settings" class="view-section space-y-2">
             <p class="text-[10px] text-gray-400 px-1 mb-2">Manage your account</p>
             
             <button class="w-full flex items-center justify-between p-3.5 bg-white rounded-xl border border-gray-100 card-hover text-left">
-                <span class="flex items-center gap-3 text-sm font-medium text-brand">
-                    <span>🔔</span>Notifications
+                <span class="flex items-center justify-between w-full text-sm font-medium text-brand">
+                    <span class="flex items-center gap-3"><span>🔔</span>Notifications</span>
                 </span>
                 <span class="text-gray-300 text-lg">›</span>
             </button>
             <button class="w-full flex items-center justify-between p-3.5 bg-white rounded-xl border border-gray-100 card-hover text-left">
-                <span class="flex items-center gap-3 text-sm font-medium text-brand">
-                    <span>🔒</span>Security & PIN
+                <span class="flex items-center justify-between w-full text-sm font-medium text-brand">
+                    <span class="flex items-center gap-3"><span>🔒</span>Security & PIN</span>
                 </span>
                 <span class="text-gray-300 text-lg">›</span>
             </button>
             <button class="w-full flex items-center justify-between p-3.5 bg-white rounded-xl border border-gray-100 card-hover text-left">
-                <span class="flex items-center gap-3 text-sm font-medium text-brand">
-                    <span>🏫</span>Linked Institutions
+                <span class="flex items-center justify-between w-full text-sm font-medium text-brand">
+                    <span class="flex items-center gap-3"><span>🏫</span>Linked Institutions</span>
                 </span>
                 <span class="text-gray-300 text-lg">›</span>
             </button>
             <button class="w-full flex items-center justify-between p-3.5 bg-white rounded-xl border border-gray-100 card-hover text-left">
-                <span class="flex items-center gap-3 text-sm font-medium text-brand">
-                    <span>❓</span>Help Center
+                <span class="flex items-center justify-between w-full text-sm font-medium text-brand">
+                    <span class="flex items-center gap-3"><span>❓</span>Help Center</span>
                 </span>
                 <span class="text-gray-300 text-lg">›</span>
             </button>
             <button class="w-full flex items-center justify-between p-3.5 bg-white rounded-xl border border-gray-100 card-hover text-left">
-                <span class="flex items-center gap-3 text-sm font-medium text-brand">
-                    <span>🌙</span>Dark Mode
+                <span class="flex items-center justify-between w-full text-sm font-medium text-brand">
+                    <span class="flex items-center gap-3"><span>🌙</span>Dark Mode</span>
                 </span>
                 <span class="text-gray-300 text-lg">›</span>
             </button>
 
-            <!-- Reset / Sign out -->
             <div class="pt-2">
                 <button onclick="signOut()" class="w-full flex items-center justify-between p-3.5 bg-red-50 rounded-xl border border-red-100 card-hover text-left">
                     <span class="flex items-center gap-3 text-sm font-medium text-red-600">
@@ -679,7 +652,6 @@
 
     </main>
 
-    <!-- BOTTOM NAVIGATION -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-gray-200/50 z-50 safe-bottom">
         <div class="max-w-md mx-auto px-1">
             <div class="flex justify-around py-2.5">
@@ -707,37 +679,50 @@
         </div>
     </nav>
 
-</div><!-- /screen-app -->
+</div><div id="toast-container"></div>
 
 
-<!-- TOAST CONTAINER -->
-<div id="toast-container"></div>
-
-
-<!-- ════════════════════════════════════════════════
-     JAVASCRIPT — SUPABASE INTEGRATION CORE
-════════════════════════════════════════════════ -->
 <script>
 // ─────────────────────────────────────────────────
 // 0. GLOBAL STATE
 // ─────────────────────────────────────────────────
-let supabase = null;
-let currentStudent = null; // the live student profile object
+let _db = null;           // Supabase client instance
+let currentStudent = null;
+
+// ─────────────────────────────────────────────────
+// TOAST UTILITY (hoisted)
+// ─────────────────────────────────────────────────
+function showToast(msg, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+
 
 // ─────────────────────────────────────────────────
 // 1. SUPABASE CONFIG FLOW
 // ─────────────────────────────────────────────────
 function saveConfig() {
-    const url = document.getElementById('cfg-url').value.trim();
+    let url = document.getElementById('cfg-url').value.trim();
     const key = document.getElementById('cfg-key').value.trim();
 
     if (!url || !key) {
         showToast('Enter both your Supabase URL and Anon Key.', 'error');
         return;
     }
+
+    // Automatically strip /rest/v1/ and trailing slashes if copied directly
+    if (url.endsWith('/rest/v1/')) {
+        url = url.replace('/rest/v1/', '');
+    }
+    if (url.endsWith('/')) {
+        url = url.slice(0, -1);
+    }
     if (!url.startsWith('https://')) {
-        showToast('URL must start with https://', 'error');
-        return;
+        url = 'https://' + url;
     }
 
     localStorage.setItem('znodeSupabaseUrl', url);
@@ -747,10 +732,18 @@ function saveConfig() {
 
 function initSupabase(url, key) {
     try {
-        supabase = window.supabase.createClient(url, key);
+        // FIXED: Changed window._db.createClient to window.supabase.createClient to map to the loaded CDN module
+        // Added explicit auth config parameters so it correctly recognizes modern publishable tokens
+        _db = window.supabase.createClient(url, key, {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true
+            }
+        });
         document.getElementById('config-modal').classList.add('hidden');
         bootApp();
     } catch (e) {
+        console.error("Supabase Initialization Error:", e);
         showToast('Failed to initialise Supabase: ' + e.message, 'error');
     }
 }
@@ -759,12 +752,10 @@ function initSupabase(url, key) {
 // 2. APP BOOT — decide which screen to show
 // ─────────────────────────────────────────────────
 async function bootApp() {
-    // Check for a saved student session
     const savedProfile = localStorage.getItem('znodeStudentProfile');
     if (savedProfile) {
         try {
             currentStudent = JSON.parse(savedProfile);
-            // Optionally refresh from DB (silent, don't block UI)
             refreshStudentProfile(currentStudent.email);
             showApp(currentStudent);
             return;
@@ -772,13 +763,12 @@ async function bootApp() {
             localStorage.removeItem('znodeStudentProfile');
         }
     }
-    // No session → show onboard
     document.getElementById('screen-onboard').classList.remove('hidden');
 }
 
 async function refreshStudentProfile(email) {
-    if (!supabase || !email) return;
-    const { data } = await supabase
+    if (!_db || !email) return;
+    const { data } = await _db
         .from('students')
         .select('*, institutions(name, country_code)')
         .eq('email', email)
@@ -794,12 +784,11 @@ async function refreshStudentProfile(email) {
 // 3. HANDLE SUBMIT — the full async pipeline
 // ─────────────────────────────────────────────────
 async function handleSubmit() {
-    if (!supabase) {
+    if (!_db) {
         showToast('Supabase not connected. Refresh and configure.', 'error');
         return;
     }
 
-    // ── Gather & validate inputs ──────────────────
     const fullName  = document.getElementById('ob-fullname').value.trim();
     const email     = document.getElementById('ob-email').value.trim().toLowerCase();
     const matric    = document.getElementById('ob-matric').value.trim().toUpperCase();
@@ -820,7 +809,6 @@ async function handleSubmit() {
 
     if (hasError) return;
 
-    // ── Lock UI ───────────────────────────────────
     const btn = document.getElementById('ob-submit-btn');
     btn.disabled = true;
     btn.innerHTML = `<span class="spinner"></span> Verifying...`;
@@ -838,16 +826,14 @@ async function handleSubmit() {
     };
 
     try {
-        // ── STEP 1: Parse domain from email ──────────
         statusText.textContent = 'Parsing institutional email…';
         const domainParts = email.split('@');
         if (domainParts.length !== 2) throw new Error('Invalid email format.');
-        const domainExtension = domainParts[1];   // e.g. "fulafia.edu.ng"
+        const domainExtension = domainParts[1];
         addStep('', `Domain detected: ${domainExtension}`);
 
-        // ── STEP 2: Look up institution ───────────────
         statusText.textContent = 'Looking up institution…';
-        const { data: institution, error: instErr } = await supabase
+        const { data: institution, error: instErr } = await _db
             .from('institutions')
             .select('id, name, country_code')
             .eq('domain_extension', domainExtension)
@@ -855,15 +841,13 @@ async function handleSubmit() {
 
         if (instErr || !institution) {
             addStep('', `Institution not found for domain: ${domainExtension}`, false);
-            // Proceed as PENDING with no institution_id
             await registerStudent({ fullName, email, matric, dept, level, institution: null, verified: false });
             return;
         }
         addStep('', `Institution: ${institution.name}`, true);
 
-        // ── STEP 3: Check whitelist ───────────────────
         statusText.textContent = 'Checking institutional whitelist…';
-        const { data: whitelist, error: wlErr } = await supabase
+        const { data: whitelist, error: wlErr } = await _db
             .from('institutional_whitelist')
             .select('*')
             .eq('institution_id', institution.id)
@@ -877,7 +861,6 @@ async function handleSubmit() {
         }
         addStep('', `Whitelist match found: ${whitelist.expected_full_name}`, true);
 
-        // ── STEP 4: Build passport & register VERIFIED ─
         statusText.textContent = 'Generating Z-Node Passport…';
         const matricSuffix = matric.replace(/\//g, '').slice(-6);
         const passportNumber = `ZNP-${institution.country_code}-2026-${matricSuffix}`;
@@ -903,7 +886,6 @@ async function handleSubmit() {
     }
 }
 
-// ── 3b. registerStudent: insert to DB & push to state ──
 async function registerStudent({ fullName, email, matric, dept, level, institution, verified, passportNumber, whitelistName }) {
     const statusText = document.getElementById('ob-status-text');
     statusText.textContent = 'Registering your profile…';
@@ -919,8 +901,7 @@ async function registerStudent({ fullName, email, matric, dept, level, instituti
         institution_id:      institution?.id ?? null,
     };
 
-    // Upsert on email (handles re-registrations gracefully)
-    const { data: student, error: insertErr } = await supabase
+    const { data: student, error: insertErr } = await _db
         .from('students')
         .upsert(insertPayload, { onConflict: 'email', ignoreDuplicates: false })
         .select('*, institutions(name, country_code)')
@@ -933,7 +914,6 @@ async function registerStudent({ fullName, email, matric, dept, level, instituti
         return;
     }
 
-    // Save to global state + localStorage
     currentStudent = student;
     localStorage.setItem('znodeStudentProfile', JSON.stringify(student));
 
@@ -960,13 +940,11 @@ function populateDashboard(student) {
     const instName   = student.institutions?.name || 'Institution Pending';
     const passport   = student.passport_number;
 
-    // ── HEADER badge ─────────────────────────────
     const headerBadge = document.getElementById('header-badge');
     headerBadge.innerHTML = isVerified
         ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 backdrop-blur-md"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>VERIFIED</span>`
         : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-700 border border-amber-500/20"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>PENDING</span>`;
 
-    // ── Student card ──────────────────────────────
     document.getElementById('card-institution').textContent = instName;
     document.getElementById('card-matric').textContent      = student.matric_number;
     document.getElementById('card-avatar').textContent      = initials;
@@ -977,7 +955,6 @@ function populateDashboard(student) {
         : `<span class="text-[8px]">⏳</span>`;
     avatarBadge.className = `absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center ${isVerified ? 'bg-emerald-500' : 'bg-amber-400'}`;
 
-    // ── Passport / Pending banners ────────────────
     if (isVerified && !passport.startsWith('ZNP-PENDING')) {
         document.getElementById('passport-card').classList.remove('hidden');
         document.getElementById('pending-notice').classList.add('hidden');
@@ -989,10 +966,8 @@ function populateDashboard(student) {
         document.getElementById('pending-notice').classList.remove('hidden');
     }
 
-    // ── Activity feed ─────────────────────────────
     document.getElementById('activity-institution').textContent = instName;
 
-    // ── Identity tab ─────────────────────────────
     document.getElementById('id-avatar').textContent    = initials;
     document.getElementById('id-fullname').textContent  = student.full_name;
     document.getElementById('id-dept').textContent      = student.academic_department;
@@ -1005,18 +980,14 @@ function populateDashboard(student) {
         ? 'px-2 py-0.5 rounded text-[9px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200'
         : 'px-2 py-0.5 rounded text-[9px] font-medium bg-amber-50 text-amber-700 border border-amber-200';
 
-    // Passport number on identity tab
     if (isVerified && !passport.startsWith('ZNP-PENDING')) {
         document.getElementById('id-passport-block').classList.remove('hidden');
         document.getElementById('id-passport-num').textContent = passport;
     }
 
-    // ── Full name on home card (top of student card) ──────
-    // The card shows institution + matric already; also show student name
     const nameEl = document.getElementById('card-student-name');
     if (nameEl) nameEl.textContent = student.full_name;
 
-    // Verification checklist
     const v = (text, ok) => ok
         ? `<span class="text-xs font-bold text-emerald-600">${text} ✓</span>`
         : `<span class="text-xs font-bold text-amber-500">${text} ⏳</span>`;
@@ -1037,24 +1008,11 @@ function signOut() {
     document.getElementById('screen-app').classList.add('hidden');
     document.getElementById('screen-onboard').classList.remove('hidden');
 
-    // Reset onboard form
     ['ob-fullname','ob-email','ob-matric','ob-dept'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('ob-level').value = '';
     document.getElementById('ob-submit-btn').disabled = false;
     document.getElementById('ob-submit-btn').innerHTML = 'Activate Z-Node Passport';
     document.getElementById('ob-status-bar').classList.add('hidden');
-}
-
-// ─────────────────────────────────────────────────
-// 6. TOAST UTILITY
-// ─────────────────────────────────────────────────
-function showToast(msg, type = 'info') {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = msg;
-    container.appendChild(toast);
-    setTimeout(() => toast.remove(), 3500);
 }
 
 // ─────────────────────────────────────────────────
@@ -1074,7 +1032,6 @@ document.querySelectorAll('.nav-item').forEach(button => {
     });
 });
 
-// Button touch feedback
 document.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('touchstart', function() { this.style.opacity = '0.85'; });
     btn.addEventListener('touchend',   function() { this.style.opacity = '1'; });
@@ -1088,12 +1045,10 @@ document.querySelectorAll('button').forEach(btn => {
     const key = localStorage.getItem('znodeSupabaseKey');
 
     if (url && key) {
-        // Pre-fill config inputs in case user wants to update later
         document.getElementById('cfg-url').value = url;
         document.getElementById('cfg-key').value = key;
         initSupabase(url, key);
     } else {
-        // Show config modal first
         document.getElementById('config-modal').classList.remove('hidden');
     }
 })();
