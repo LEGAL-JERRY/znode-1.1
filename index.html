@@ -726,11 +726,11 @@ async function bootApp() {
 
 async function refreshStudentProfile(email) {
     if (!_db || !email) return;
-    const { data } = await _db
+    const { data, error } = await _db
         .from('students')
         .select('*, institutions(name, country_code)')
         .eq('email', email)
-        .single();
+        .maybeSingle();
     if (data) {
         currentStudent = data;
         localStorage.setItem('znodeStudentProfile', JSON.stringify(data));
@@ -799,11 +799,14 @@ async function handleSubmit() {
             .from('institutions')
             .select('id, name, country_code')
             .eq('domain_extension', domainExtension)
-            .single();
+            .maybeSingle();
 
-        if (instErr || !institution) {
-            addStep('', `Institution not found for domain: ${domainExtension}`, false);
-            // Proceed as PENDING with no institution_id
+        if (instErr && instErr.code !== 'PGRST116') {
+            // Real error (RLS, network, bad schema) — surface it
+            throw new Error('Institution lookup failed: ' + instErr.message);
+        }
+        if (!institution) {
+            addStep('', `Domain @${domainExtension} not yet onboarded — registering as PENDING`, false);
             await registerStudent({ fullName, email, matric, dept, level, institution: null, verified: false });
             return;
         }
@@ -816,10 +819,13 @@ async function handleSubmit() {
             .select('*')
             .eq('institution_id', institution.id)
             .eq('matric_number', matric)
-            .single();
+            .maybeSingle();
 
-        if (wlErr || !whitelist) {
-            addStep('', `Matric not found in whitelist`, false);
+        if (wlErr && wlErr.code !== 'PGRST116') {
+            throw new Error('Whitelist lookup failed: ' + wlErr.message);
+        }
+        if (!whitelist) {
+            addStep('', `Matric not found in whitelist — registering as PENDING`, false);
             await registerStudent({ fullName, email, matric, dept, level, institution, verified: false });
             return;
         }
@@ -867,18 +873,38 @@ async function registerStudent({ fullName, email, matric, dept, level, instituti
         institution_id:      institution?.id ?? null,
     };
 
-    // Upsert on email (handles re-registrations gracefully)
-    const { data: student, error: insertErr } = await _db
+    // Step 1: Try INSERT
+    let student = null;
+    const { data: inserted, error: insertErr } = await _db
         .from('students')
-        .upsert(insertPayload, { onConflict: 'email', ignoreDuplicates: false })
+        .insert(insertPayload)
         .select('*, institutions(name, country_code)')
-        .single();
+        .maybeSingle();
 
     if (insertErr) {
-        showToast('DB error: ' + insertErr.message, 'error');
-        document.getElementById('ob-submit-btn').disabled = false;
-        document.getElementById('ob-submit-btn').innerHTML = 'Activate Z-Node Passport';
-        return;
+        // 23505 = unique_violation (student already exists) — try SELECT instead
+        if (insertErr.code === '23505') {
+            const { data: existing, error: fetchErr } = await _db
+                .from('students')
+                .select('*, institutions(name, country_code)')
+                .eq('email', insertPayload.email)
+                .maybeSingle();
+            if (fetchErr || !existing) {
+                showToast('Account exists but could not be retrieved: ' + (fetchErr?.message || 'unknown error'), 'error');
+                document.getElementById('ob-submit-btn').disabled = false;
+                document.getElementById('ob-submit-btn').innerHTML = 'Activate Z-Node Passport';
+                return;
+            }
+            student = existing;
+            showToast('Welcome back! Restoring your existing profile.', 'info');
+        } else {
+            showToast('Registration failed: ' + insertErr.message, 'error');
+            document.getElementById('ob-submit-btn').disabled = false;
+            document.getElementById('ob-submit-btn').innerHTML = 'Activate Z-Node Passport';
+            return;
+        }
+    } else {
+        student = inserted;
     }
 
     // Save to global state + localStorage
