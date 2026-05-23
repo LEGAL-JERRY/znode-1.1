@@ -63,6 +63,10 @@
         .tab-content { display: none; animation: fadeIn 0.3s ease-out; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Warning banner */
+        .warn-banner { background: #FFFBEB; border: 1px solid #F59E0B; color: #92400E; padding: 10px 16px; font-size: 11px; font-family: monospace; margin-bottom: 16px; display: none; }
+        .warn-banner.visible { display: block; }
     </style>
 </head>
 <body class="flex">
@@ -78,6 +82,7 @@
             <div style="font-size: 11px; font-weight: 600; color: #000000; letter-spacing: 2px; margin-bottom: 24px; text-transform: uppercase;">System Authentication</div>
             <input type="email" id="auth-email" class="input-field" placeholder="Admin Email" autocomplete="off">
             <input type="password" id="auth-password" class="input-field" placeholder="Password">
+            <div id="auth-error" style="color: #EF4444; font-size: 11px; font-family: monospace; margin-bottom: 12px; display: none;"></div>
             <button class="btn-primary" id="auth-btn" onclick="handleLogin()" style="margin-top: 8px;">Authenticate</button>
         </div>
     </div>
@@ -89,20 +94,23 @@
                     <div style="width: 32px; height: 32px; border: 2px solid #000000; display: flex; align-items: center; justify-content: center; color: #000000; font-family: monospace; font-weight: bold;">Z</div>
                     <span style="font-weight: 600; font-size: 16px; letter-spacing: 3px;">Z-NODE</span>
                 </div>
-                <div class="nav-item active" onclick="switchTab('overview')">
+                <div class="nav-item active" onclick="switchTab('overview', this)">
                     <span style="font-family: monospace; color: #A3A3A3;">01</span><span>Telemetry</span>
                 </div>
-                <div class="nav-item" onclick="switchTab('institutions')">
+                <div class="nav-item" onclick="switchTab('institutions', this)">
                     <span style="font-family: monospace; color: #A3A3A3;">02</span><span>Active Nodes</span>
                 </div>
-                <div class="nav-item" onclick="switchTab('settlement')">
+                <div class="nav-item" onclick="switchTab('settlement', this)">
                     <span style="font-family: monospace; color: #A3A3A3;">03</span><span>Clearing</span>
                 </div>
-                <div class="nav-item" onclick="switchTab('ledger')">
+                <div class="nav-item" onclick="switchTab('ledger', this)">
                     <span style="font-family: monospace; color: #A3A3A3;">04</span><span>Master Ledger</span>
                 </div>
-                <div class="nav-item" onclick="switchTab('audit')">
+                <div class="nav-item" onclick="switchTab('audit', this)">
                     <span style="font-family: monospace; color: #A3A3A3;">05</span><span>Audit Trail</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('students', this)">
+                    <span style="font-family: monospace; color: #A3A3A3;">06</span><span>Students</span>
                 </div>
             </div>
             <div style="position: absolute; bottom: 0; width: 260px; padding: 20px; border-top: 1px solid #E5E5E5; background: #FFFFFF;">
@@ -112,6 +120,8 @@
         </div>
 
         <div style="flex: 1; padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%;">
+
+            <!-- ── TELEMETRY ── -->
             <div class="tab-content active" id="overview-tab">
                 <div style="margin-bottom: 40px; border-bottom: 1px solid #E5E5E5; padding-bottom: 24px;">
                     <h1 style="font-size: 28px; font-weight: 400; letter-spacing: -0.5px; margin-bottom: 8px;">Global Telemetry</h1>
@@ -123,11 +133,13 @@
                     <div class="metric-card" style="border-color: #000000;"><div class="metric-label">Locked Escrow Value</div><div class="metric-value" id="total-escrow">₦0.00</div></div>
                 </div>
                 <div class="metric-card">
-                    <h3 style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #737373; margin-bottom: 24px;">Liquidity Flow (24H)</h3>
+                    <h3 style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #737373; margin-bottom: 8px;">Liquidity Flow (24H)</h3>
+                    <div id="chart-warn" class="warn-banner">⚠ escrow_velocity_metrics view not found in database. Chart requires this view to be created.</div>
                     <canvas id="velocityChart" height="250"></canvas>
                 </div>
             </div>
 
+            <!-- ── ACTIVE NODES ── -->
             <div class="tab-content" id="institutions-tab">
                 <div style="margin-bottom: 40px; border-bottom: 1px solid #E5E5E5; padding-bottom: 24px;">
                     <h2 style="font-size: 24px; font-weight: 400; letter-spacing: -0.5px;">Tenant Registry</h2>
@@ -138,16 +150,19 @@
                 </div>
             </div>
 
+            <!-- ── CLEARING ── -->
             <div class="tab-content" id="settlement-tab">
                 <div style="margin-bottom: 40px; border-bottom: 1px solid #E5E5E5; padding-bottom: 24px;">
                     <h2 style="font-size: 24px; font-weight: 400; letter-spacing: -0.5px;">Settlement Console</h2>
                 </div>
+                <div id="settlement-rpc-warn" class="warn-banner">⚠ execute_settlement RPC not found. Create this stored procedure in Supabase before using the Clear Block action.</div>
                 <div class="metric-card">
                     <div id="settlement-loading" class="loading">FETCHING ESCROW QUEUE...</div>
                     <div id="settlement-list" style="display: none;"></div>
                 </div>
             </div>
 
+            <!-- ── MASTER LEDGER ── -->
             <div class="tab-content" id="ledger-tab">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #E5E5E5; padding-bottom: 24px;">
                     <h2 style="font-size: 24px; font-weight: 400; letter-spacing: -0.5px;">Master Immutable Ledger</h2>
@@ -159,6 +174,7 @@
                 </div>
             </div>
 
+            <!-- ── AUDIT TRAIL ── -->
             <div class="tab-content" id="audit-tab">
                 <div style="margin-bottom: 40px; border-bottom: 1px solid #E5E5E5; padding-bottom: 24px;">
                     <h2 style="font-size: 24px; font-weight: 400; letter-spacing: -0.5px;">System Audit Trail</h2>
@@ -168,9 +184,26 @@
                     <div id="audit-list" style="display: none;"></div>
                 </div>
             </div>
+
+            <!-- ── STUDENTS ── -->
+            <div class="tab-content" id="students-tab">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #E5E5E5; padding-bottom: 24px;">
+                    <h2 style="font-size: 24px; font-weight: 400; letter-spacing: -0.5px;">Student Registry</h2>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <input id="student-search" class="input-field" style="margin:0; width: 220px;" placeholder="Search name / matric…" oninput="filterStudents(this.value)">
+                        <button class="btn-secondary" style="width: auto; padding: 8px 16px; font-size: 10px; white-space: nowrap;" onclick="exportStudentsCSV()">Export CSV</button>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div id="students-loading" class="loading">LOADING STUDENTS...</div>
+                    <div id="students-list" style="display: none;"></div>
+                </div>
+            </div>
+
         </div>
     </div>
 
+    <!-- Settlement Modal -->
     <div id="settlement-modal" class="modal">
         <div class="modal-content">
             <div style="font-size: 14px; font-weight: 600; letter-spacing: 1px; color: #000000; margin-bottom: 24px; text-transform: uppercase;">Authorize Clearing Protocol</div>
@@ -191,44 +224,58 @@
 
     <script>
         // ============================================================
-        // CORE CONFIGURATION (REPLACE WITH YOUR PROJECT DETAILS)
+        // CORE CONFIGURATION
         // ============================================================
-        const SUPABASE_URL = 'https://yohndnmwvgcwadkytmix.supabase.co'; 
+        const SUPABASE_URL  = 'https://yohndnmwvgcwadkytmix.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_zwFSpf5e_-VsOG9Voe6GKA_Bw_2zdOA';
 
-const SUPABASE_ANON_KEY = 'sb_publishable_zwFSpf5e_-VsOG9Voe6GKA_Bw_2zdOA';
-        
-        let supabase;
+        // FIX 1: renamed from 'supabase' → 'supabaseClient'
+        // 'supabase' is already declared globally by the CDN script above,
+        // re-declaring it with 'let' crashed the entire script block.
+        let supabaseClient = null;
         let currentUser = null;
         let velocityChart = null;
         let activeSettlementData = null;
         let rawLedgerData = [];
+        let rawStudentData = [];
 
+        // ── Helpers ──────────────────────────────────────────────────
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.textContent = `[ ${type.toUpperCase()} ] ${message}`;
             container.appendChild(toast);
-            
             setTimeout(() => toast.classList.add('show'), 10);
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 4000);
         }
 
+        function fmt(amount) {
+            return '₦' + (amount || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 });
+        }
+
+        // Safely read a column that might be named differently
+        function instName(inst) {
+            return inst.institution_name || inst.name || inst.short_name || 'Unknown';
+        }
+        function instCode(inst) {
+            return inst.institution_code || inst.short_name || inst.code || '—';
+        }
+        function instBalance(inst) {
+            return inst.current_escrow_balance ?? inst.escrow_balance ?? 0;
+        }
+        function instStatus(inst) {
+            return inst.status || '—';
+        }
+
+        // ── Boot ─────────────────────────────────────────────────────
         async function initSystem() {
-            if (SUPABASE_URL.includes('YOUR_PROJECT')) {
-                document.getElementById('auth-email').placeholder = "ERROR: CONFIGURE KEYS";
-                document.getElementById('auth-password').disabled = true;
-                return;
-            }
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             checkSession();
         }
 
         async function checkSession() {
-            const { data: { session }, error } = await supabase.auth.getSession();
+            const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 currentUser = session.user;
                 document.getElementById('current-user-email').textContent = `AUTH: ${currentUser.email}`;
@@ -242,19 +289,22 @@ const SUPABASE_ANON_KEY = 'sb_publishable_zwFSpf5e_-VsOG9Voe6GKA_Bw_2zdOA';
         }
 
         async function handleLogin() {
-            const email = document.getElementById('auth-email').value;
+            const email    = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value;
-            const btn = document.getElementById('auth-btn');
-            
-            if (!email || !password) return showToast('Credentials required', 'error');
-            
+            const btn      = document.getElementById('auth-btn');
+            const errEl    = document.getElementById('auth-error');
+            errEl.style.display = 'none';
+
+            if (!email || !password) { errEl.textContent = 'Email and password are required.'; errEl.style.display = 'block'; return; }
+
             btn.textContent = 'Verifying...';
             btn.disabled = true;
 
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-            
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
             if (error) {
-                showToast(error.message, 'error');
+                errEl.textContent = error.message;
+                errEl.style.display = 'block';
                 btn.textContent = 'Authenticate';
                 btn.disabled = false;
             } else {
@@ -264,173 +314,284 @@ const SUPABASE_ANON_KEY = 'sb_publishable_zwFSpf5e_-VsOG9Voe6GKA_Bw_2zdOA';
         }
 
         async function handleLogout() {
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
             currentUser = null;
             checkSession();
             showToast('Session Terminated', 'success');
         }
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        // FIX 2: switchTab now receives the clicked element directly (el)
+        // instead of relying on the implicit window.event which breaks in Firefox.
+        function switchTab(tab, el) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(tab + '-tab').classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            if (el) el.classList.add('active');
 
-            if (tab === 'overview') loadOverview();
-            else if (tab === 'institutions') loadInstitutions();
-            else if (tab === 'settlement') loadSettlementQueue();
-            else if (tab === 'ledger') loadLedger();
-            else if (tab === 'audit') loadAudit();
+            if      (tab === 'overview')      loadOverview();
+            else if (tab === 'institutions')  loadInstitutions();
+            else if (tab === 'settlement')    loadSettlementQueue();
+            else if (tab === 'ledger')        loadLedger();
+            else if (tab === 'audit')         loadAudit();
+            else if (tab === 'students')      loadStudents();
         }
 
+        // ── Overview / Telemetry ──────────────────────────────────────
         async function loadOverview() {
             try {
-                const { data: settled } = await supabase.from('global_financial_ledger').select('amount').eq('status', 'SETTLED');
-                document.getElementById('total-volume').textContent = '₦' + (settled?.reduce((a, b) => a + (b.amount || 0), 0) || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 });
+                const { data: settled } = await supabaseClient.from('global_financial_ledger').select('amount').eq('status', 'SETTLED');
+                document.getElementById('total-volume').textContent = fmt(settled?.reduce((a, b) => a + (b.amount || 0), 0));
 
-                const { data: insts } = await supabase.from('institutions').select('id').eq('status', 'ACTIVE');
+                const { data: insts } = await supabaseClient.from('institutions').select('id').eq('status', 'ACTIVE');
                 document.getElementById('active-institutions').textContent = insts?.length || 0;
 
-                const { data: escrow } = await supabase.from('global_financial_ledger').select('amount').in('status', ['PENDING', 'HELD_IN_ESCROW']);
-                document.getElementById('total-escrow').textContent = '₦' + (escrow?.reduce((a, b) => a + (b.amount || 0), 0) || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 });
+                const { data: escrow } = await supabaseClient.from('global_financial_ledger').select('amount').in('status', ['PENDING', 'HELD_IN_ESCROW']);
+                document.getElementById('total-escrow').textContent = fmt(escrow?.reduce((a, b) => a + (b.amount || 0), 0));
 
                 renderVelocityChart();
-            } catch (err) { showToast('Telemetry fetch failed', 'error'); }
+            } catch (err) {
+                showToast('Telemetry fetch failed: ' + err.message, 'error');
+            }
         }
 
+        // FIX 3: escrow_velocity_metrics — graceful handling if view doesn't exist
         async function renderVelocityChart() {
-            const { data } = await supabase.from('escrow_velocity_metrics').select('*').order('time_bucket', { ascending: false }).limit(12);
-            if (!data) return;
+            const warnEl = document.getElementById('chart-warn');
+            try {
+                const { data, error } = await supabaseClient.from('escrow_velocity_metrics').select('*').order('time_bucket', { ascending: false }).limit(12);
 
-            const ctx = document.getElementById('velocityChart').getContext('2d');
-            if (velocityChart) velocityChart.destroy();
-            
-            velocityChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.reverse().map(m => new Date(m.time_bucket).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})),
-                    datasets: [{
-                        label: 'Locked Liquidity (₦)',
-                        data: data.map(m => m.escrow_held || 0),
-                        borderColor: '#000000', borderWidth: 2, backgroundColor: 'transparent', tension: 0, pointBackgroundColor: '#000000', pointRadius: 3
-                    }]
-                },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, 
-                    scales: { 
-                        y: { border: { dash: [4, 4] }, grid: { color: '#E5E5E5' }, ticks: { color: '#737373', font: { family: 'monospace' } } }, 
-                        x: { grid: { display: false }, ticks: { color: '#737373', font: { family: 'monospace' } } } 
-                    }, 
-                    plugins: { legend: { display: false } } 
+                if (error) {
+                    // View probably doesn't exist yet
+                    warnEl.classList.add('visible');
+                    return;
                 }
-            });
+                if (!data || !data.length) {
+                    warnEl.textContent = '⚠ escrow_velocity_metrics view exists but returned no data yet.';
+                    warnEl.classList.add('visible');
+                    return;
+                }
+
+                warnEl.classList.remove('visible');
+                const ctx = document.getElementById('velocityChart').getContext('2d');
+                if (velocityChart) velocityChart.destroy();
+
+                velocityChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.reverse().map(m => new Date(m.time_bucket).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })),
+                        datasets: [{
+                            label: 'Locked Liquidity (₦)',
+                            data: data.map(m => m.escrow_held || 0),
+                            borderColor: '#000000', borderWidth: 2, backgroundColor: 'transparent',
+                            tension: 0, pointBackgroundColor: '#000000', pointRadius: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: {
+                            y: { border: { dash: [4, 4] }, grid: { color: '#E5E5E5' }, ticks: { color: '#737373', font: { family: 'monospace' } } },
+                            x: { grid: { display: false }, ticks: { color: '#737373', font: { family: 'monospace' } } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            } catch (err) {
+                warnEl.classList.add('visible');
+            }
         }
 
+        // ── Institutions ──────────────────────────────────────────────
+        // FIX 4: column-name-safe rendering via instName/instCode/instBalance helpers
         async function loadInstitutions() {
             document.getElementById('institutions-loading').style.display = 'block';
             document.getElementById('institutions-list').style.display = 'none';
-            
-            const { data, error } = await supabase.from('institutions').select('*').order('created_at', { ascending: false });
-            if (error) { showToast(error.message, 'error'); return; }
 
-            document.getElementById('institutions-list').innerHTML = data?.map(inst => `
-                <div class="table-row">
-                    <div>
-                        <div style="font-weight: 500; margin-bottom: 4px;">${inst.institution_name}</div>
-                        <div style="font-size: 11px; color: #737373; font-family: monospace;">CODE: ${inst.institution_code}</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-family: monospace; font-size: 16px; margin-bottom: 4px;">₦${(inst.current_escrow_balance || 0).toLocaleString()}</div>
-                        <span style="font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">${inst.status}</span>
-                    </div>
-                </div>`).join('') || '<div class="loading">NO NODES DETECTED</div>';
-                
+            const { data, error } = await supabaseClient.from('institutions').select('*').order('created_at', { ascending: false });
+            if (error) { showToast(error.message, 'error'); document.getElementById('institutions-loading').style.display = 'none'; return; }
+
+            document.getElementById('institutions-list').innerHTML = data?.length
+                ? data.map(inst => `
+                    <div class="table-row">
+                        <div>
+                            <div style="font-weight: 500; margin-bottom: 4px;">${instName(inst)}</div>
+                            <div style="font-size: 11px; color: #737373; font-family: monospace;">CODE: ${instCode(inst)}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-family: monospace; font-size: 16px; margin-bottom: 4px;">${fmt(instBalance(inst))}</div>
+                            <span style="font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">${instStatus(inst)}</span>
+                        </div>
+                    </div>`).join('')
+                : '<div class="loading">NO NODES DETECTED</div>';
+
             document.getElementById('institutions-loading').style.display = 'none';
             document.getElementById('institutions-list').style.display = 'block';
         }
 
+        // ── Settlement Queue ──────────────────────────────────────────
         async function loadSettlementQueue() {
             document.getElementById('settlement-loading').style.display = 'block';
             document.getElementById('settlement-list').style.display = 'none';
 
-            const { data, error } = await supabase.from('global_financial_ledger')
-                .select(`id, amount, status, transaction_reference, institutions(institution_name)`)
-                .in('status', ['PENDING', 'HELD_IN_ESCROW']).order('created_at', { ascending: false });
-            
-            if (error) { showToast(error.message, 'error'); return; }
+            const { data, error } = await supabaseClient.from('global_financial_ledger')
+                .select(`id, amount, status, transaction_reference, institutions(*)`)
+                .in('status', ['PENDING', 'HELD_IN_ESCROW'])
+                .order('created_at', { ascending: false });
 
-            document.getElementById('settlement-list').innerHTML = data?.map(tx => {
-                const nodeName = tx.institutions?.institution_name || 'Unknown Node';
-                return `
-                <div class="table-row">
-                    <div>
-                        <div style="font-weight: 500; margin-bottom: 4px;">${nodeName}</div>
-                        <div style="font-size: 11px; color: #737373; font-family: monospace;">HASH: ${tx.transaction_reference}</div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 24px;">
-                        <div style="font-family: monospace; font-size: 16px;">₦${tx.amount.toLocaleString()}</div>
-                        <button class="btn-primary" style="width: 120px;" onclick="openSettlementModal('${tx.id}', '${nodeName}', '${tx.transaction_reference}', ${tx.amount})">Clear Block</button>
-                    </div>
-                </div>`}).join('') || '<div class="loading">QUEUE EMPTY</div>';
+            if (error) { showToast(error.message, 'error'); document.getElementById('settlement-loading').style.display = 'none'; return; }
+
+            document.getElementById('settlement-list').innerHTML = data?.length
+                ? data.map(tx => {
+                    const node = tx.institutions ? instName(tx.institutions) : 'Unknown Node';
+                    return `
+                    <div class="table-row">
+                        <div>
+                            <div style="font-weight: 500; margin-bottom: 4px;">${node}</div>
+                            <div style="font-size: 11px; color: #737373; font-family: monospace;">HASH: ${tx.transaction_reference}</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 24px;">
+                            <div style="font-family: monospace; font-size: 16px;">${fmt(tx.amount)}</div>
+                            <button class="btn-primary" style="width: 120px;"
+                                onclick="openSettlementModal('${tx.id}', '${node}', '${tx.transaction_reference}', ${tx.amount})">
+                                Clear Block
+                            </button>
+                        </div>
+                    </div>`;}).join('')
+                : '<div class="loading">QUEUE EMPTY</div>';
 
             document.getElementById('settlement-loading').style.display = 'none';
             document.getElementById('settlement-list').style.display = 'block';
         }
 
+        // ── Ledger ────────────────────────────────────────────────────
         async function loadLedger() {
             document.getElementById('ledger-loading').style.display = 'block';
             document.getElementById('ledger-list').style.display = 'none';
 
-            const { data, error } = await supabase.from('global_financial_ledger')
-                .select(`amount, status, transaction_reference, created_at, institutions(institution_name)`)
+            const { data, error } = await supabaseClient.from('global_financial_ledger')
+                .select(`amount, status, transaction_reference, created_at, institutions(*)`)
                 .order('created_at', { ascending: false }).limit(50);
-            
-            if (error) { showToast(error.message, 'error'); return; }
-            rawLedgerData = data;
 
-            document.getElementById('ledger-list').innerHTML = data?.map(tx => `
-                <div class="table-row">
-                    <div>
-                        <div style="font-weight: 500; margin-bottom: 4px;">${tx.institutions?.institution_name || 'Unknown'}</div>
-                        <div style="font-size: 11px; color: #737373; font-family: monospace;">${new Date(tx.created_at).toLocaleString()} | ${tx.transaction_reference}</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-family: monospace; font-size: 16px; margin-bottom: 8px;">₦${tx.amount.toLocaleString()}</div>
-                        <span class="${tx.status === 'SETTLED' ? 'badge-settled' : 'badge-escrow'}">${tx.status}</span>
-                    </div>
-                </div>`).join('') || '<div class="loading">LEDGER EMPTY</div>';
+            if (error) { showToast(error.message, 'error'); document.getElementById('ledger-loading').style.display = 'none'; return; }
+            rawLedgerData = data || [];
+
+            document.getElementById('ledger-list').innerHTML = rawLedgerData.length
+                ? rawLedgerData.map(tx => `
+                    <div class="table-row">
+                        <div>
+                            <div style="font-weight: 500; margin-bottom: 4px;">${tx.institutions ? instName(tx.institutions) : 'Unknown'}</div>
+                            <div style="font-size: 11px; color: #737373; font-family: monospace;">${new Date(tx.created_at).toLocaleString()} | ${tx.transaction_reference}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-family: monospace; font-size: 16px; margin-bottom: 8px;">${fmt(tx.amount)}</div>
+                            <span class="${tx.status === 'SETTLED' ? 'badge-settled' : 'badge-escrow'}">${tx.status}</span>
+                        </div>
+                    </div>`).join('')
+                : '<div class="loading">LEDGER EMPTY</div>';
 
             document.getElementById('ledger-loading').style.display = 'none';
             document.getElementById('ledger-list').style.display = 'block';
         }
 
+        // ── Audit Trail ───────────────────────────────────────────────
         async function loadAudit() {
             document.getElementById('audit-loading').style.display = 'block';
             document.getElementById('audit-list').style.display = 'none';
 
-            const { data, error } = await supabase.from('global_audit_logs').select('*').order('timestamp', { ascending: false }).limit(30);
-            if (error) { showToast(error.message, 'error'); return; }
+            const { data, error } = await supabaseClient.from('global_audit_logs')
+                .select('*').order('timestamp', { ascending: false }).limit(30);
 
-            document.getElementById('audit-list').innerHTML = data?.map(log => `
-                <div class="table-row">
-                    <div>
-                        <div style="font-family: monospace; font-size: 12px; font-weight: 600; margin-bottom: 4px; text-transform: uppercase;">[ ${log.action_type} ]</div>
-                        <div style="font-size: 11px; color: #737373; font-family: monospace;">BY: ${log.admin_email} | ${new Date(log.timestamp).toLocaleString()}</div>
-                    </div>
-                    <div>
-                        <span style="font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">Verified</span>
-                    </div>
-                </div>`).join('') || '<div class="loading">NO LOGS</div>';
+            if (error) { showToast(error.message, 'error'); document.getElementById('audit-loading').style.display = 'none'; return; }
+
+            document.getElementById('audit-list').innerHTML = data?.length
+                ? data.map(log => `
+                    <div class="table-row">
+                        <div>
+                            <div style="font-family: monospace; font-size: 12px; font-weight: 600; margin-bottom: 4px; text-transform: uppercase;">[ ${log.action_type || 'ACTION'} ]</div>
+                            <div style="font-size: 11px; color: #737373; font-family: monospace;">
+                                BY: ${log.admin_email || log.performed_by || '—'} | ${new Date(log.timestamp || log.created_at).toLocaleString()}
+                            </div>
+                        </div>
+                        <div><span style="font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">Verified</span></div>
+                    </div>`).join('')
+                : '<div class="loading">NO LOGS</div>';
 
             document.getElementById('audit-loading').style.display = 'none';
             document.getElementById('audit-list').style.display = 'block';
         }
 
+        // ── Students ──────────────────────────────────────────────────
+        async function loadStudents() {
+            document.getElementById('students-loading').style.display = 'block';
+            document.getElementById('students-list').style.display = 'none';
+
+            const { data, error } = await supabaseClient.from('students')
+                .select('*, institutions(name, short_name)')
+                .order('created_at', { ascending: false })
+                .limit(100);
+
+            if (error) { showToast(error.message, 'error'); document.getElementById('students-loading').style.display = 'none'; return; }
+            rawStudentData = data || [];
+            renderStudentList(rawStudentData);
+
+            document.getElementById('students-loading').style.display = 'none';
+            document.getElementById('students-list').style.display = 'block';
+        }
+
+        function renderStudentList(data) {
+            document.getElementById('students-list').innerHTML = data.length
+                ? data.map(s => `
+                    <div class="table-row">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500; margin-bottom: 2px;">${s.full_name || '—'}</div>
+                            <div style="font-size: 11px; color: #737373; font-family: monospace;">
+                                ${s.matric_number || '—'} | ${s.faculty || '—'} › ${s.department || '—'}
+                            </div>
+                            <div style="font-size: 11px; color: #737373; font-family: monospace; margin-top: 2px;">
+                                ${s.institutions ? (s.institutions.name || s.institutions.short_name) : 'No institution'} | ${s.academic_level || '—'}
+                            </div>
+                        </div>
+                        <div style="text-align: right; flex-shrink: 0; margin-left: 24px;">
+                            <div style="font-family: monospace; font-size: 11px; margin-bottom: 6px;">${s.znode_passport_id || '—'}</div>
+                            <span class="${s.is_verified ? 'badge-settled' : 'badge-escrow'}">${s.is_verified ? 'VERIFIED' : 'PENDING'}</span>
+                        </div>
+                    </div>`).join('')
+                : '<div class="loading">NO STUDENTS FOUND</div>';
+        }
+
+        function filterStudents(query) {
+            const q = query.toLowerCase().trim();
+            if (!q) { renderStudentList(rawStudentData); return; }
+            const filtered = rawStudentData.filter(s =>
+                (s.full_name || '').toLowerCase().includes(q) ||
+                (s.matric_number || '').toLowerCase().includes(q) ||
+                (s.department || '').toLowerCase().includes(q) ||
+                (s.faculty || '').toLowerCase().includes(q)
+            );
+            renderStudentList(filtered);
+        }
+
+        function exportStudentsCSV() {
+            if (!rawStudentData.length) return showToast('No student data to export', 'error');
+            const headers = ['Full Name', 'Matric', 'Faculty', 'Department', 'Level', 'Email', 'Username', 'Passport ID', 'Verified', 'Institution'];
+            const rows = rawStudentData.map(s => [
+                s.full_name, s.matric_number, s.faculty, s.department, s.academic_level,
+                s.email, s.username, s.znode_passport_id, s.is_verified,
+                s.institutions?.name || s.institutions?.short_name || ''
+            ]);
+            const csv = "data:text/csv;charset=utf-8," + [headers, ...rows].map(r => r.join(',')).join('\n');
+            const link = document.createElement('a');
+            link.setAttribute('href', encodeURI(csv));
+            link.setAttribute('download', `Z-Node_Students_${Date.now()}.csv`);
+            document.body.appendChild(link); link.click(); link.remove();
+            showToast('Student data exported', 'success');
+        }
+
+        // ── Settlement Modal ──────────────────────────────────────────
         function openSettlementModal(txId, institution, reference, amount) {
             activeSettlementData = { txId };
             document.getElementById('modal-institution-name').textContent = institution;
             document.getElementById('modal-transaction-id').textContent = reference;
-            document.getElementById('modal-amount').textContent = '₦' + amount.toLocaleString('en-NG', { minimumFractionDigits: 2 });
+            document.getElementById('modal-amount').textContent = fmt(amount);
             document.getElementById('settlement-modal').classList.add('active');
         }
 
@@ -439,29 +600,41 @@ const SUPABASE_ANON_KEY = 'sb_publishable_zwFSpf5e_-VsOG9Voe6GKA_Bw_2zdOA';
             activeSettlementData = null;
         }
 
+        // FIX 5: execute_settlement RPC — graceful error if procedure doesn't exist yet
         async function executeSettlement() {
             if (!activeSettlementData || !currentUser) return;
             const btn = document.getElementById('modal-approve-btn');
             btn.textContent = 'Executing...';
             btn.disabled = true;
 
-            const { data, error } = await supabase.rpc('execute_settlement', {
+            const { data, error } = await supabaseClient.rpc('execute_settlement', {
                 p_transaction_id: activeSettlementData.txId,
-                p_admin_user_id: currentUser.id
+                p_admin_user_id:  currentUser.id
             });
 
-            if (error || (data && !data[0].success)) {
-                showToast(error?.message || data[0].message, 'error');
+            if (error) {
+                // Check if the RPC simply doesn't exist yet
+                const msg = error.code === 'PGRST202' || error.message?.includes('function')
+                    ? 'execute_settlement RPC not found. Create this stored procedure in Supabase first.'
+                    : error.message;
+                showToast(msg, 'error');
+                document.getElementById('settlement-rpc-warn').classList.add('visible');
                 btn.textContent = 'Execute';
                 btn.disabled = false;
                 return;
             }
-            
+
+            if (data && data[0] && !data[0].success) {
+                showToast(data[0].message || 'Settlement failed', 'error');
+                btn.textContent = 'Execute';
+                btn.disabled = false;
+                return;
+            }
+
             showToast('Block Cleared Successfully', 'success');
             btn.textContent = 'Cleared';
             btn.style.background = '#FFFFFF';
             btn.style.color = '#000000';
-            
             setTimeout(() => {
                 closeSettlementModal();
                 loadSettlementQueue();
@@ -471,29 +644,24 @@ const SUPABASE_ANON_KEY = 'sb_publishable_zwFSpf5e_-VsOG9Voe6GKA_Bw_2zdOA';
             }, 1000);
         }
 
+        // ── CSV Export (Ledger) ───────────────────────────────────────
         function exportLedgerCSV() {
             if (!rawLedgerData.length) return showToast('No data to export', 'error');
-            
             const headers = ['Date', 'Institution', 'Transaction Hash', 'Amount (NGN)', 'Status'];
             const rows = rawLedgerData.map(tx => [
                 new Date(tx.created_at).toISOString(),
-                tx.institutions?.institution_name || 'Unknown',
-                tx.transaction_reference,
-                tx.amount,
-                tx.status
+                tx.institutions ? instName(tx.institutions) : 'Unknown',
+                tx.transaction_reference, tx.amount, tx.status
             ]);
-            
-            let csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Z-Node_Ledger_Export_${new Date().getTime()}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+            const csv = "data:text/csv;charset=utf-8," + [headers, ...rows].map(r => r.join(',')).join('\n');
+            const link = document.createElement('a');
+            link.setAttribute('href', encodeURI(csv));
+            link.setAttribute('download', `Z-Node_Ledger_Export_${Date.now()}.csv`);
+            document.body.appendChild(link); link.click(); link.remove();
             showToast('Ledger Exported', 'success');
         }
 
+        // ── Boot ──────────────────────────────────────────────────────
         window.addEventListener('DOMContentLoaded', initSystem);
     </script>
 </body>
