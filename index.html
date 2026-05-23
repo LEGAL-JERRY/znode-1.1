@@ -1441,7 +1441,6 @@ document.querySelectorAll('button').forEach(btn => {
 (function init() {
     initSupabase();
     bootApp();
-    signup_initFacultyDropdown();
 })();
 
 // ═══════════════════════════════════════════════════════════════
@@ -1538,19 +1537,26 @@ const NIGERIA_FACULTIES_DATA = {
 };
 
 // ── Populate faculty dropdown from Supabase or fallback ────────
+// Phase 1: populate from hardcoded data immediately on DOM ready
+document.addEventListener('DOMContentLoaded', function signup_domReady() {
+    const select = document.getElementById('su-faculty');
+    if (!select) return;
+    // Always populate hardcoded list first so the dropdown is never empty
+    signup_populateFacultySelect(select, Object.keys(NIGERIA_FACULTIES_DATA));
+    // Phase 2: try to upgrade with Supabase data (async, best-effort)
+    signup_initFacultyDropdown();
+});
+
 async function signup_initFacultyDropdown() {
     const select = document.getElementById('su-faculty');
     if (!select) return;
-    let faculties = Object.keys(NIGERIA_FACULTIES_DATA);
     try {
-        if (_db) {
-            const { data, error } = await _db.from('nuc_faculties').select('name');
-            if (!error && data && data.length > 0) {
-                faculties = data.map(r => r.name);
-            }
+        if (!_db) return;
+        const { data, error } = await _db.from('nuc_faculties').select('name');
+        if (!error && data && data.length > 0) {
+            signup_populateFacultySelect(select, data.map(r => r.name));
         }
-    } catch (_) { /* silent fallback */ }
-    signup_populateFacultySelect(select, faculties);
+    } catch (_) { /* silent — hardcoded list already shown */ }
 }
 
 function signup_populateFacultySelect(select, faculties) {
