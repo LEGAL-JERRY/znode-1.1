@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Z-Node | Master Ledger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0A0A0A; /* Deep Space UI Background */
+            color: #e2e8f0;
+        }
+        .sidebar { 
+            background: #0f1115; 
+            border-right: 1px solid #1f2937; 
+        }
+        .nav-item { 
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px; 
+            cursor: pointer; border-left: 3px solid transparent;
+            transition: all 0.2s; color: #9ca3af;
+        }
+        .nav-item:hover { background: #16181d; color: #fff; }
+        .nav-item.active { 
+            background: #16181d; color: #fff; border-left-color: #00F0FF;
+        }
+        .metric-card {
+            background: #13151a; border: 1px solid #1f2937; border-radius: 12px;
+            padding: 20px; transition: transform 0.2s, border-color 0.2s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .metric-card:hover { border-color: #374151; transform: translateY(-2px); }
+        .metric-label { font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .metric-value { font-size: 28px; font-weight: 600; color: #f8fafc; font-variant-numeric: tabular-nums; }
+        
+        /* Neon Badges */
+        .badge-settled { background: rgba(16, 185, 129, 0.1); color: #00FFA3; border: 1px solid #00FFA3; padding: 4px 12px; border-radius: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+        .badge-escrow { background: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid #fbbf24; padding: 4px 12px; border-radius: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+        .badge-pending { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid #60a5fa; padding: 4px 12px; border-radius: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .status-active { color: #00FFA3; text-shadow: 0 0 10px rgba(0, 255, 163, 0.3); }
+        .table-row { border-bottom: 1px solid #1f2937; padding: 16px 0; }
+        .table-row:last-child { border-bottom: none; }
+        
+        .btn-primary { 
+            background: transparent; color: #00F0FF; padding: 8px 16px; border-radius: 4px;
+            font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #00F0FF; 
+            text-transform: uppercase; transition: all 0.2s; letter-spacing: 1px;
+        }
+        .btn-primary:hover { background: rgba(0, 240, 255, 0.1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.3); }
+        
+        .btn-secondary { 
+            background: #1f2937; color: #f8fafc; padding: 8px 16px; border-radius: 4px;
+            font-size: 13px; cursor: pointer; border: 1px solid #374151; transition: background 0.2s;
+        }
+        .btn-secondary:hover { background: #374151; }
+        
+        .modal { 
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content { 
+            background: #13151a; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; max-width: 500px;
+            width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+        .loading { color: #00F0FF; text-align: center; padding: 40px; font-family: monospace; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        
+        .tab-container { display: flex; gap: 16px; border-bottom: 1px solid #1f2937; margin-bottom: 20px; }
+        .tab-btn { 
+            padding: 12px 16px; cursor: pointer; border: none; background: transparent;
+            color: #6b7280; font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -1px;
+        }
+        .tab-btn.active { color: #00F0FF; border-bottom-color: #00F0FF; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="flex">
+    <div class="sidebar w-64 min-h-screen">
+        <div style="padding: 24px 16px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 32px;">
+                <div style="width: 32px; height: 32px; background: rgba(0, 240, 255, 0.1); border: 1px solid #00F0FF; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #00F0FF; font-weight: bold; font-family: monospace;">Z</div>
+                <span style="font-weight: 600; font-size: 16px; letter-spacing: 2px;">Z-NODE</span>
+            </div>
+            <div class="nav-item active" onclick="switchTab('overview')">
+                <span style="font-family: monospace;">[01]</span>
+                <span>Telemetry</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('institutions')">
+                <span style="font-family: monospace;">[02]</span>
+                <span>Active Nodes</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('settlement')">
+                <span style="font-family: monospace;">[03]</span>
+                <span>Clearing</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('ledger')">
+                <span style="font-family: monospace;">[04]</span>
+                <span>Master Ledger</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('audit')">
+                <span style="font-family: monospace;">[05]</span>
+                <span>Audit Trail</span>
+            </div>
+        </div>
+    </div>
+
+    <div style="flex: 1; padding: 32px;">
+        <div class="tab-content active" id="overview-tab">
+            <div style="margin-bottom: 32px;">
+                <h1 style="font-size: 24px; font-weight: 300; letter-spacing: 2px; color: #f8fafc; margin-bottom: 8px;">GLOBAL TELEMETRY</h1>
+                <p style="color: #6b7280; font-size: 13px; font-family: monospace;">SYSTEM STATUS: ONLINE | REAL-TIME ESCROW VELOCITY</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                <div class="metric-card">
+                    <div class="metric-label">Total System Volume</div>
+                    <div class="metric-value" id="total-volume">₦0.00</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Active Institutional Nodes</div>
+                    <div class="metric-value" id="active-institutions">0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Locked Escrow Value</div>
+                    <div class="metric-value" style="color: #00F0FF;" id="total-escrow">₦0.00</div>
+                </div>
+            </div>
+
+            <div class="metric-card" style="margin-bottom: 32px;">
+                <h3 style="font-weight: 500; font-size: 14px; letter-spacing: 1px; color: #9ca3af; margin-bottom: 24px;">LIQUIDITY FLOW (24H)</h3>
+                <canvas id="velocityChart" height="300"></canvas>
+            </div>
+        </div>
+
+        <div class="tab-content" id="institutions-tab">
+            <h2 style="font-size: 20px; font-weight: 300; letter-spacing: 2px; margin-bottom: 24px;">TENANT REGISTRY</h2>
+            <div class="metric-card">
+                <div id="institutions-loading" class="loading">SYNCING NODES...</div>
+                <div id="institutions-list" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="settlement-tab">
+            <h2 style="font-size: 20px; font-weight: 300; letter-spacing: 2px; margin-bottom: 24px;">SETTLEMENT CONSOLE</h2>
+            <div class="metric-card">
+                <div id="settlement-pending-loading" class="loading">FETCHING ESCROW QUEUE...</div>
+                <div id="settlement-pending-list" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="ledger-tab">
+            <h2 style="font-size: 20px; font-weight: 300; letter-spacing: 2px; margin-bottom: 24px;">MASTER IMMUTABLE LEDGER</h2>
+            <div class="metric-card">
+                <div id="ledger-all-loading" class="loading">READING BLOCKS...</div>
+                <div id="ledger-all-list" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="audit-tab">
+            <h2 style="font-size: 20px; font-weight: 300; letter-spacing: 2px; margin-bottom: 24px;">SYSTEM AUDIT TRAIL</h2>
+            <div class="metric-card">
+                <div id="audit-loading" class="loading">DECRYPTING LOGS...</div>
+                <div id="audit-list" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settlement-modal" class="modal">
+        <div class="modal-content">
+            <div style="font-size: 14px; letter-spacing: 1px; color: #00F0FF; margin-bottom: 24px;">AUTHORIZE CLEARING</div>
+            
+            <div style="background: #0A0A0A; padding: 16px; border-radius: 8px; border: 1px solid #1f2937; margin-bottom: 24px;">
+                <div style="font-size: 11px; color: #6b7280; font-family: monospace; margin-bottom: 4px;">TARGET NODE</div>
+                <div id="modal-institution-name" style="font-weight: 500; color: #f8fafc; margin-bottom: 12px;"></div>
+                
+                <div style="font-size: 11px; color: #6b7280; font-family: monospace; margin-bottom: 4px;">TX HASH</div>
+                <div id="modal-transaction-id" style="font-family: monospace; font-size: 12px; color: #9ca3af; margin-bottom: 12px;"></div>
+                
+                <div style="font-size: 11px; color: #6b7280; font-family: monospace; margin-bottom: 4px;">SETTLEMENT AMOUNT</div>
+                <div id="modal-amount" style="font-size: 24px; font-weight: 600; color: #00FFA3;"></div>
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="btn-secondary" onclick="closeSettlementModal()">ABORT</button>
+                <button class="btn-primary" id="modal-approve-btn" onclick="approveSettlement()">EXECUTE SETTLEMENT</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // SUPABASE CONFIG: INSERT YOUR KEYS HERE
+        // ============================================================
+        const SUPABASE_URL = 'YOUR_PROJECT_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
+
+        let supabase;
+        let currentAdmin = { id: '00000000-0000-0000-0000-000000000000', email: 'super@z-node.io' }; // Dummy UUID format
+        let velocityChart = null;
+        let settlementModalData = null;
+
+        function initSupabase() {
+            if (!SUPABASE_URL.includes('YOUR_PROJECT')) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(tab + '-tab').classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            if (tab === 'overview') loadOverview();
+            else if (tab === 'institutions') loadInstitutions();
+            else if (tab === 'settlement') loadSettlement();
+            else if (tab === 'ledger') loadLedger();
+            else if (tab === 'audit') loadAudit();
+        }
+
+        async function loadOverview() {
+            if (!supabase) return;
+            try {
+                const { data: settled } = await supabase.from('global_financial_ledger').select('amount').eq('status', 'SETTLED');
+                const totalVolume = settled?.reduce((sum, tx) => sum + (tx.amount || 0), 0) || 0;
+                document.getElementById('total-volume').textContent = '₦' + totalVolume.toLocaleString('en-NG', { minimumFractionDigits: 2 });
+
+                const { data: institutions } = await supabase.from('institutions').select('id').eq('status', 'ACTIVE');
+                document.getElementById('active-institutions').textContent = institutions?.length || 0;
+
+                const { data: escrow } = await supabase.from('global_financial_ledger').select('amount').in('status', ['PENDING', 'HELD_IN_ESCROW']);
+                const totalEscrow = escrow?.reduce((sum, tx) => sum + (tx.amount || 0), 0) || 0;
+                document.getElementById('total-escrow').textContent = '₦' + totalEscrow.toLocaleString('en-NG', { minimumFractionDigits: 2 });
+
+                loadVelocityChart();
+            } catch (err) { console.error('Telemetry Error:', err); }
+        }
+
+        async function loadVelocityChart() {
+            if (!supabase) return;
+            const { data: velocity } = await supabase.from('escrow_velocity_metrics').select('*').order('time_bucket', { ascending: false }).limit(12);
+            if (!velocity) return;
+
+            const labels = velocity.reverse().map(m => new Date(m.time_bucket).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+            
+            const ctx = document.getElementById('velocityChart').getContext('2d');
+            if (velocityChart) velocityChart.destroy();
+            
+            velocityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Locked in Escrow',
+                        data: velocity.map(m => m.escrow_held || 0),
+                        borderColor: '#00F0FF', backgroundColor: 'rgba(0, 240, 255, 0.1)',
+                        tension: 0.1, fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { grid: { color: '#1f2937' }, ticks: { color: '#9ca3af' } },
+                        x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                    },
+                    plugins: { legend: { labels: { color: '#e2e8f0' } } }
+                }
+            });
+        }
+
+        async function loadInstitutions() {
+            if (!supabase) return;
+            const { data } = await supabase.from('institutions').select('*').order('created_at', { ascending: false });
+            let html = '';
+            data?.forEach(inst => {
+                html += `
+                    <div class="table-row flex justify-between items-center">
+                        <div>
+                            <div class="text-white font-medium mb-1">${inst.institution_name}</div>
+                            <div class="text-xs text-gray-500 font-mono">NODE_ID: ${inst.institution_code}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-cyan-400 font-mono mb-1">₦${(inst.current_escrow_balance || 0).toLocaleString()}</div>
+                            <span class="status-active text-xs">ONLINE</span>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('institutions-list').innerHTML = html || '<div class="text-gray-500 text-center py-8 font-mono">NO NODES DETECTED</div>';
+            document.getElementById('institutions-loading').style.display = 'none';
+            document.getElementById('institutions-list').style.display = 'block';
+        }
+
+        async function loadSettlement() {
+            if (!supabase) return;
+            // FIX: Using single object parsing for institutions
+            const { data } = await supabase.from('global_financial_ledger')
+                .select(`id, amount, status, transaction_reference, institutions(institution_name)`)
+                .in('status', ['PENDING', 'HELD_IN_ESCROW'])
+                .order('created_at', { ascending: false });
+            
+            let html = '';
+            data?.forEach(tx => {
+                const nodeName = tx.institutions?.institution_name || 'Unknown Node';
+                html += `
+                    <div class="table-row flex justify-between items-center">
+                        <div>
+                            <div class="text-white font-medium mb-1">${nodeName}</div>
+                            <div class="text-xs text-gray-500 font-mono">HASH: ${tx.transaction_reference}</div>
+                        </div>
+                        <div class="text-right flex items-center gap-4">
+                            <div class="text-white font-mono">₦${tx.amount.toLocaleString()}</div>
+                            <button class="btn-primary" onclick="openSettlementModal('${tx.id}', '${nodeName}', '${tx.transaction_reference}', ${tx.amount})">CLEAR</button>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('settlement-pending-list').innerHTML = html || '<div class="text-gray-500 text-center py-8 font-mono">NO PENDING BLOCKS</div>';
+            document.getElementById('settlement-pending-loading').style.display = 'none';
+            document.getElementById('settlement-pending-list').style.display = 'block';
+        }
+
+        async function loadLedger() {
+            if (!supabase) return;
+            const { data } = await supabase.from('global_financial_ledger')
+                .select(`amount, status, transaction_reference, created_at, institutions(institution_name)`)
+                .order('created_at', { ascending: false }).limit(20);
+                
+            let html = '';
+            data?.forEach(tx => {
+                const badgeClass = tx.status === 'SETTLED' ? 'badge-settled' : 'badge-escrow';
+                html += `
+                    <div class="table-row flex justify-between items-center">
+                        <div>
+                            <div class="text-white font-medium mb-1">${tx.institutions?.institution_name || 'Unknown'}</div>
+                            <div class="text-xs text-gray-500 font-mono">${new Date(tx.created_at).toLocaleString()} | ${tx.transaction_reference}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-white font-mono mb-2">₦${tx.amount.toLocaleString()}</div>
+                            <span class="${badgeClass}">${tx.status}</span>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('ledger-all-list').innerHTML = html || '<div class="text-gray-500 text-center py-8">EMPTY LEDGER</div>';
+            document.getElementById('ledger-all-loading').style.display = 'none';
+            document.getElementById('ledger-all-list').style.display = 'block';
+        }
+
+        async function loadAudit() {
+            if (!supabase) return;
+            const { data } = await supabase.from('global_audit_logs').select('*').order('timestamp', { ascending: false }).limit(20);
+            let html = '';
+            data?.forEach(log => {
+                html += `
+                    <div class="table-row flex justify-between items-center">
+                        <div>
+                            <div class="text-cyan-400 font-mono text-sm mb-1">[${log.action_type}]</div>
+                            <div class="text-xs text-gray-500">INITIATOR: ${log.admin_email} | ${new Date(log.timestamp).toLocaleString()}</div>
+                        </div>
+                        <div class="text-right">
+                            <span class="status-active font-mono text-xs">VERIFIED</span>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('audit-list').innerHTML = html;
+            document.getElementById('audit-loading').style.display = 'none';
+            document.getElementById('audit-list').style.display = 'block';
+        }
+
+        function openSettlementModal(txId, institution, reference, amount) {
+            settlementModalData = { txId };
+            document.getElementById('modal-institution-name').textContent = institution;
+            document.getElementById('modal-transaction-id').textContent = reference;
+            document.getElementById('modal-amount').textContent = '₦' + amount.toLocaleString('en-NG', { minimumFractionDigits: 2 });
+            document.getElementById('settlement-modal').classList.add('active');
+        }
+
+        function closeSettlementModal() {
+            document.getElementById('settlement-modal').classList.remove('active');
+            settlementModalData = null;
+        }
+
+        async function approveSettlement() {
+            if (!supabase || !settlementModalData) return;
+            const btn = document.getElementById('modal-approve-btn');
+            btn.textContent = 'EXECUTING...';
+            btn.disabled = true;
+
+            try {
+                const { data, error } = await supabase.rpc('execute_settlement', {
+                    p_transaction_id: settlementModalData.txId,
+                    p_admin_user_id: currentAdmin.id
+                });
+                if (error) throw error;
+                
+                btn.textContent = 'CLEARED';
+                btn.style.color = '#00FFA3';
+                btn.style.borderColor = '#00FFA3';
+                setTimeout(() => {
+                    closeSettlementModal();
+                    loadSettlement();
+                    loadOverview();
+                    btn.textContent = 'EXECUTE SETTLEMENT';
+                    btn.style = '';
+                    btn.disabled = false;
+                }, 1000);
+            } catch (err) {
+                console.error(err);
+                btn.textContent = 'FAILED';
+                btn.style.color = '#ff4444';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initSupabase();
+            loadOverview();
+        });
+    </script>
+</body>
+</html>
