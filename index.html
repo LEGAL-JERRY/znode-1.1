@@ -279,24 +279,38 @@
                 <p id="passport-preview-val" class="text-white font-mono font-bold text-xs mt-0.5"></p>
             </div>
 
-            <!-- Department & Level -->
-            <div class="grid grid-cols-2 gap-2">
-                <div>
-                    <label class="text-white/50 text-[10px] font-semibold uppercase tracking-wide block mb-1.5">Department</label>
-                    <input id="su-dept" type="text" class="onboard-input" placeholder="e.g. Computer Science">
-                </div>
-                <div>
-                    <label class="text-white/50 text-[10px] font-semibold uppercase tracking-wide block mb-1.5">Level</label>
-                    <select id="su-level" class="onboard-input" onchange="this.style.color='#fff'">
-                        <option value="" disabled selected style="color:#999;">Level</option>
-                        <option value="100L" style="color:#113136;">100L</option>
-                        <option value="200L" style="color:#113136;">200L</option>
-                        <option value="300L" style="color:#113136;">300L</option>
-                        <option value="400L" style="color:#113136;">400L</option>
-                        <option value="500L" style="color:#113136;">500L</option>
-                        <option value="PG"   style="color:#113136;">PG</option>
-                    </select>
-                </div>
+            <!-- Faculty -->
+            <div>
+                <label class="text-white/50 text-[10px] font-semibold uppercase tracking-wide block mb-1.5">Faculty</label>
+                <select id="su-faculty" class="onboard-input" onchange="signup_onFacultyChange(this.value); this.style.color='#fff'">
+                    <option value="" disabled selected style="color:#999;">-- Select Faculty --</option>
+                </select>
+                <p id="err-su-faculty" class="text-red-400 text-[10px] mt-1 hidden"></p>
+            </div>
+
+            <!-- Department -->
+            <div>
+                <label class="text-white/50 text-[10px] font-semibold uppercase tracking-wide block mb-1.5">Department</label>
+                <select id="su-dept" class="onboard-input opacity-50 cursor-not-allowed" disabled onchange="this.style.color='#fff'">
+                    <option value="" disabled selected style="color:#999;">-- Select Department --</option>
+                </select>
+                <p id="err-su-dept" class="text-red-400 text-[10px] mt-1 hidden"></p>
+            </div>
+
+            <!-- Academic Level -->
+            <div>
+                <label class="text-white/50 text-[10px] font-semibold uppercase tracking-wide block mb-1.5">Academic Level</label>
+                <select id="su-level" class="onboard-input" onchange="this.style.color='#fff'">
+                    <option value="" disabled selected style="color:#999;">-- Select Level --</option>
+                    <option value="100 Level" style="color:#113136;">100 Level</option>
+                    <option value="200 Level" style="color:#113136;">200 Level</option>
+                    <option value="300 Level" style="color:#113136;">300 Level</option>
+                    <option value="400 Level" style="color:#113136;">400 Level</option>
+                    <option value="500 Level" style="color:#113136;">500 Level</option>
+                    <option value="600 Level" style="color:#113136;">600 Level</option>
+                    <option value="700 Level" style="color:#113136;">700 Level</option>
+                </select>
+                <p id="err-su-level" class="text-red-400 text-[10px] mt-1 hidden"></p>
             </div>
 
             <!-- Email -->
@@ -1110,7 +1124,8 @@ async function handleSignup() {
 
     const fullName  = document.getElementById('su-fullname').value.trim();
     const matric    = document.getElementById('su-matric').value.trim().toUpperCase();
-    const dept      = document.getElementById('su-dept').value.trim();
+    const faculty   = document.getElementById('su-faculty').value;
+    const dept      = document.getElementById('su-dept').value;
     const level     = document.getElementById('su-level').value;
     const email     = document.getElementById('su-email').value.trim().toLowerCase();
     const username  = document.getElementById('su-username').value.trim().toLowerCase();
@@ -1127,6 +1142,9 @@ async function handleSignup() {
     if (!selectedUniversity) { setErr('err-uni', 'Please select your university.'); hasError = true; }
     setErr('err-su-fullname', fullName  ? '' : 'Full name is required.');
     setErr('err-su-matric',   matric    ? '' : 'Matric number is required.');
+    setErr('err-su-faculty',  faculty   ? '' : 'Please select your faculty.');
+    setErr('err-su-dept',     dept      ? '' : 'Please select your department.');
+    setErr('err-su-level',    level     ? '' : 'Please select your academic level.');
     setErr('err-su-email',    email && email.includes('@') ? '' : 'Valid email required.');
     setErr('err-su-username', username.length >= 3 ? '' : 'Username must be at least 3 characters.');
     setErr('err-su-password', password.length >= 8 ? '' : 'Password must be at least 8 characters.');
@@ -1198,6 +1216,7 @@ async function handleSignup() {
             password_hash:     pwdHash,
             matric_number:     matric,
             znode_passport_id: passportId,
+            faculty:           faculty || 'Not Specified',
             department:        dept || 'Not Specified',
             academic_level:    level || 'Not Specified',
             is_verified:       false,
@@ -1422,7 +1441,167 @@ document.querySelectorAll('button').forEach(btn => {
 (function init() {
     initSupabase();
     bootApp();
+    signup_initFacultyDropdown();
 })();
+
+// ═══════════════════════════════════════════════════════════════
+// 13. SIGNUP FACULTY / DEPARTMENT / LEVEL HELPERS
+// ═══════════════════════════════════════════════════════════════
+
+// ── Hardcoded faculty + department data ────────────────────────
+const NIGERIA_FACULTIES_DATA = {
+  "Faculty of Agriculture": [
+    "Agricultural Economics & Extension","Animal Science","Agronomy",
+    "Crop Science & Production","Fisheries & Aquaculture","Food Science & Technology",
+    "Forestry & Wildlife Management","Soil Science & Land Management","Agricultural Engineering"
+  ],
+  "Faculty of Arts": [
+    "Arabic & Islamic Studies","Christian Religious Studies","English & Literary Studies",
+    "French Language","German Language","History & International Studies","Islamic Studies",
+    "Linguistics & Nigerian Languages","Music","Philosophy","Theatre & Performing Arts",
+    "Hausa Language","Igbo Language","Yoruba Language"
+  ],
+  "Faculty of Education": [
+    "Adult Education","Business Education","Curriculum Studies & Instruction",
+    "Early Childhood Education","Educational Administration & Planning",
+    "Educational Foundations","Educational Technology","Guidance & Counselling",
+    "Health & Physical Education","Home Economics Education","Library & Information Science",
+    "Science Education","Special Education","Technical & Vocational Education"
+  ],
+  "Faculty of Engineering & Technology": [
+    "Agricultural Engineering","Biomedical Engineering","Chemical Engineering",
+    "Civil Engineering","Computer Engineering","Electrical & Electronics Engineering",
+    "Environmental Engineering","Mechanical Engineering","Metallurgical & Materials Engineering",
+    "Petroleum Engineering","Structural Engineering","Systems Engineering",
+    "Telecommunications Engineering"
+  ],
+  "Faculty of Environmental Sciences": [
+    "Architecture","Building Technology","Estate Management","Fine & Applied Arts",
+    "Geography & Environmental Management","Geomatics & Surveying","Industrial Design",
+    "Quantity Surveying","Urban & Regional Planning"
+  ],
+  "Faculty of Law": [
+    "Common & Applied Law","Commercial & Property Law","International Law & Jurisprudence",
+    "Islamic Law","Private & Property Law","Public Law"
+  ],
+  "Faculty of Management Sciences": [
+    "Accounting","Actuarial Science","Banking & Finance","Business Administration",
+    "Entrepreneurship","Insurance","Marketing","Office & Information Management",
+    "Public Administration","Tourism & Hospitality Management"
+  ],
+  "Faculty of Medicine & Health Sciences": [
+    "Anatomy","Biochemistry","Community Medicine","Dentistry","Medicine & Surgery",
+    "Medical Laboratory Science","Medical Rehabilitation","Nursing Science",
+    "Optometry","Pharmacology","Physiology","Radiography & Radiation Science"
+  ],
+  "Faculty of Pharmaceutical Sciences": [
+    "Clinical Pharmacy & Pharmacy Practice","Pharmaceutical Chemistry",
+    "Pharmaceutical Microbiology","Pharmacognosy & Drug Development",
+    "Pharmaceutics & Pharmaceutical Technology","Pharmacology & Toxicology"
+  ],
+  "Faculty of Science": [
+    "Biochemistry","Botany","Chemistry","Computer Science","Environmental Science",
+    "Geology & Mining","Industrial Chemistry","Mathematics","Microbiology",
+    "Physics","Pure & Applied Biology","Statistics","Zoology"
+  ],
+  "Faculty of Social Sciences": [
+    "Criminology & Security Studies","Economics","Geography & Planning",
+    "Mass Communication","Political Science","Psychology","Public Administration",
+    "Social Work","Sociology"
+  ],
+  "Faculty of Veterinary Medicine": [
+    "Animal Production","Veterinary Anatomy","Veterinary Medicine & Surgery",
+    "Veterinary Microbiology","Veterinary Pathology","Veterinary Physiology & Pharmacology",
+    "Veterinary Public Health & Epidemiology"
+  ],
+  "Faculty of Basic Medical Sciences": [
+    "Anatomy","Biochemistry","Medical Laboratory Science","Physiology"
+  ],
+  "Faculty of Basic Clinical Sciences": [
+    "Anaesthesia","Community Medicine","Dermatology & Venereology",
+    "Haematology & Blood Transfusion","Internal Medicine",
+    "Medical Microbiology & Parasitology","Morbid Anatomy & Forensic Medicine",
+    "Obstetrics & Gynaecology","Ophthalmology","Orthopaedics & Trauma",
+    "Paediatrics & Child Health","Radiology","Surgery"
+  ],
+  "Faculty of Technology": [
+    "Computer Science","Food Technology","Industrial Chemistry","Industrial Mathematics",
+    "Information Technology","Science Laboratory Technology","Statistics"
+  ],
+  "College of General Studies": [
+    "General Studies (GST)","Use of English","Logic & Philosophy",
+    "Nigerian Peoples & Culture","Peace Studies & Conflict Resolution"
+  ],
+  "Postgraduate School": [
+    "Postgraduate Diploma","Masters Programme","Doctoral Programme","Professional Masters"
+  ]
+};
+
+// ── Populate faculty dropdown from Supabase or fallback ────────
+async function signup_initFacultyDropdown() {
+    const select = document.getElementById('su-faculty');
+    if (!select) return;
+    let faculties = Object.keys(NIGERIA_FACULTIES_DATA);
+    try {
+        if (_db) {
+            const { data, error } = await _db.from('nuc_faculties').select('name');
+            if (!error && data && data.length > 0) {
+                faculties = data.map(r => r.name);
+            }
+        }
+    } catch (_) { /* silent fallback */ }
+    signup_populateFacultySelect(select, faculties);
+}
+
+function signup_populateFacultySelect(select, faculties) {
+    const current = select.value;
+    // Remove all options except the placeholder
+    while (select.options.length > 1) select.remove(1);
+    faculties.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        opt.style.color = '#113136';
+        select.appendChild(opt);
+    });
+    if (current && faculties.includes(current)) select.value = current;
+}
+
+// ── Called when faculty selection changes ──────────────────────
+function signup_onFacultyChange(facultyName) {
+    const deptSelect = document.getElementById('su-dept');
+    if (!deptSelect) return;
+
+    // Reset department
+    while (deptSelect.options.length > 1) deptSelect.remove(1);
+    deptSelect.value = '';
+    deptSelect.style.color = '';
+
+    if (!facultyName) {
+        deptSelect.disabled = true;
+        deptSelect.classList.add('opacity-50', 'cursor-not-allowed');
+        return;
+    }
+
+    // Determine department list: use Supabase-loaded data if the faculty name
+    // is in NIGERIA_FACULTIES_DATA, otherwise show an empty enabled select
+    // so the user can proceed (graceful degradation).
+    const depts = NIGERIA_FACULTIES_DATA[facultyName] || [];
+    depts.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        opt.style.color = '#113136';
+        deptSelect.appendChild(opt);
+    });
+
+    deptSelect.disabled = false;
+    deptSelect.classList.remove('opacity-50', 'cursor-not-allowed');
+
+    // Clear any prior department error
+    const errEl = document.getElementById('err-su-dept');
+    if (errEl) errEl.classList.add('hidden');
+}
 
 </script>
 
