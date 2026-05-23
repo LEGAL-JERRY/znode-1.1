@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,15 @@
     
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
                         brand: '#0a2225',
                         'brand-light': '#113136',
                         accent: '#10B981',
+                        'dark-bg': '#0f172a',
+                        'dark-panel': '#1e293b'
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -27,19 +30,32 @@
     </script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #F3F4F6; font-family: 'Inter', sans-serif; color: #1f2937; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; overflow: hidden; transition: background-color 0.3s, color 0.3s; }
         
-        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); }
+        /* Light/Dark Base */
+        body.light { background: #F3F4F6; color: #1f2937; }
+        body.dark { background: #0f172a; color: #f8fafc; }
+        
+        .glass-panel { backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); transition: background-color 0.3s, border-color 0.3s; }
+        .light .glass-panel { background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(255, 255, 255, 0.5); }
+        .dark .glass-panel { background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); }
+
         .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; }
         .hidden { display: none !important; }
         
-        .input-field { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-size: 13px; outline: none; transition: border 0.2s; }
-        .input-field:focus { border-color: #113136; }
+        .input-field { width: 100%; padding: 10px 14px; border-radius: 8px; font-size: 13px; outline: none; transition: all 0.2s; }
+        .light .input-field { border: 1px solid #e5e7eb; background: #f9fafb; color: #1f2937; }
+        .dark .input-field { border: 1px solid #334155; background: #0f172a; color: #f8fafc; }
+        .input-field:focus { border-color: #10B981; }
         
         .btn-primary { background: #113136; color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: background 0.2s; border: none; }
         .btn-primary:hover { background: #0a2225; }
+        
         .btn-success { background: #10B981; color: white; padding: 8px 16px; border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; text-transform: uppercase; transition: transform 0.1s; border: none; }
         .btn-success:active { transform: scale(0.95); }
+
+        .btn-danger { background: #EF4444; color: white; padding: 8px 16px; border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; text-transform: uppercase; transition: transform 0.1s; border: none; }
+        .btn-danger:active { transform: scale(0.95); }
 
         /* Sidebar Tree CSS */
         details > summary { list-style: none; cursor: pointer; padding: 8px 12px; border-radius: 6px; transition: background 0.2s; font-size: 13px; font-weight: 600; color: #d1d5db; display: flex; align-items: center; justify-content: space-between; }
@@ -58,13 +74,14 @@
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
     </style>
 </head>
-<body>
+<body class="light">
 
 <div id="config-modal" class="modal-overlay hidden">
     <div class="glass-panel rounded-xl p-8 max-w-sm w-full mx-4">
-        <h2 class="text-xl font-bold text-brand mb-2">System Config</h2>
+        <h2 class="text-xl font-bold dark:text-white text-brand mb-2">System Config</h2>
         <p class="text-xs text-gray-500 mb-6">Connect Z-Node Admin to your database.</p>
         <div class="space-y-4 mb-6">
             <input id="cfg-url" type="url" class="input-field" placeholder="Supabase Project URL" />
@@ -81,26 +98,23 @@
     </div>
 </div>
 
-<div id="add-admin-modal" class="modal-overlay hidden">
+<div id="add-faculty-modal" class="modal-overlay hidden">
     <div class="glass-panel rounded-xl p-6 max-w-sm w-full mx-4 relative">
-        <button onclick="hideEl('add-admin-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-lg">✕</button>
-        <h2 class="text-lg font-bold text-brand mb-1">Add Co-Admin</h2>
-        <p class="text-xs text-gray-500 mb-5">Institutions are limited to 2 admin accounts.</p>
+        <button onclick="hideEl('add-faculty-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800 dark:hover:text-white text-lg">✕</button>
+        <h2 class="text-lg font-bold text-brand dark:text-white mb-1">Add New Faculty</h2>
+        <p class="text-xs text-amber-500 mb-5 font-medium flex items-center gap-1">⚠️ Prototype Warning: NUC approvals bypass.</p>
         <div class="space-y-3 mb-5">
-            <input id="new-admin-name" type="text" class="input-field" placeholder="Full Name">
-            <input id="new-admin-email" type="email" class="input-field" placeholder="Official Email">
-            <input id="new-admin-user" type="text" class="input-field" placeholder="Username">
-            <input id="new-admin-pass" type="password" class="input-field" placeholder="Temporary Password">
+            <input id="new-faculty-name" type="text" class="input-field" placeholder="e.g. Faculty of Engineering">
         </div>
-        <button onclick="createSecondaryAdmin()" class="btn-primary w-full">Provision Account</button>
+        <button onclick="createFaculty()" class="btn-primary w-full bg-amber-600 hover:bg-amber-700">Force Add Faculty</button>
     </div>
 </div>
 
-<div id="screen-login" class="min-h-screen flex items-center justify-center p-4 hidden bg-gradient-to-br from-gray-100 to-gray-200">
+<div id="screen-login" class="min-h-screen flex items-center justify-center p-4 hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-slate-900 dark:to-slate-800">
     <div class="glass-panel rounded-2xl p-8 max-w-sm w-full shadow-2xl">
         <div class="text-center mb-8">
             <div class="w-12 h-12 bg-brand text-white rounded-xl flex items-center justify-center font-black text-2xl mx-auto mb-4">Z</div>
-            <h1 class="text-xl font-black text-brand">Admin Portal</h1>
+            <h1 class="text-xl font-black text-brand dark:text-white">Admin Portal</h1>
         </div>
         <div class="space-y-4">
             <div>
@@ -119,22 +133,22 @@
 
 <div id="screen-dashboard" class="hidden h-screen flex flex-col">
     
-    <header class="bg-white border-b border-gray-200 h-16 flex-shrink-0 flex items-center justify-between px-6 z-10 shadow-sm">
+    <header class="bg-white dark:bg-dark-panel border-b border-gray-200 dark:border-gray-800 h-16 flex-shrink-0 flex items-center justify-between px-6 z-10 shadow-sm transition-colors">
         <div class="flex items-center gap-4">
             <div class="w-8 h-8 bg-brand rounded flex items-center justify-center text-white font-black">Z</div>
             <div>
-                <h1 id="nav-inst-name" class="font-bold text-brand text-sm">University Name</h1>
+                <h1 id="nav-inst-name" class="font-bold text-brand dark:text-white text-sm">University Name</h1>
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Administrative Console</p>
             </div>
         </div>
         
         <div class="flex items-center gap-4">
-            <button onclick="showEl('add-admin-modal')" class="text-xs font-bold text-brand bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition flex items-center gap-2">
-                <span>+</span> Add Co-Admin
+            <button onclick="toggleTheme()" class="text-gray-500 hover:text-brand dark:text-gray-400 dark:hover:text-white p-2 rounded-lg bg-gray-100 dark:bg-slate-800 transition">
+                <span id="theme-icon">🌙</span>
             </button>
-            <div class="h-6 w-px bg-gray-200"></div>
+            <div class="h-6 w-px bg-gray-200 dark:bg-gray-700"></div>
             <div class="text-right hidden md:block">
-                <p id="nav-admin-name" class="text-xs font-bold text-gray-800">Admin Name</p>
+                <p id="nav-admin-name" class="text-xs font-bold text-gray-800 dark:text-gray-200">Admin Name</p>
                 <button onclick="logout()" class="text-[10px] text-red-500 font-bold uppercase hover:underline">Sign Out</button>
             </div>
         </div>
@@ -143,8 +157,11 @@
     <div class="flex flex-1 overflow-hidden">
         
         <aside class="w-64 bg-brand flex-shrink-0 flex flex-col h-full overflow-y-auto">
-            <div class="p-5">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">Directory View</p>
+            <div class="p-5 flex-1">
+                <div class="flex justify-between items-center mb-3">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Directory View</p>
+                    <button onclick="showEl('add-faculty-modal')" class="text-[10px] bg-white/10 hover:bg-white/20 text-white px-2 py-1 rounded transition">+ Add</button>
+                </div>
                 <div id="sidebar-tree" class="space-y-1">
                     </div>
             </div>
@@ -152,40 +169,36 @@
             <div class="mt-auto p-5 border-t border-white/10">
                 <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">System</p>
                 <button class="w-full text-left text-xs font-medium text-gray-300 hover:text-white py-2 flex items-center gap-2">
-                    <span>🎧</span> Customer Support
-                </button>
-                <button class="w-full text-left text-xs font-medium text-gray-300 hover:text-white py-2 flex items-center gap-2">
                     <span>⚙️</span> Portal Settings
                 </button>
             </div>
         </aside>
 
-        <main class="flex-1 bg-gray-50 overflow-y-auto p-8">
+        <main class="flex-1 bg-gray-50 dark:bg-dark-bg overflow-y-auto p-8 transition-colors">
             
             <div class="flex items-end justify-between mb-6">
                 <div>
-                    <h2 id="view-title" class="text-2xl font-black text-brand">Dashboard Overview</h2>
+                    <h2 id="view-title" class="text-2xl font-black text-brand dark:text-white">Dashboard Overview</h2>
                     <p id="view-subtitle" class="text-xs text-gray-500 mt-1">Select a level from the sidebar to view students.</p>
                 </div>
-                <button onclick="fetchAndRenderData()" class="text-xs font-bold text-gray-500 hover:text-brand bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm">↻ Sync</button>
+                
+                <div class="flex items-center gap-3">
+                    <div class="bg-white dark:bg-dark-panel border border-gray-200 dark:border-gray-700 rounded-lg p-1 flex gap-1 shadow-sm">
+                        <button onclick="setViewMode('grid')" id="btn-view-grid" class="p-1.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-white transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                        </button>
+                        <button onclick="setViewMode('list')" id="btn-view-list" class="p-1.5 rounded text-gray-400 hover:text-gray-800 dark:hover:text-white transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        </button>
+                    </div>
+                    <button onclick="fetchAndRenderData()" class="text-xs font-bold text-gray-500 dark:text-gray-300 hover:text-brand bg-white dark:bg-dark-panel border border-gray-200 dark:border-gray-700 px-3 py-1.5 rounded-lg shadow-sm">↻ Sync</button>
+                </div>
             </div>
 
             <div id="overview-stats" class="grid grid-cols-3 gap-5 mb-8">
-                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Total Enrolled</p>
-                    <p id="stat-total" class="text-3xl font-black text-brand">0</p>
                 </div>
-                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-                    <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-wider mb-1">Verified Passports</p>
-                    <p id="stat-verified" class="text-3xl font-black text-emerald-600">0</p>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-                    <p class="text-[10px] text-amber-500 font-bold uppercase tracking-wider mb-1">Pending Review</p>
-                    <p id="stat-pending" class="text-3xl font-black text-amber-600">0</p>
-                </div>
-            </div>
 
-            <div id="student-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div id="student-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 </div>
 
         </main>
@@ -200,18 +213,34 @@ let _db = null;
 let currentAdmin = null;
 let currentInstitution = null;
 let allStudents = [];
+let currentDisplayStudents = [];
+let manualFaculties = []; // Prototype array for faculties created on the fly
+let viewMode = 'grid'; // 'grid' or 'list'
 
 const showEl = (id) => document.getElementById(id).classList.remove('hidden');
 const hideEl = (id) => document.getElementById(id).classList.add('hidden');
+function showLoader(text) { showEl('loading-overlay'); document.getElementById('loading-text').textContent = text; }
+function hideLoader() { hideEl('loading-overlay'); }
+
+// Formatting Currency for Nigerian Naira
+const formatNaira = (amount) => new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(amount || 0);
 
 async function hashPassword(password) {
-    const data = new TextEncoder().encode(password + 'znode_salt_2026'); // Matches student hash logic
+    const data = new TextEncoder().encode(password + 'znode_salt_2026');
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-function showLoader(text) { showEl('loading-overlay'); document.getElementById('loading-text').textContent = text; }
-function hideLoader() { hideEl('loading-overlay'); }
+// Theme Logic
+function toggleTheme() {
+    const html = document.documentElement;
+    const icon = document.getElementById('theme-icon');
+    if (html.classList.contains('dark')) {
+        html.classList.remove('dark'); html.classList.add('light'); icon.textContent = '🌙';
+    } else {
+        html.classList.remove('light'); html.classList.add('dark'); icon.textContent = '☀️';
+    }
+}
 
 // ════════════════════════════════════════════════════════
 // 2. BOOT & AUTHENTICATION
@@ -226,14 +255,8 @@ function saveConfig() {
 }
 
 function initApp(url, key) {
-    try {
-        _db = window.supabase.createClient(url, key);
-        hideEl('config-modal');
-        checkSession();
-    } catch (e) {
-        alert('Connection Failed.');
-        localStorage.clear();
-    }
+    try { _db = window.supabase.createClient(url, key); hideEl('config-modal'); checkSession(); } 
+    catch (e) { alert('Connection Failed.'); localStorage.clear(); }
 }
 
 async function checkSession() {
@@ -242,9 +265,7 @@ async function checkSession() {
         currentAdmin = JSON.parse(saved);
         await loadInstitutionData();
         bootDashboard();
-    } else {
-        showEl('screen-login');
-    }
+    } else showEl('screen-login');
 }
 
 async function loadInstitutionData() {
@@ -260,23 +281,17 @@ async function handleLogin() {
 
     hideEl('login-error'); showLoader("Authenticating...");
     const hash = await hashPassword(pass);
-
     const { data: admin, error } = await _db.from('institution_admins').select('*').eq('username', user).eq('password_hash', hash).single();
     hideLoader();
 
     if (error || !admin) { err.textContent = "Invalid credentials."; showEl('login-error'); return; }
-    
     currentAdmin = admin;
     localStorage.setItem('znodeAdminSession', JSON.stringify(admin));
     await loadInstitutionData();
-    hideEl('screen-login');
-    bootDashboard();
+    hideEl('screen-login'); bootDashboard();
 }
 
-function logout() {
-    localStorage.removeItem('znodeAdminSession');
-    location.reload();
-}
+function logout() { localStorage.removeItem('znodeAdminSession'); location.reload(); }
 
 // ════════════════════════════════════════════════════════
 // 3. DASHBOARD & SIDEBAR DATA ENGINE
@@ -295,28 +310,56 @@ async function fetchAndRenderData() {
     if (error) return alert('Sync error: ' + error.message);
     
     allStudents = data || [];
+    // Mocking Fee Data if not present in schema
+    allStudents = allStudents.map(s => ({
+        ...s,
+        fee_status: s.fee_status || (Math.random() > 0.5 ? 'PAID' : (Math.random() > 0.5 ? 'PARTIAL' : 'UNPAID')),
+        fee_paid: s.fee_paid || (Math.floor(Math.random() * 150000)),
+        fee_total: s.fee_total || 150000
+    }));
+
     updateStats();
     buildSidebarTree();
-    document.getElementById('student-grid').innerHTML = ''; // Clear grid
+    showOverview(); // Default to overview
 }
 
 function updateStats() {
-    const verified = allStudents.filter(s => s.is_verified).length;
-    document.getElementById('stat-total').textContent = allStudents.length;
-    document.getElementById('stat-verified').textContent = verified;
-    document.getElementById('stat-pending').textContent = allStudents.length - verified;
+    const verified = allStudents.filter(s => s.verification_status === 'VERIFIED').length;
+    const rejected = allStudents.filter(s => s.verification_status === 'REJECTED').length;
+    const pending = allStudents.length - verified - rejected;
+    
+    document.getElementById('overview-stats').innerHTML = `
+        <div class="bg-white dark:bg-dark-panel p-5 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm transition-colors">
+            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Total Enrolled</p>
+            <p class="text-3xl font-black text-brand dark:text-white">${allStudents.length}</p>
+        </div>
+        <div class="bg-white dark:bg-dark-panel p-5 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm transition-colors">
+            <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-wider mb-1">Verified Passports</p>
+            <p class="text-3xl font-black text-emerald-600 dark:text-emerald-400">${verified}</p>
+        </div>
+        <div class="bg-white dark:bg-dark-panel p-5 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm transition-colors">
+            <p class="text-[10px] text-amber-500 font-bold uppercase tracking-wider mb-1">Pending Review</p>
+            <p class="text-3xl font-black text-amber-600 dark:text-amber-400">${pending}</p>
+        </div>
+    `;
 }
 
 function buildSidebarTree() {
     const tree = {};
+    // Seed with existing students
     allStudents.forEach(s => {
-        const fac = s.faculty || 'General Faculty';
-        const dep = s.department || 'General Department';
-        const lvl = s.academic_level || 'General Level';
+        const fac = s.faculty || 'Unassigned Faculty';
+        const dep = s.department || 'Unassigned Department';
+        const lvl = s.academic_level || 'Lvl 100';
         if (!tree[fac]) tree[fac] = {};
         if (!tree[fac][dep]) tree[fac][dep] = {};
         if (!tree[fac][dep][lvl]) tree[fac][dep][lvl] = [];
         tree[fac][dep][lvl].push(s);
+    });
+
+    // Add manually created prototype faculties
+    manualFaculties.forEach(fac => {
+        if (!tree[fac]) tree[fac] = { 'Setup Required': { '0': [] } };
     });
 
     let html = `<div onclick="showOverview()" class="tree-level active mb-4 font-bold" style="padding-left:12px;">🏠 Global Overview</div>`;
@@ -327,7 +370,7 @@ function buildSidebarTree() {
             html += `<details><summary class="text-xs text-gray-400">📚 ${dep}</summary><div class="pl-3 border-l border-white/10 ml-4 mt-1 mb-2 space-y-1">`;
             Object.keys(tree[fac][dep]).sort().forEach(lvl => {
                 const count = tree[fac][dep][lvl].length;
-                html += `<div onclick="renderGrid('${fac}', '${dep}', '${lvl}')" class="tree-level flex justify-between">
+                html += `<div onclick="loadGridData('${fac}', '${dep}', '${lvl}')" class="tree-level flex justify-between">
                             <span>Level ${lvl}</span> <span class="bg-brand-light px-1.5 rounded text-[10px]">${count}</span>
                          </div>`;
             });
@@ -338,121 +381,173 @@ function buildSidebarTree() {
     document.getElementById('sidebar-tree').innerHTML = html;
 }
 
+// Prototype Function: Create Faculty Manually
+function createFaculty() {
+    const name = document.getElementById('new-faculty-name').value.trim();
+    if (!name) return alert("Enter faculty name.");
+    if (manualFaculties.includes(name)) return alert("Faculty already exists.");
+    
+    manualFaculties.push(name);
+    buildSidebarTree();
+    hideEl('add-faculty-modal');
+    document.getElementById('new-faculty-name').value = '';
+}
+
 // ════════════════════════════════════════════════════════
-// 4. GRID RENDER & VERIFICATION ACTIONS
+// 4. DISPLAY ENGINE (GRID/LIST) & ACTIONS
 // ════════════════════════════════════════════════════════
+function setViewMode(mode) {
+    viewMode = mode;
+    const btnGrid = document.getElementById('btn-view-grid');
+    const btnList = document.getElementById('btn-view-list');
+    
+    if (mode === 'grid') {
+        btnGrid.className = 'p-1.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-white transition';
+        btnList.className = 'p-1.5 rounded text-gray-400 hover:text-gray-800 dark:hover:text-white transition';
+        document.getElementById('student-container').className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5';
+    } else {
+        btnList.className = 'p-1.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-white transition';
+        btnGrid.className = 'p-1.5 rounded text-gray-400 hover:text-gray-800 dark:hover:text-white transition';
+        document.getElementById('student-container').className = 'flex flex-col gap-3';
+    }
+    renderStudents(currentDisplayStudents);
+}
+
 function showOverview() {
     document.getElementById('view-title').textContent = "Dashboard Overview";
     document.getElementById('view-subtitle').textContent = "Select a level from the sidebar to view students.";
     showEl('overview-stats');
-    document.getElementById('student-grid').innerHTML = '';
+    currentDisplayStudents = [];
+    document.getElementById('student-container').innerHTML = '';
     document.querySelectorAll('.tree-level').forEach(el => el.classList.remove('active'));
     event.currentTarget.classList.add('active');
 }
 
-function renderGrid(faculty, department, level) {
+function loadGridData(faculty, department, level) {
     hideEl('overview-stats');
     document.getElementById('view-title').textContent = `${department} (${level})`;
     document.getElementById('view-subtitle').textContent = `${faculty}`;
     
-    // Highlight sidebar
     document.querySelectorAll('.tree-level').forEach(el => el.classList.remove('active'));
     event.currentTarget.classList.add('active');
 
-    const students = allStudents.filter(s => 
-        (s.faculty || 'General Faculty') === faculty && 
-        (s.department || 'General Department') === department && 
-        (s.academic_level || 'General Level') === level
+    currentDisplayStudents = allStudents.filter(s => 
+        (s.faculty || 'Unassigned Faculty') === faculty && 
+        (s.department || 'Unassigned Department') === department && 
+        (s.academic_level || 'Lvl 100') === level
     );
-
-    let html = '';
-    students.forEach(st => {
-        const isVer = st.is_verified;
-        const passport = st.znode_passport_id || 'Pending Issuance';
-        
-        html += `
-        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition">
-            <div class="flex items-start justify-between mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-brand flex items-center justify-center text-white font-black uppercase">${st.full_name.charAt(0)}</div>
-                    <div>
-                        <p class="font-bold text-gray-800 text-sm leading-tight">${st.full_name}</p>
-                        <p class="text-[10px] text-gray-500 font-mono">${st.matric_number}</p>
-                    </div>
-                </div>
-                ${isVer ? '<span class="bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-1 rounded">VERIFIED</span>' : '<span class="bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-1 rounded">PENDING</span>'}
-            </div>
-            
-            <div class="bg-gray-50 p-3 rounded-lg mb-4 border border-gray-100">
-                <p class="text-[9px] text-gray-400 uppercase font-bold mb-0.5">Z-Node Passport</p>
-                <p class="text-xs font-mono font-bold ${isVer ? 'text-brand' : 'text-gray-400'}">${passport}</p>
-            </div>
-
-            ${!isVer ? `<button onclick="verifyStudent(${st.id}, '${st.matric_number}')" class="btn-success w-full">Verify & Issue Passport</button>` : `<div class="text-center text-[10px] font-bold text-gray-400 py-2">✓ Passport Active</div>`}
-        </div>`;
-    });
-    
-    document.getElementById('student-grid').innerHTML = html;
+    renderStudents(currentDisplayStudents);
 }
 
-async function verifyStudent(studentId, matricNumber) {
-    if (!confirm('Verify this student and issue official Z-Node Passport?')) return;
-    showLoader('Issuing Passport...');
+function renderStudents(students) {
+    const container = document.getElementById('student-container');
+    let html = '';
     
-    // Generate Passport Logic: ZNP-[PREFIX]-2026-[MATRIC SUFFIX]
-    const prefix = currentInstitution.passport_prefix;
-    const suffix = matricNumber.replace(/[^a-zA-Z0-9]/g, '').slice(-6).toUpperCase();
-    const newPassport = `ZNP-${prefix}-2026-${suffix}`;
+    if (students.length === 0) {
+        container.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400 text-sm">No students found in this block.</div>`;
+        return;
+    }
 
-    const { error } = await _db.from('students').update({
-        is_verified: true,
-        verification_status: 'VERIFIED',
-        znode_passport_id: newPassport
-    }).eq('id', studentId);
+    students.forEach(st => {
+        const isVer = st.verification_status === 'VERIFIED';
+        const isRej = st.verification_status === 'REJECTED';
+        const passport = st.znode_passport_id || 'Pending Issuance';
+        
+        // Fee Badge Logic
+        let feeColor = st.fee_status === 'PAID' ? 'text-emerald-600 bg-emerald-100' : 
+                       st.fee_status === 'PARTIAL' ? 'text-amber-600 bg-amber-100' : 'text-red-600 bg-red-100';
+        
+        if (viewMode === 'grid') {
+            html += `
+            <div class="bg-white dark:bg-dark-panel rounded-xl border border-gray-200 dark:border-gray-800 p-5 shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-brand flex items-center justify-center text-white font-black uppercase flex-shrink-0">${st.full_name.charAt(0)}</div>
+                        <div class="overflow-hidden">
+                            <p class="font-bold text-gray-800 dark:text-white text-sm leading-tight truncate">${st.full_name}</p>
+                            <p class="text-[10px] text-gray-500 font-mono">${st.matric_number}</p>
+                        </div>
+                    </div>
+                    ${isVer ? '<span class="bg-emerald-100/50 text-emerald-600 dark:text-emerald-400 text-[9px] font-bold px-2 py-1 rounded border border-emerald-200 dark:border-emerald-800">VERIFIED</span>' : 
+                      isRej ? '<span class="bg-red-100/50 text-red-600 dark:text-red-400 text-[9px] font-bold px-2 py-1 rounded border border-red-200 dark:border-red-800">REJECTED</span>' : 
+                      '<span class="bg-amber-100/50 text-amber-600 dark:text-amber-400 text-[9px] font-bold px-2 py-1 rounded border border-amber-200 dark:border-amber-800">PENDING</span>'}
+                </div>
+                
+                <div class="bg-gray-50 dark:bg-slate-800/50 p-3 rounded-lg mb-4 border border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                    <div>
+                        <p class="text-[9px] text-gray-400 uppercase font-bold mb-0.5">Z-Node Passport</p>
+                        <p class="text-xs font-mono font-bold ${isVer ? 'text-brand dark:text-emerald-400' : 'text-gray-400'}">${passport}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[9px] text-gray-400 uppercase font-bold mb-0.5">Fee Status</p>
+                        <span class="${feeColor} text-[9px] font-bold px-1.5 py-0.5 rounded">${st.fee_status}</span>
+                        <p class="text-[10px] font-bold dark:text-gray-300 mt-1">${formatNaira(st.fee_paid)}</p>
+                    </div>
+                </div>
 
+                ${(!isVer && !isRej) ? `
+                    <div class="flex gap-2">
+                        <button onclick="updateStudentStatus(${st.id}, '${st.matric_number}', 'VERIFIED')" class="btn-success flex-1">Issue Passport</button>
+                        <button onclick="updateStudentStatus(${st.id}, '${st.matric_number}', 'REJECTED')" class="btn-danger">Reject</button>
+                    </div>
+                ` : isVer ? `<div class="text-center text-[10px] font-bold text-gray-400 py-2">✓ Passport Active</div>` 
+                          : `<div class="text-center text-[10px] font-bold text-red-400 py-2">✕ Application Rejected</div>`}
+            </div>`;
+        } else {
+            // List View
+            html += `
+            <div class="bg-white dark:bg-dark-panel rounded-xl border border-gray-200 dark:border-gray-800 p-4 shadow-sm flex items-center gap-4 transition-all hover:bg-gray-50 dark:hover:bg-slate-800">
+                <div class="w-10 h-10 rounded-full bg-brand flex items-center justify-center text-white font-black uppercase flex-shrink-0">${st.full_name.charAt(0)}</div>
+                
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-gray-800 dark:text-white text-sm leading-tight truncate">${st.full_name}</p>
+                    <p class="text-[10px] text-gray-500 font-mono">${st.matric_number} • <span class="${st.fee_status === 'PAID'?'text-emerald-500':'text-amber-500'} font-bold">${formatNaira(st.fee_paid)} ${st.fee_status}</span></p>
+                </div>
+                
+                <div class="hidden md:block flex-1">
+                    <p class="text-xs font-mono font-bold ${isVer ? 'text-brand dark:text-emerald-400' : 'text-gray-400'}">${passport}</p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    ${(!isVer && !isRej) ? `
+                        <button onclick="updateStudentStatus(${st.id}, '${st.matric_number}', 'VERIFIED')" class="btn-success">Verify</button>
+                        <button onclick="updateStudentStatus(${st.id}, '${st.matric_number}', 'REJECTED')" class="btn-danger">Reject</button>
+                    ` : isVer ? `<span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1.5 rounded border border-emerald-100 dark:border-emerald-800">VERIFIED</span>`
+                              : `<span class="text-[10px] font-bold text-red-500 bg-red-50 dark:bg-red-900/30 px-3 py-1.5 rounded border border-red-100 dark:border-red-800">REJECTED</span>`}
+                </div>
+            </div>`;
+        }
+    });
+    
+    container.innerHTML = html;
+}
+
+async function updateStudentStatus(studentId, matricNumber, status) {
+    const actionText = status === 'VERIFIED' ? 'Verify and issue passport?' : 'Reject this student application due to incorrect information?';
+    if (!confirm(actionText)) return;
+    
+    showLoader(status === 'VERIFIED' ? 'Issuing Passport...' : 'Rejecting Application...');
+    
+    let updatePayload = { verification_status: status };
+    
+    if (status === 'VERIFIED') {
+        const prefix = currentInstitution?.passport_prefix || 'UNV';
+        const suffix = matricNumber.replace(/[^a-zA-Z0-9]/g, '').slice(-6).toUpperCase();
+        updatePayload.znode_passport_id = `ZNP-${prefix}-2026-${suffix}`;
+    }
+
+    const { error } = await _db.from('students').update(updatePayload).eq('id', studentId);
     hideLoader();
+    
     if (error) return alert('Database Error: ' + error.message);
     
     // Refresh Data seamlessly
-    const activeLevelText = document.getElementById('view-title').textContent; // Keep current view
+    const activeLevelText = document.getElementById('view-title').textContent; 
     await fetchAndRenderData();
     
-    // Re-click the sidebar to stay on the same page (simple hack for UX)
+    // Re-click the sidebar to stay on the same page
     const treeLinks = document.querySelectorAll('.tree-level');
     treeLinks.forEach(link => { if(link.textContent.includes(activeLevelText.split(' ')[1].replace(/[()]/g, ''))) link.click(); });
-}
-
-// ════════════════════════════════════════════════════════
-// 5. ADD SECONDARY ADMIN
-// ════════════════════════════════════════════════════════
-async function createSecondaryAdmin() {
-    const name = document.getElementById('new-admin-name').value;
-    const email = document.getElementById('new-admin-email').value;
-    const user = document.getElementById('new-admin-user').value;
-    const pass = document.getElementById('new-admin-pass').value;
-
-    if(!name || !email || !user || !pass) return alert("All fields required.");
-    
-    showLoader("Provisioning Account...");
-    const hash = await hashPassword(pass);
-
-    const { error } = await _db.from('institution_admins').insert({
-        institution_id: currentAdmin.institution_id,
-        full_name: name,
-        email: email,
-        username: user,
-        password_hash: hash
-    });
-
-    hideLoader();
-    
-    if (error) {
-        if (error.message.includes('limit reached')) alert("Action Blocked: University already has maximum 2 admins.");
-        else alert('Error: ' + error.message);
-    } else {
-        alert('Secondary Admin created successfully.');
-        hideEl('add-admin-modal');
-    }
 }
 
 // ════════════════════════════════════════════════════════
