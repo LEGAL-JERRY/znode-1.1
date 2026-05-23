@@ -54,12 +54,18 @@
         .btn-success { background: #10B981; color: white; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer; border: none; }
         .btn-danger { background: transparent; color: #ef4444; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer; border: 1px solid #ef4444; }
 
-        details > summary { list-style: none; cursor: pointer; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; color: #94a3b8; display: flex; align-items: center; justify-content: space-between; }
+        /* Nested Tree UI Styles */
+        details > summary { list-style: none; cursor: pointer; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; color: #94a3b8; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; }
         details > summary::-webkit-details-marker { display: none; }
         details > summary:hover { background: rgba(255,255,255,0.03); color: #f8fafc; }
         details[open] > summary { color: #ffffff; }
         
-        .tree-level { cursor: pointer; padding: 8px 14px 8px 34px; font-size: 13px; font-weight: 500; color: #64748b; border-radius: 8px; margin-bottom: 2px; }
+        /* Sub-department styling */
+        details details > summary { font-size: 12px; padding: 8px 12px; color: #cbd5e1; }
+        details details > summary:hover { color: #10B981; }
+        details details[open] > summary { color: #10B981; }
+        
+        .tree-level { cursor: pointer; padding: 8px 14px 8px 34px; font-size: 12px; font-weight: 500; color: #64748b; border-radius: 8px; margin-bottom: 2px; transition: all 0.2s; }
         .tree-level:hover { color: #f8fafc; background: rgba(255,255,255,0.02); }
         .tree-level.active { background: rgba(16, 185, 129, 0.1); color: #10B981; font-weight: 600; border-left: 3px solid #10B981; border-radius: 0 8px 8px 0; }
 
@@ -141,7 +147,7 @@
 
     <div class="flex flex-1 overflow-hidden">
         
-        <aside class="w-72 bg-brand-900 flex-shrink-0 flex flex-col h-full overflow-y-auto border-r border-brand-800">
+        <aside class="w-80 bg-brand-900 flex-shrink-0 flex flex-col h-full overflow-y-auto border-r border-brand-800">
             <div class="p-6 flex-1">
                 <p class="text-[11px] font-bold text-brand-400 uppercase tracking-widest mb-6 px-2 text-slate-400">NUC Structural Matrix</p>
                 <div id="sidebar-tree" class="space-y-1">
@@ -159,7 +165,7 @@
             <div id="viewport-header" class="flex items-end justify-between mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
                 <div>
                     <h2 id="view-title" class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Dashboard Overview</h2>
-                    <p id="view-subtitle" class="text-sm text-slate-500 mt-2 font-medium">Select a structural node to review student financial records.</p>
+                    <p id="view-subtitle" class="text-sm text-slate-500 mt-2 font-medium">Select an academic level to review student financial records.</p>
                 </div>
                 <div class="flex items-center gap-4">
                     <button onclick="fetchAndRenderData()" class="text-sm font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2.5 rounded-xl shadow-sm hover:shadow transition-all">
@@ -190,7 +196,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                     <div class="premium-card p-6 rounded-2xl md:col-span-1">
-                        <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-4 uppercase tracking-wide">Verification Matrix Matrix</h3>
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-4 uppercase tracking-wide">Verification Matrix</h3>
                         <div class="relative h-64 w-full flex items-center justify-center">
                             <canvas id="verificationMatrixChart"></canvas>
                         </div>
@@ -230,7 +236,7 @@
 
 <script>
 // ════════════════════════════════════════════════════════
-// 1. STATE & ENGINE VARIABLES (ZERO-TRUST, DB ONLY)
+// 1. STATE & ENGINE VARIABLES
 // ════════════════════════════════════════════════════════
 let _db = null;
 let currentAdmin = null;
@@ -267,8 +273,6 @@ async function checkSession() {
     const saved = localStorage.getItem('znodeAdminSession');
     if (saved) {
         currentAdmin = JSON.parse(saved);
-        let logsKey = `znode_audit_logs_${currentAdmin.institution_id}`;
-        systemAuditLogs = JSON.parse(localStorage.getItem(logsKey)) || [];
         await loadInstitutionData();
         bootDashboard();
     } else showEl('screen-login');
@@ -306,7 +310,7 @@ async function handleLogin() {
 function logout() { localStorage.removeItem('znodeAdminSession'); location.reload(); }
 
 // ════════════════════════════════════════════════════════
-// 3. REGISTRY SYNC & STRICT DB PARSING
+// 3. REGISTRY SYNC
 // ════════════════════════════════════════════════════════
 function bootDashboard() {
     showEl('screen-dashboard');
@@ -318,11 +322,9 @@ function bootDashboard() {
 async function fetchAndRenderData() {
     showLoader("Pulling Strict Database State...");
     
-    // 1. Fetch Structural NUC Tiers
     const { data: facultiesData } = await _db.from('nuc_faculties').select('name').order('name');
     nucFacultiesList = facultiesData || [];
     
-    // 2. Fetch Active Student Entity Data (No Mocking)
     const { data: studentData, error } = await _db.from('students').select('*').eq('institution_id', currentAdmin.institution_id);
     hideLoader();
     
@@ -351,19 +353,18 @@ function updateDashboardMetrics() {
 }
 
 // ════════════════════════════════════════════════════════
-// 4. CHART.JS ANALYTICS ENGINE
+// 4. CHART.JS ANALYTICS
 // ════════════════════════════════════════════════════════
 function initAnalyticsChart() {
     const ctx = document.getElementById('verificationMatrixChart').getContext('2d');
-    
     let verified = 0, pending = 0, rejected = 0;
+    
     allStudents.forEach(s => {
         if(s.verification_status === 'VERIFIED') verified++;
         else if (s.verification_status === 'REJECTED') rejected++;
         else pending++;
     });
 
-    // If DB is completely empty, render empty state chart
     const dataValues = allStudents.length > 0 ? [verified, pending, rejected] : [0, 0, 1];
     const bgColors = allStudents.length > 0 ? ['#10B981', '#F59E0B', '#EF4444'] : ['#e2e8f0', '#e2e8f0', '#e2e8f0'];
 
@@ -372,47 +373,33 @@ function initAnalyticsChart() {
     verificationChartInstance = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: allStudents.length > 0 ? ['Verified Passport', 'Pending Clearance', 'Rejected/Failed'] : ['No Data'],
-            datasets: [{
-                data: dataValues,
-                backgroundColor: bgColors,
-                borderWidth: 0,
-                hoverOffset: 4
-            }]
+            labels: allStudents.length > 0 ? ['Verified', 'Pending', 'Rejected'] : ['No Data'],
+            datasets: [{ data: dataValues, backgroundColor: bgColors, borderWidth: 0, hoverOffset: 4 }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '75%',
-            plugins: {
-                legend: { position: 'bottom', labels: { boxWidth: 10, font: { family: "'Plus Jakarta Sans', sans-serif" } } }
-            }
-        }
+        options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom' } } }
     });
 }
 
 // ════════════════════════════════════════════════════════
-// 5. DYNAMIC NUC SIDEBAR RENDER
+// 5. TRIPLE-TIER NESTED SIDEBAR RENDER
 // ════════════════════════════════════════════════════════
 function buildSidebarTree() {
-    // We base the tree strictly on the NUC SQL list.
     let html = `<div onclick="showOverview()" class="tree-level active mb-6 font-bold" style="padding-left:14px;">🏠 Global Node Hub</div>`;
     
-    if (nucFacultiesList.length === 0) {
-        html += `<div class="text-[10px] text-slate-500 p-2">SQL Table 'nuc_faculties' is empty. Execute Seed Script.</div>`;
-    }
+    if (nucFacultiesList.length === 0) html += `<div class="text-[10px] text-slate-500 p-2">SQL Table 'nuc_faculties' is empty.</div>`;
 
     nucFacultiesList.forEach(facRecord => {
         const facName = facRecord.name;
-        // Find students in this faculty
         const facStudents = allStudents.filter(s => s.faculty === facName);
         
-        // Group by department present in the database
+        // Group by Department, then by Level
         const deptMap = {};
         facStudents.forEach(s => {
-            const dep = s.department || 'Unassigned Core';
-            if(!deptMap[dep]) deptMap[dep] = 0;
-            deptMap[dep]++;
+            const dep = s.department || 'Unassigned Dept';
+            const lvl = s.academic_level || '100';
+            if(!deptMap[dep]) deptMap[dep] = {};
+            if(!deptMap[dep][lvl]) deptMap[dep][lvl] = 0;
+            deptMap[dep][lvl]++;
         });
 
         html += `<details class="mb-2"><summary>🏛️ ${facName}</summary><div class="pl-4 border-l border-brand-800/50 ml-4 mt-2 space-y-1">`;
@@ -421,9 +408,16 @@ function buildSidebarTree() {
             html += `<div class="tree-level text-slate-500 text-[10px]">0 Active Records</div>`;
         } else {
             Object.keys(deptMap).sort().forEach(dep => {
-                html += `<div onclick="loadTargetBlockData('${facName}', '${dep}')" class="tree-level flex justify-between">
-                            <span>${dep}</span> <span class="bg-brand-800/50 text-slate-300 px-1.5 rounded text-[10px]">${deptMap[dep]}</span>
-                         </div>`;
+                html += `<details class="mb-1"><summary>📚 ${dep}</summary><div class="pl-4 border-l border-brand-800/50 ml-4 mt-1 space-y-1">`;
+                
+                Object.keys(deptMap[dep]).sort().forEach(lvl => {
+                    const count = deptMap[dep][lvl];
+                    html += `<div onclick="loadTargetBlockData('${facName}', '${dep}', '${lvl}')" class="tree-level flex justify-between">
+                                <span>Level ${lvl}</span> <span class="bg-brand-800/50 text-slate-300 px-1.5 rounded text-[10px]">${count}</span>
+                             </div>`;
+                });
+                
+                html += `</div></details>`;
             });
         }
         html += `</div></details>`;
@@ -433,26 +427,30 @@ function buildSidebarTree() {
 }
 
 // ════════════════════════════════════════════════════════
-// 6. VIEW CONTROLLERS (Zero Mock DB Render)
+// 6. VIEW CONTROLLERS 
 // ════════════════════════════════════════════════════════
 function showOverview() {
     showEl('overview-dashboard-view');
     hideEl('student-render-target');
     hideEl('settings-panel-target');
     document.getElementById('view-title').textContent = "Dashboard Overview";
-    document.getElementById('view-subtitle').textContent = "Select a structural node to review student financial records.";
+    document.getElementById('view-subtitle').textContent = "Select an academic level to review student financial records.";
     document.querySelectorAll('.tree-level').forEach(el => el.classList.remove('active'));
 }
 
-function loadTargetBlockData(faculty, department) {
+function loadTargetBlockData(faculty, department, level) {
     hideEl('overview-dashboard-view');
     hideEl('settings-panel-target');
     showEl('student-render-target');
     
-    document.getElementById('view-title').textContent = `${department}`;
+    document.getElementById('view-title').textContent = `${department} (Level ${level})`;
     document.getElementById('view-subtitle').textContent = `${faculty}`;
     
-    const students = allStudents.filter(s => s.faculty === faculty && s.department === department);
+    // Highlight sidebar node
+    document.querySelectorAll('.tree-level').forEach(el => el.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    
+    const students = allStudents.filter(s => s.faculty === faculty && s.department === department && s.academic_level === level);
     renderActiveDataset(students);
 }
 
@@ -500,15 +498,6 @@ function renderActiveDataset(students) {
                     </div>
                 </div>
             </div>
-            <div class="mt-4">
-                ${(!isVer && !isRej) ? `
-                    <div class="flex gap-2">
-                        <button class="flex-1 btn-success">Issue Passport</button>
-                        <button class="flex-1 btn-danger">Decline</button>
-                    </div>
-                ` : isVer ? `<div class="text-center text-[10px] font-bold text-slate-400 py-1 border border-slate-100 dark:border-slate-800 rounded">✓ Active Node</div>` 
-                          : `<div class="text-center text-[10px] font-bold text-red-400 py-1 border border-red-100 dark:border-red-900/20 rounded">✕ Access Denied</div>`}
-            </div>
         </div>`;
     });
     
@@ -532,7 +521,6 @@ function toggleTheme() {
     }
 }
 
-// Init Check
 (function initRuntimeEngine() {
     const url = localStorage.getItem('znodeAdminUrl');
     const key = localStorage.getItem('znodeAdminKey');
