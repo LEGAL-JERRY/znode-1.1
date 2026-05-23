@@ -728,7 +728,7 @@ async function refreshStudentProfile(email) {
     if (!_db || !email) return;
     const { data, error } = await _db
         .from('students')
-        .select('*, institutions(name, country_code)')
+        .select('*, institutions(name, short_name, country_code)')
         .eq('email', email)
         .maybeSingle();
     if (data) {
@@ -798,7 +798,7 @@ async function handleSubmit() {
         const { data: institution, error: instErr } = await _db
             .from('institutions')
             .select('id, name, country_code')
-            .eq('domain_extension', domainExtension)
+            .eq('domain', domainExtension)
             .maybeSingle();
 
         if (instErr && instErr.code !== 'PGRST116') {
@@ -812,28 +812,28 @@ async function handleSubmit() {
         }
         addStep('', `Institution: ${institution.name}`, true);
 
-        // ── STEP 3: Check whitelist ───────────────────
-        statusText.textContent = 'Checking institutional whitelist…';
+        // ── STEP 3: Check institutional_whitelist (domain allowlist) ───
+        statusText.textContent = 'Checking domain whitelist…';
         const { data: whitelist, error: wlErr } = await _db
             .from('institutional_whitelist')
-            .select('*')
+            .select('id, is_active, email_domain')
             .eq('institution_id', institution.id)
-            .eq('matric_number', matric)
+            .eq('email_domain', domainExtension)
             .maybeSingle();
 
         if (wlErr && wlErr.code !== 'PGRST116') {
             throw new Error('Whitelist lookup failed: ' + wlErr.message);
         }
-        if (!whitelist) {
-            addStep('', `Matric not found in whitelist — registering as PENDING`, false);
+        if (!whitelist || !whitelist.is_active) {
+            addStep('', `Domain not on active whitelist — registering as PENDING`, false);
             await registerStudent({ fullName, email, matric, dept, level, institution, verified: false });
             return;
         }
-        addStep('', `Whitelist match found: ${whitelist.expected_full_name}`, true);
+        addStep('', `Domain @${domainExtension} is whitelisted ✓`, true);
 
-        // ── STEP 4: Build passport & register VERIFIED ─
+        // ── STEP 4: Build passport & register VERIFIED ─────────────
         statusText.textContent = 'Generating Z-Node Passport…';
-        const matricSuffix = matric.replace(/\//g, '').slice(-6);
+        const matricSuffix = matric.replace(/[^a-zA-Z0-9]/g, '').slice(-6).toUpperCase();
         const passportNumber = `ZNP-${institution.country_code}-2026-${matricSuffix}`;
         addStep('', `Passport: ${passportNumber}`, true);
 
@@ -841,12 +841,11 @@ async function handleSubmit() {
             fullName,
             email,
             matric,
-            dept:       whitelist.department,
-            level:      whitelist.academic_level,
+            dept,
+            level,
             institution,
-            verified:   true,
+            verified:      true,
             passportNumber,
-            whitelistName: whitelist.expected_full_name,
         });
 
     } catch (err) {
@@ -863,14 +862,14 @@ async function registerStudent({ fullName, email, matric, dept, level, instituti
     statusText.textContent = 'Registering your profile…';
 
     const insertPayload = {
-        full_name:           fullName,
-        email:               email,
-        matric_number:       matric,
-        passport_number:     passportNumber || `ZNP-PENDING-${Date.now()}`,
-        academic_department: dept || 'Not Specified',
-        academic_level:      level || 'Not Specified',
-        verification_status: verified ? 'VERIFIED' : 'PENDING',
-        institution_id:      institution?.id ?? null,
+        full_name:          fullName,
+        email:              email,
+        matric_number:      matric,
+        znode_passport_id:  passportNumber || `ZNP-PENDING-${Date.now()}`,
+        department:         dept || 'Not Specified',
+        academic_level:     level || 'Not Specified',
+        is_verified:        verified ? true : false,
+        institution_id:     institution?.id ?? null,
     };
 
     // Step 1: Try INSERT
@@ -878,7 +877,7 @@ async function registerStudent({ fullName, email, matric, dept, level, instituti
     const { data: inserted, error: insertErr } = await _db
         .from('students')
         .insert(insertPayload)
-        .select('*, institutions(name, country_code)')
+        .select('*, institutions(name, short_name, country_code)')
         .maybeSingle();
 
     if (insertErr) {
@@ -886,7 +885,7 @@ async function registerStudent({ fullName, email, matric, dept, level, instituti
         if (insertErr.code === '23505') {
             const { data: existing, error: fetchErr } = await _db
                 .from('students')
-                .select('*, institutions(name, country_code)')
+                .select('*, institutions(name, short_name, country_code)')
                 .eq('email', insertPayload.email)
                 .maybeSingle();
             if (fetchErr || !existing) {
@@ -929,10 +928,10 @@ function showApp(student) {
 }
 
 function populateDashboard(student) {
-    const isVerified = student.verification_status === 'VERIFIED';
+    const isVerified = student.is_verified === true;
     const initials   = (student.full_name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
     const instName   = student.institutions?.name || 'Institution Pending';
-    const passport   = student.passport_number;
+    const passport   = student.znode_passport_id || '';
 
     // ── HEADER badge ─────────────────────────────
     const headerBadge = document.getElementById('header-badge');
@@ -952,11 +951,11 @@ function populateDashboard(student) {
     avatarBadge.className = `absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center ${isVerified ? 'bg-emerald-500' : 'bg-amber-400'}`;
 
     // ── Passport / Pending banners ────────────────
-    if (isVerified && !passport.startsWith('ZNP-PENDING')) {
+    if (isVerified && passport && !passport.startsWith('ZNP-PENDING')) {
         document.getElementById('passport-card').classList.remove('hidden');
         document.getElementById('pending-notice').classList.add('hidden');
         document.getElementById('passport-number').textContent = passport;
-        document.getElementById('passport-dept').textContent   = student.academic_department;
+        document.getElementById('passport-dept').textContent   = student.department;
         document.getElementById('passport-level').textContent  = student.academic_level;
     } else {
         document.getElementById('passport-card').classList.add('hidden');
@@ -969,7 +968,7 @@ function populateDashboard(student) {
     // ── Identity tab ─────────────────────────────
     document.getElementById('id-avatar').textContent    = initials;
     document.getElementById('id-fullname').textContent  = student.full_name;
-    document.getElementById('id-dept').textContent      = student.academic_department;
+    document.getElementById('id-dept').textContent      = student.department;
     document.getElementById('id-matric').textContent    = student.matric_number;
     document.getElementById('id-inst-badge').textContent = `Institution: ${instName}`;
 
@@ -980,7 +979,7 @@ function populateDashboard(student) {
         : 'px-2 py-0.5 rounded text-[9px] font-medium bg-amber-50 text-amber-700 border border-amber-200';
 
     // Passport number on identity tab
-    if (isVerified && !passport.startsWith('ZNP-PENDING')) {
+    if (isVerified && passport && !passport.startsWith('ZNP-PENDING')) {
         document.getElementById('id-passport-block').classList.remove('hidden');
         document.getElementById('id-passport-num').textContent = passport;
     }
