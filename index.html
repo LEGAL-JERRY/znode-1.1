@@ -168,65 +168,23 @@
             animation: spin 0.7s linear infinite;
             display: inline-block;
         }
-
-        /* ─── CONFIG MODAL ─── */
-        #config-modal {
-            position: fixed; inset: 0; z-index: 300;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
-            display: flex; align-items: center; justify-content: center; padding: 1.5rem;
-        }
-        #config-modal.hidden { display: none; }
-        .config-panel {
-            background: #0d2b30; border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 20px; padding: 1.5rem; width: 100%; max-width: 400px;
-        }
-        .config-input {
-            width: 100%; background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 10px; padding: 11px 14px;
-            color: #fff; font-size: 12px; font-family: 'JetBrains Mono', monospace;
-            outline: none;
-        }
-        .config-input:focus { border-color: rgba(255,255,255,0.4); }
     </style>
 </head>
 <body>
 
-<div id="config-modal">
-    <div class="config-panel animate-scale-in">
-        <div class="flex items-center gap-2 mb-1">
-            <div class="w-6 h-6 rounded-md bg-white/10 flex items-center justify-center text-white font-black text-[10px]">Z</div>
-            <span class="text-white font-bold text-sm">Z-Node Config</span>
-        </div>
-        <p class="text-white/50 text-[11px] mb-5">Enter your Supabase project credentials to connect the live backend. These are saved locally in your browser.</p>
-        
-        <div class="space-y-3">
-            <div>
-                <label class="text-white/60 text-[10px] font-semibold uppercase tracking-wide block mb-1.5">Project URL</label>
-                <input id="cfg-url" type="url" class="config-input" placeholder="https://xxxx._db.co" />
-            </div>
-            <div>
-                <label class="text-white/60 text-[10px] font-semibold uppercase tracking-wide block mb-1.5">Anon Public Key</label>
-                <input id="cfg-key" type="text" class="config-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." />
-            </div>
-        </div>
-
-        <button id="cfg-save-btn" onclick="saveConfig()" class="onboard-btn mt-5">
-            Connect to Supabase
-        </button>
-        <p class="text-white/30 text-[10px] text-center mt-3">Your keys are stored only in localStorage on this device.</p>
-    </div>
-</div>
-
-
+<!-- ════════════════════════════════════════════════
+     ONBOARDING / SIGNUP SCREEN
+════════════════════════════════════════════════ -->
 <div id="screen-onboard" class="hidden">
     <div class="w-full max-w-sm">
+        <!-- Brand -->
         <div class="text-center mb-8">
             <div class="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-white font-black text-xl mx-auto mb-3 animate-float">Z</div>
             <h1 class="text-white font-extrabold text-2xl tracking-tight">Z-Node</h1>
             <p class="text-white/50 text-xs mt-1 font-medium">Financial & Identity Ecosystem for African Students</p>
         </div>
 
+        <!-- Form -->
         <div class="space-y-3">
             <div>
                 <input id="ob-fullname" type="text" class="onboard-input" placeholder="Full Name (as on admission letter)">
@@ -256,6 +214,7 @@
             </div>
         </div>
 
+        <!-- Status display during verification -->
         <div id="ob-status-bar" class="hidden mt-4 p-3 rounded-xl bg-white/10 border border-white/15">
             <div class="flex items-center gap-2.5">
                 <div class="spinner text-white/70 flex-shrink-0"></div>
@@ -273,8 +232,12 @@
 </div>
 
 
+<!-- ════════════════════════════════════════════════
+     MAIN APP (shown after onboarding)
+════════════════════════════════════════════════ -->
 <div id="screen-app" class="hidden">
 
+    <!-- HEADER -->
     <header class="glass-panel sticky top-0 z-50 safe-top">
         <div class="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -285,10 +248,13 @@
         </div>
     </header>
 
+    <!-- MAIN CONTENT AREA -->
     <main class="max-w-md mx-auto px-4 py-4 pb-20">
         
+        <!-- ========== HOME VIEW ========== -->
         <section id="view-home" class="view-section active space-y-4">
             
+            <!-- STUDENT CARD -->
             <div class="relative overflow-hidden rounded-3xl p-0 animate-scale-in glass-panel">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -translate-y-10 translate-x-10 blur-2xl"></div>
                 <div class="absolute bottom-0 left-0 w-24 h-24 bg-emerald/5 rounded-full translate-y-8 -translate-x-8 blur-xl"></div>
@@ -331,6 +297,7 @@
                 </div>
             </div>
 
+            <!-- PASSPORT CARD (shown only for verified users) -->
             <div id="passport-card" class="hidden glass-panel rounded-2xl p-4 animate-scale-in border-l-4 border-emerald-500">
                 <div class="flex items-center justify-between mb-2">
                     <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Z-Node Passport</p>
@@ -344,6 +311,7 @@
                 </div>
             </div>
 
+            <!-- PENDING NOTICE (shown only for pending users) -->
             <div id="pending-notice" class="hidden glass-panel rounded-2xl p-4 animate-scale-in border-l-4 border-amber-400">
                 <div class="flex items-start gap-3">
                     <span class="text-lg">⏳</span>
@@ -354,6 +322,7 @@
                 </div>
             </div>
 
+            <!-- QUICK ACTIONS -->
             <div class="grid grid-cols-4 gap-3 animate-slide-in">
                 <button class="glass-card rounded-2xl p-3 flex flex-col items-center gap-2">
                     <div class="w-10 h-10 rounded-xl bg-brand/5 flex items-center justify-center p-1.5">
@@ -381,6 +350,7 @@
                 </button>
             </div>
 
+            <!-- TUITION PROGRESS -->
             <div class="glass-card rounded-2xl p-4 animate-scale-in">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="text-[10px] font-bold text-brand uppercase tracking-wider">Tuition Progress</h3>
@@ -402,6 +372,7 @@
                 </div>
             </div>
 
+            <!-- RECENT ACTIVITY -->
             <div class="glass-card rounded-2xl p-4 animate-slide-in">
                 <h3 class="text-[10px] font-bold text-brand uppercase tracking-wider mb-4">Recent Activity</h3>
                 <div class="space-y-3">
@@ -445,6 +416,7 @@
             </div>
         </section>
 
+        <!-- ========== PAYMENTS VIEW ========== -->
         <section id="view-payments" class="view-section space-y-4">
             <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm animate-scale-in">
                 <h3 class="text-[10px] font-bold text-brand uppercase mb-3">Wallet</h3>
@@ -484,6 +456,7 @@
             </div>
         </section>
 
+        <!-- ========== IDENTITY VIEW ========== -->
         <section id="view-identity" class="view-section space-y-4">
             <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm animate-scale-in">
                 <h3 class="text-[10px] font-bold text-brand uppercase mb-3">Z-Node Student ID</h3>
@@ -501,6 +474,7 @@
                 </div>
             </div>
 
+            <!-- Passport Number block -->
             <div id="id-passport-block" class="hidden bg-white rounded-2xl border border-gray-100 p-4 shadow-sm animate-slide-in">
                 <h3 class="text-[10px] font-bold text-brand uppercase mb-2">Z-Node Passport</h3>
                 <p id="id-passport-num" class="text-sm font-mono font-black text-brand"></p>
@@ -530,6 +504,7 @@
             </div>
         </section>
 
+        <!-- ========== SERVICES VIEW ========== -->
         <section id="view-services" class="view-section space-y-3">
             <p class="text-[10px] text-gray-400 px-1">Connected student platforms</p>
             
@@ -586,7 +561,7 @@
             <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm animate-slide-in">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-brand/5 flex items-center justify-center text-lg">Purple-50</div>
+                        <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-lg">🤖</div>
                         <div>
                             <p class="text-xs font-bold text-brand">AI Access</p>
                             <p class="text-[9px] text-gray-400">OpenAI Credits</p>
@@ -600,6 +575,7 @@
             </div>
         </section>
 
+        <!-- ========== SETTINGS VIEW ========== -->
         <section id="view-settings" class="view-section space-y-2">
             <p class="text-[10px] text-gray-400 px-1 mb-2">Manage your account</p>
             
@@ -634,6 +610,7 @@
                 <span class="text-gray-300 text-lg">›</span>
             </button>
 
+            <!-- Reset / Sign out -->
             <div class="pt-2">
                 <button onclick="signOut()" class="w-full flex items-center justify-between p-3.5 bg-red-50 rounded-xl border border-red-100 card-hover text-left">
                     <span class="flex items-center gap-3 text-sm font-medium text-red-600">
@@ -652,6 +629,7 @@
 
     </main>
 
+    <!-- BOTTOM NAVIGATION -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-gray-200/50 z-50 safe-bottom">
         <div class="max-w-md mx-auto px-1">
             <div class="flex justify-around py-2.5">
@@ -679,22 +657,32 @@
         </div>
     </nav>
 
-</div><div id="toast-container"></div>
+</div><!-- /screen-app -->
 
 
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+
+<!-- ════════════════════════════════════════════════
+     JAVASCRIPT — SUPABASE INTEGRATION CORE
+════════════════════════════════════════════════ -->
 <script>
 // ─────────────────────────────────────────────────
-// 0. GLOBAL STATE
+// 0. GLOBAL STATE + HARDCODED SUPABASE CREDENTIALS
 // ─────────────────────────────────────────────────
-let _db = null;           // Supabase client — named _db to avoid collision with window.supabase CDN
+const SUPABASE_URL = "https://yohndnmwvgcwadkytmix.supabase.co";
+const SUPABASE_KEY = "sb_publishable_zwFSpf5e_-VsOG9Voe6GKA_Bw_2zdOA";
 
+let _db = null;
 let currentStudent = null;
 
 // ─────────────────────────────────────────────────
-// TOAST UTILITY (hoisted — used by all sections below)
+// TOAST UTILITY (hoisted so all functions can use it)
 // ─────────────────────────────────────────────────
 function showToast(msg, type = 'info') {
     const container = document.getElementById('toast-container');
+    if (!container) return;
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.textContent = msg;
@@ -702,35 +690,16 @@ function showToast(msg, type = 'info') {
     setTimeout(() => toast.remove(), 3500);
 }
 
-
 // ─────────────────────────────────────────────────
-// 1. SUPABASE CONFIG FLOW
+// SUPABASE INIT (hardcoded — no config modal needed)
 // ─────────────────────────────────────────────────
-function saveConfig() {
-    const url = document.getElementById('cfg-url').value.trim();
-    const key = document.getElementById('cfg-key').value.trim();
-
-    if (!url || !key) {
-        showToast('Enter both your Supabase URL and Anon Key.', 'error');
-        return;
-    }
-    if (!url.startsWith('https://')) {
-        showToast('URL must start with https://', 'error');
-        return;
-    }
-
-    localStorage.setItem('znodeSupabaseUrl', url);
-    localStorage.setItem('znodeSupabaseKey', key);
-    initSupabase(url, key);
-}
-
-function initSupabase(url, key) {
+function initSupabase() {
     try {
-        _db = window.supabase.createClient(url, key);
-        document.getElementById('config-modal').classList.add('hidden');
-        bootApp();
+        _db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        console.log('[Z-Node] ✅ Supabase connected to', SUPABASE_URL);
     } catch (e) {
-        showToast('Failed to initialise Supabase: ' + e.message, 'error');
+        console.error('[Z-Node] Supabase init failed:', e.message);
+        showToast('Supabase init failed: ' + e.message, 'error');
     }
 }
 
@@ -1024,7 +993,6 @@ function signOut() {
     document.getElementById('ob-status-bar').classList.add('hidden');
 }
 
-// [showToast hoisted to top — see section 0]
 
 // ─────────────────────────────────────────────────
 // 7. NAV TAB SWITCHING
@@ -1053,1089 +1021,8 @@ document.querySelectorAll('button').forEach(btn => {
 // 8. INIT — check for saved credentials
 // ─────────────────────────────────────────────────
 (function init() {
-    const url = localStorage.getItem('znodeSupabaseUrl');
-    const key = localStorage.getItem('znodeSupabaseKey');
-
-    if (url && key) {
-        // Pre-fill config inputs in case user wants to update later
-        document.getElementById('cfg-url').value = url;
-        document.getElementById('cfg-key').value = key;
-        initSupabase(url, key);
-    } else {
-        // Show config modal first
-        document.getElementById('config-modal').classList.remove('hidden');
-    }
-})();
-</script>
-
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Z-Node | Student Portal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        canvas: '#F8F9FA',
-                        brand: '#113136',
-                        'brand-light': '#1a4a52',
-                        'brand-dark': '#0a2225',
-                        emerald: '#10B981',
-                        amber: '#F59E0B',
-                        red: '#EF4444',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { 
-            background: linear-gradient(135deg, #F0F2F5 0%, #E8EAED 100%); 
-            font-family: 'Inter', sans-serif; 
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes scaleIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-3px); } }
-        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes pulse-ring { 0% { transform: scale(0.95); opacity: 0.7; } 70% { transform: scale(1.05); opacity: 0; } 100% { transform: scale(0.95); opacity: 0; } }
-        
-        .animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-slide-in { animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-float { animation: float 4s ease-in-out infinite; }
-        .animate-spin { animation: spin 0.8s linear infinite; }
-        
-        .view-section { display: none; }
-        .view-section.active { display: block; animation: fadeIn 0.35s ease-out; }
-        
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.65);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
-        }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            transition: all 0.25s ease;
-        }
-        .glass-card:active { transform: scale(0.98); }
-        
-        .card-hover { transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
-        .card-hover:active { transform: scale(0.98); }
-        
-        .btn-primary { background: #113136; transition: all 0.2s; }
-        .btn-primary:active { background: #0a2225; transform: scale(0.98); }
-        .btn-primary:disabled { background: #8a9ea0; cursor: not-allowed; transform: none; }
-        
-        .nav-item.active { color: #113136; }
-        .nav-item.active::after { content: ''; position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: #113136; border-radius: 50%; }
-        
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #113136; border-radius: 2px; }
-        
-        @supports (padding: max(0px)) {
-            .safe-top { padding-top: max(1rem, env(safe-area-inset-top)); }
-            .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
-        }
-
-        /* ─── ONBOARD SCREEN STYLES ─── */
-        #screen-onboard {
-            position: fixed; inset: 0; z-index: 200;
-            background: linear-gradient(160deg, #0a2225 0%, #113136 50%, #1a4a52 100%);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 2rem 1.5rem;
-            overflow-y: auto;
-        }
-        #screen-onboard.hidden { display: none; }
-        
-        .onboard-input {
-            width: 100%;
-            background: rgba(255,255,255,0.07);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 14px;
-            padding: 14px 16px;
-            color: #fff;
-            font-size: 13px;
-            font-family: 'Inter', sans-serif;
-            outline: none;
-            transition: border-color 0.2s, background 0.2s;
-        }
-        .onboard-input::placeholder { color: rgba(255,255,255,0.35); }
-        .onboard-input:focus { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.1); }
-        .onboard-input.error { border-color: #EF4444; }
-        
-        .onboard-btn {
-            width: 100%;
-            background: #fff;
-            color: #113136;
-            font-weight: 800;
-            font-size: 13px;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            border: none;
-            border-radius: 14px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-        .onboard-btn:active { transform: scale(0.98); background: #f0f0f0; }
-        .onboard-btn:disabled { background: rgba(255,255,255,0.25); color: rgba(255,255,255,0.5); cursor: not-allowed; transform: none; }
-
-        /* ─── TOAST ─── */
-        #toast-container {
-            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-            z-index: 999; display: flex; flex-direction: column; gap: 8px; pointer-events: none;
-        }
-        .toast {
-            padding: 10px 18px; border-radius: 10px;
-            font-size: 12px; font-weight: 600;
-            animation: fadeIn 0.3s ease-out;
-            white-space: nowrap;
-        }
-        .toast-success { background: #113136; color: #fff; }
-        .toast-error { background: #EF4444; color: #fff; }
-        .toast-info { background: #1a4a52; color: #fff; }
-        
-        /* ─── PENDING BADGE ─── */
-        .badge-pending {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 3px 10px; border-radius: 20px;
-            background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3);
-            font-size: 10px; font-weight: 700; color: #B45309;
-        }
-        .badge-verified {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 3px 10px; border-radius: 20px;
-            background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2);
-            font-size: 10px; font-weight: 700; color: #065F46;
-        }
-
-        /* ─── SPINNER ─── */
-        .spinner {
-            width: 16px; height: 16px; border: 2px solid transparent;
-            border-top-color: currentColor; border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-            display: inline-block;
-        }
-
-        /* ─── CONFIG MODAL ─── */
-        #config-modal {
-            position: fixed; inset: 0; z-index: 300;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
-            display: flex; align-items: center; justify-content: center; padding: 1.5rem;
-        }
-        #config-modal.hidden { display: none; }
-        .config-panel {
-            background: #0d2b30; border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 20px; padding: 1.5rem; width: 100%; max-width: 400px;
-        }
-        .config-input {
-            width: 100%; background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 10px; padding: 11px 14px;
-            color: #fff; font-size: 12px; font-family: 'JetBrains Mono', monospace;
-            outline: none;
-        }
-        .config-input:focus { border-color: rgba(255,255,255,0.4); }
-    </style>
-</head>
-<body>
-
-<div id="config-modal">
-    <div class="config-panel animate-scale-in">
-        <div class="flex items-center gap-2 mb-1">
-            <div class="w-6 h-6 rounded-md bg-white/10 flex items-center justify-center text-white font-black text-[10px]">Z</div>
-            <span class="text-white font-bold text-sm">Z-Node Config</span>
-        </div>
-        <p class="text-white/50 text-[11px] mb-5">Enter your Supabase project credentials to connect the live backend. These are saved locally in your browser.</p>
-        
-        <div class="space-y-3">
-            <div>
-                <label class="text-white/60 text-[10px] font-semibold uppercase tracking-wide block mb-1.5">Project URL</label>
-                <input id="cfg-url" type="url" class="config-input" placeholder="https://xxxx._db.co" />
-            </div>
-            <div>
-                <label class="text-white/60 text-[10px] font-semibold uppercase tracking-wide block mb-1.5">Anon Public Key</label>
-                <input id="cfg-key" type="text" class="config-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." />
-            </div>
-        </div>
-
-        <button id="cfg-save-btn" onclick="saveConfig()" class="onboard-btn mt-5">
-            Connect to Supabase
-        </button>
-        <p class="text-white/30 text-[10px] text-center mt-3">Your keys are stored only in localStorage on this device.</p>
-    </div>
-</div>
-
-
-<div id="screen-onboard" class="hidden">
-    <div class="w-full max-w-sm">
-        <div class="text-center mb-8">
-            <div class="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-white font-black text-xl mx-auto mb-3 animate-float">Z</div>
-            <h1 class="text-white font-extrabold text-2xl tracking-tight">Z-Node</h1>
-            <p class="text-white/50 text-xs mt-1 font-medium">Financial & Identity Ecosystem for African Students</p>
-        </div>
-
-        <div class="space-y-3">
-            <div>
-                <input id="ob-fullname" type="text" class="onboard-input" placeholder="Full Name (as on admission letter)">
-                <p id="err-fullname" class="text-red-400 text-[10px] mt-1 hidden"></p>
-            </div>
-            <div>
-                <input id="ob-email" type="email" class="onboard-input" placeholder="Institutional Email (e.g. jay@fulafia.edu.ng)">
-                <p id="err-email" class="text-red-400 text-[10px] mt-1 hidden"></p>
-            </div>
-            <div>
-                <input id="ob-matric" type="text" class="onboard-input" placeholder="Matric Number (e.g. FUL/CSC/2022/001)">
-                <p id="err-matric" class="text-red-400 text-[10px] mt-1 hidden"></p>
-            </div>
-            <div>
-                <input id="ob-dept" type="text" class="onboard-input" placeholder="Department (will auto-fill if whitelisted)">
-            </div>
-            <div>
-                <select id="ob-level" class="onboard-input" onchange="this.style.color='#fff'">
-                    <option value="" disabled selected style="color:#999;">Academic Level</option>
-                    <option value="100L" style="color:#113136;">100 Level</option>
-                    <option value="200L" style="color:#113136;">200 Level</option>
-                    <option value="300L" style="color:#113136;">300 Level</option>
-                    <option value="400L" style="color:#113136;">400 Level</option>
-                    <option value="500L" style="color:#113136;">500 Level</option>
-                    <option value="PG"   style="color:#113136;">Postgraduate</option>
-                </select>
-            </div>
-        </div>
-
-        <div id="ob-status-bar" class="hidden mt-4 p-3 rounded-xl bg-white/10 border border-white/15">
-            <div class="flex items-center gap-2.5">
-                <div class="spinner text-white/70 flex-shrink-0"></div>
-                <p id="ob-status-text" class="text-white/70 text-[11px] font-medium"></p>
-            </div>
-            <div id="ob-steps" class="mt-2.5 space-y-1.5"></div>
-        </div>
-
-        <button id="ob-submit-btn" onclick="handleSubmit()" class="onboard-btn mt-5">
-            Activate Z-Node Passport
-        </button>
-
-        <p class="text-white/25 text-[10px] text-center mt-4">By continuing, you confirm you are an enrolled student and your details are accurate.</p>
-    </div>
-</div>
-
-
-<div id="screen-app" class="hidden">
-
-    <header class="glass-panel sticky top-0 z-50 safe-top">
-        <div class="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-brand flex items-center justify-center text-white font-black text-xs">Z</div>
-                <span class="font-bold text-brand text-sm">Z-Node</span>
-            </div>
-            <div id="header-badge"></div>
-        </div>
-    </header>
-
-    <main class="max-w-md mx-auto px-4 py-4 pb-20">
-        
-        <section id="view-home" class="view-section active space-y-4">
-            
-            <div class="relative overflow-hidden rounded-3xl p-0 animate-scale-in glass-panel">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -translate-y-10 translate-x-10 blur-2xl"></div>
-                <div class="absolute bottom-0 left-0 w-24 h-24 bg-emerald/5 rounded-full translate-y-8 -translate-x-8 blur-xl"></div>
-                
-                <div class="relative p-5">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex-1">
-                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">Student Identity</p>
-                            <h2 id="card-institution" class="text-base font-extrabold text-brand">—</h2>
-                            <p id="card-student-name" class="text-[11px] font-semibold text-brand/70 mt-0.5">—</p>
-                            <p id="card-matric" class="text-[11px] font-mono text-gray-500 mt-0.5">—</p>
-                        </div>
-                        <div class="relative">
-                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 border border-white/50 shadow-inner flex items-center justify-center overflow-hidden animate-float">
-                                <div id="card-avatar" class="w-full h-full bg-brand flex items-center justify-center text-white font-black text-xl">?</div>
-                            </div>
-                            <div id="card-avatar-badge" class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center bg-gray-300">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-4 gap-2.5">
-                        <div class="glass-card rounded-2xl p-3 text-center">
-                            <p class="text-[9px] font-semibold text-gray-500 uppercase mb-1">Balance</p>
-                            <p class="text-base font-mono font-black text-brand">₦84.5K</p>
-                        </div>
-                        <div class="glass-card rounded-2xl p-3 text-center">
-                            <p class="text-[9px] font-semibold text-gray-500 uppercase mb-1">AI Credits</p>
-                            <p class="text-base font-mono font-black text-brand">245</p>
-                        </div>
-                        <div class="glass-card rounded-2xl p-3 text-center">
-                            <p class="text-[9px] font-semibold text-gray-500 uppercase mb-1">Benefits</p>
-                            <p class="text-base font-mono font-black text-emerald">12</p>
-                        </div>
-                        <div class="glass-card rounded-2xl p-3 text-center">
-                            <p class="text-[9px] font-semibold text-gray-500 uppercase mb-1">Score</p>
-                            <p class="text-base font-mono font-black text-emerald">96%</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="passport-card" class="hidden glass-panel rounded-2xl p-4 animate-scale-in border-l-4 border-emerald-500">
-                <div class="flex items-center justify-between mb-2">
-                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Z-Node Passport</p>
-                    <span class="badge-verified"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>VERIFIED</span>
-                </div>
-                <p id="passport-number" class="text-sm font-mono font-black text-brand"></p>
-                <div class="flex items-center gap-2 mt-1.5">
-                    <p id="passport-dept" class="text-[10px] text-gray-400"></p>
-                    <span class="text-gray-300">·</span>
-                    <p id="passport-level" class="text-[10px] text-gray-400"></p>
-                </div>
-            </div>
-
-            <div id="pending-notice" class="hidden glass-panel rounded-2xl p-4 animate-scale-in border-l-4 border-amber-400">
-                <div class="flex items-start gap-3">
-                    <span class="text-lg">⏳</span>
-                    <div>
-                        <p class="text-xs font-bold text-brand">Manual Verification Pending</p>
-                        <p class="text-[10px] text-gray-400 mt-0.5">Your institution isn't fully onboarded yet. You have proxy access to all features. A Z-Node Passport will be issued once verified by our team.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-4 gap-3 animate-slide-in">
-                <button class="glass-card rounded-2xl p-3 flex flex-col items-center gap-2">
-                    <div class="w-10 h-10 rounded-xl bg-brand/5 flex items-center justify-center p-1.5">
-                        <img src="https://img.icons8.com/ios-filled/50/money-transfer.png" alt="Transfer" class="w-full h-full object-contain opacity-75">
-                    </div>
-                    <span class="text-[9px] font-bold uppercase text-gray-600">Transfer</span>
-                </button>
-                <button class="glass-card rounded-2xl p-3 flex flex-col items-center gap-2">
-                    <div class="w-10 h-10 rounded-xl bg-brand/5 flex items-center justify-center p-1.5">
-                        <img src="https://img.icons8.com/ios-filled/50/receipt.png" alt="Fees" class="w-full h-full object-contain opacity-75">
-                    </div>
-                    <span class="text-[9px] font-bold uppercase text-gray-600">Fees</span>
-                </button>
-                <button class="glass-card rounded-2xl p-3 flex flex-col items-center gap-2">
-                    <div class="w-10 h-10 rounded-xl bg-brand/5 flex items-center justify-center p-1.5">
-                        <img src="https://img.icons8.com/ios-filled/50/bank-building.png" alt="Fund" class="w-full h-full object-contain opacity-75">
-                    </div>
-                    <span class="text-[9px] font-bold uppercase text-gray-600">Fund</span>
-                </button>
-                <button class="glass-card rounded-2xl p-3 flex flex-col items-center gap-2">
-                    <div class="w-10 h-10 rounded-xl bg-brand/5 flex items-center justify-center p-1.5">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg" alt="AI" class="w-full h-full object-contain">
-                    </div>
-                    <span class="text-[9px] font-bold uppercase text-gray-600">AI</span>
-                </button>
-            </div>
-
-            <div class="glass-card rounded-2xl p-4 animate-scale-in">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-[10px] font-bold text-brand uppercase tracking-wider">Tuition Progress</h3>
-                    <span class="text-[9px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">2025/2026</span>
-                </div>
-                <div class="flex justify-between items-end mb-2">
-                    <div>
-                        <p class="text-[9px] text-gray-500 uppercase tracking-wide">Remaining</p>
-                        <p class="text-lg font-mono font-black text-brand">₦65,000</p>
-                    </div>
-                    <span class="text-xs font-bold text-emerald bg-emerald/5 px-2 py-1 rounded-lg">74% Paid</span>
-                </div>
-                <div class="w-full bg-gray-200/50 h-2 rounded-full overflow-hidden backdrop-blur-sm">
-                    <div class="bg-brand h-full rounded-full transition-all duration-700 ease-out" style="width: 74%"></div>
-                </div>
-                <div class="flex items-center gap-1.5 mt-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                    <p class="text-[10px] text-gray-500 font-medium">Installment Plan Active</p>
-                </div>
-            </div>
-
-            <div class="glass-card rounded-2xl p-4 animate-slide-in">
-                <h3 class="text-[10px] font-bold text-brand uppercase tracking-wider mb-4">Recent Activity</h3>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between py-1.5 border-b border-gray-100/50 pb-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-xl bg-gray-100 p-1.5 flex items-center justify-center">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" alt="School" class="w-full h-full object-contain opacity-80" style="filter: grayscale(100%);">
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-brand">School Fees</p>
-                                <p id="activity-institution" class="text-[9px] text-gray-500">—</p>
-                            </div>
-                        </div>
-                        <p class="text-xs font-mono font-bold text-gray-700">-₦45,000</p>
-                    </div>
-                    <div class="flex items-center justify-between py-1.5 border-b border-gray-100/50 pb-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-xl bg-gray-100 p-1.5 flex items-center justify-center">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg" alt="AI" class="w-full h-full object-contain">
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-brand">AI Credit Top Up</p>
-                                <p class="text-[9px] text-gray-500">OpenAI educational credits</p>
-                            </div>
-                        </div>
-                        <p class="text-xs font-mono font-bold text-gray-700">-₦5,000</p>
-                    </div>
-                    <div class="flex items-center justify-between py-1.5">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-xl bg-gray-100 p-1.5 flex items-center justify-center">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" alt="Spotify" class="w-full h-full object-contain">
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-brand">Spotify Student</p>
-                                <p class="text-[9px] text-gray-500">Monthly student plan</p>
-                            </div>
-                        </div>
-                        <p class="text-xs font-mono font-bold text-gray-700">-₦1,200</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="view-payments" class="view-section space-y-4">
-            <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm animate-scale-in">
-                <h3 class="text-[10px] font-bold text-brand uppercase mb-3">Wallet</h3>
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 mb-4">
-                    <div>
-                        <p class="text-[9px] text-gray-400 uppercase">Available Balance</p>
-                        <p class="text-lg font-mono font-black text-brand">₦84,500</p>
-                    </div>
-                    <button class="btn-primary text-white text-[10px] font-bold uppercase px-4 py-2 rounded-xl">Add Money</button>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <button class="border border-brand text-brand text-[10px] font-bold uppercase px-3 py-2.5 rounded-xl text-center card-hover">Pay Tuition</button>
-                    <button class="border border-brand text-brand text-[10px] font-bold uppercase px-3 py-2.5 rounded-xl text-center card-hover">Transfer</button>
-                    <button class="border border-brand text-brand text-[10px] font-bold uppercase px-3 py-2.5 rounded-xl text-center card-hover">Request</button>
-                    <button class="border border-brand text-brand text-[10px] font-bold uppercase px-3 py-2.5 rounded-xl text-center card-hover">Pay Bills</button>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm animate-slide-in">
-                <h3 class="text-[10px] font-bold text-brand uppercase mb-3">Linked Accounts</h3>
-                <div class="space-y-2.5">
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
-                        <div>
-                            <p class="text-xs font-bold text-brand">GTBank</p>
-                            <p class="text-[9px] text-gray-400">•••• 4821</p>
-                        </div>
-                        <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Connected</span>
-                    </div>
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
-                        <div>
-                            <p class="text-xs font-bold text-brand">PalmPay Wallet</p>
-                            <p class="text-[9px] text-gray-400">Primary funding source</p>
-                        </div>
-                        <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-brand/5 text-brand border border-brand/10">Active</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="view-identity" class="view-section space-y-4">
-            <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm animate-scale-in">
-                <h3 class="text-[10px] font-bold text-brand uppercase mb-3">Z-Node Student ID</h3>
-                <div class="flex items-start gap-4">
-                    <div id="id-avatar" class="w-14 h-14 rounded-xl bg-brand flex items-center justify-center text-white font-bold text-lg animate-float">?</div>
-                    <div class="flex-1">
-                        <p id="id-fullname" class="text-sm font-bold text-brand">—</p>
-                        <p id="id-dept" class="text-[10px] text-gray-400">—</p>
-                        <p id="id-matric" class="text-[10px] font-mono text-brand mt-0.5">—</p>
-                        <div class="flex gap-1.5 mt-2 flex-wrap">
-                            <span id="id-inst-badge" class="px-2 py-0.5 rounded text-[9px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">—</span>
-                            <span id="id-status-badge" class="px-2 py-0.5 rounded text-[9px] font-medium">—</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="id-passport-block" class="hidden bg-white rounded-2xl border border-gray-100 p-4 shadow-sm animate-slide-in">
-                <h3 class="text-[10px] font-bold text-brand uppercase mb-2">Z-Node Passport</h3>
-                <p id="id-passport-num" class="text-sm font-mono font-black text-brand"></p>
-                <p class="text-[9px] text-gray-400 mt-1">Issued 2026 · Valid for enrolled period</p>
-            </div>
-
-            <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm animate-slide-in">
-                <h3 class="text-[10px] font-bold text-brand uppercase mb-3">Verification Status</h3>
-                <div class="space-y-2.5">
-                    <div class="flex items-center justify-between py-2 border-b border-gray-50">
-                        <span class="text-xs text-gray-500">Institution</span>
-                        <span id="vstatus-institution" class="text-xs font-bold">—</span>
-                    </div>
-                    <div class="flex items-center justify-between py-2 border-b border-gray-50">
-                        <span class="text-xs text-gray-500">School Email</span>
-                        <span id="vstatus-email" class="text-xs font-bold text-emerald">Verified ✓</span>
-                    </div>
-                    <div class="flex items-center justify-between py-2 border-b border-gray-50">
-                        <span class="text-xs text-gray-500">Whitelist Status</span>
-                        <span id="vstatus-whitelist" class="text-xs font-bold">—</span>
-                    </div>
-                    <div class="flex items-center justify-between py-2">
-                        <span class="text-xs text-gray-500">Student Benefits</span>
-                        <span id="vstatus-benefits" class="text-xs font-bold">—</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="view-services" class="view-section space-y-3">
-            <p class="text-[10px] text-gray-400 px-1">Connected student platforms</p>
-            
-            <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm animate-scale-in">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-lg">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="w-6 h-6 object-contain">
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-brand">Spotify</p>
-                            <p class="text-[9px] text-gray-400">Student premium access</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <span class="px-2 py-0.5 rounded text-[9px] font-semibold bg-emerald-100 text-emerald-700">Connected</span>
-                        <button class="block mt-1 text-[9px] font-bold text-brand hover:underline">Manage</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm animate-slide-in">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-lg">🚗</div>
-                        <div>
-                            <p class="text-xs font-bold text-brand">Bolt Campus</p>
-                            <p class="text-[9px] text-gray-400">Student ride discounts</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <span class="px-2 py-0.5 rounded text-[9px] font-semibold bg-amber-100 text-amber-700">Eligible</span>
-                        <button class="block mt-1 text-[9px] font-bold text-brand hover:underline">Activate</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm animate-slide-in">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-brand/5 flex items-center justify-center text-lg">💻</div>
-                        <div>
-                            <p class="text-xs font-bold text-brand">GitHub Pack</p>
-                            <p class="text-[9px] text-gray-400">Developer student tools</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <span class="px-2 py-0.5 rounded text-[9px] font-semibold bg-amber-100 text-amber-700">Ready</span>
-                        <button class="block mt-1 text-[9px] font-bold text-brand hover:underline">Connect</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm animate-slide-in">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-brand/5 flex items-center justify-center text-lg">Purple-50</div>
-                        <div>
-                            <p class="text-xs font-bold text-brand">AI Access</p>
-                            <p class="text-[9px] text-gray-400">OpenAI Credits</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <span class="px-2 py-0.5 rounded text-[9px] font-semibold bg-emerald-100 text-emerald-700">Active</span>
-                        <button class="block mt-1 text-[9px] font-bold text-brand hover:underline">Top Up</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="view-settings" class="view-section space-y-2">
-            <p class="text-[10px] text-gray-400 px-1 mb-2">Manage your account</p>
-            
-            <button class="w-full flex items-center justify-between p-3.5 bg-white rounded-xl border border-gray-100 card-hover text-left">
-                <span class="flex items-center gap-3 text-sm font-medium text-brand">
-                    <span>🔔</span>Notifications
-                </span>
-                <span class="text-gray-300 text-lg">›</span>
-            </button>
-            <button class="w-full flex items-center justify-between p-3.5 bg-white rounded-xl border border-gray-100 card-hover text-left">
-                <span class="flex items-center gap-3 text-sm font-medium text-brand">
-                    <span>🔒</span>Security & PIN
-                </span>
-                <span class="text-gray-300 text-lg">›</span>
-            </button>
-            <button class="w-full flex items-center justify-between p-3.5 bg-white rounded-xl border border-gray-100 card-hover text-left">
-                <span class="flex items-center gap-3 text-sm font-medium text-brand">
-                    <span>🏫</span>Linked Institutions
-                </span>
-                <span class="text-gray-300 text-lg">›</span>
-            </button>
-            <button class="w-full flex items-center justify-between p-3.5 bg-white rounded-xl border border-gray-100 card-hover text-left">
-                <span class="flex items-center gap-3 text-sm font-medium text-brand">
-                    <span>❓</span>Help Center
-                </span>
-                <span class="text-gray-300 text-lg">›</span>
-            </button>
-            <button class="w-full flex items-center justify-between p-3.5 bg-white rounded-xl border border-gray-100 card-hover text-left">
-                <span class="flex items-center gap-3 text-sm font-medium text-brand">
-                    <span>🌙</span>Dark Mode
-                </span>
-                <span class="text-gray-300 text-lg">›</span>
-            </button>
-
-            <div class="pt-2">
-                <button onclick="signOut()" class="w-full flex items-center justify-between p-3.5 bg-red-50 rounded-xl border border-red-100 card-hover text-left">
-                    <span class="flex items-center gap-3 text-sm font-medium text-red-600">
-                        <span>🚪</span>Sign Out / Reset
-                    </span>
-                    <span class="text-red-300 text-lg">›</span>
-                </button>
-            </div>
-
-            <div class="text-center pt-4">
-                <button class="inline-flex items-center gap-1.5 text-xs font-bold text-brand hover:underline card-hover">
-                    🛟 Contact Support
-                </button>
-            </div>
-        </section>
-
-    </main>
-
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-gray-200/50 z-50 safe-bottom">
-        <div class="max-w-md mx-auto px-1">
-            <div class="flex justify-around py-2.5">
-                <button class="nav-item active relative flex flex-col items-center gap-0.5 px-2 py-1 text-gray-400" data-view="view-home">
-                    <span class="text-lg">🏠</span>
-                    <span class="text-[9px] font-bold uppercase">Home</span>
-                </button>
-                <button class="nav-item relative flex flex-col items-center gap-0.5 px-2 py-1 text-gray-400" data-view="view-payments">
-                    <span class="text-lg">💳</span>
-                    <span class="text-[9px] font-bold uppercase">Payments</span>
-                </button>
-                <button class="nav-item relative flex flex-col items-center gap-0.5 px-2 py-1 text-gray-400" data-view="view-identity">
-                    <span class="text-lg">🪪</span>
-                    <span class="text-[9px] font-bold uppercase">Identity</span>
-                </button>
-                <button class="nav-item relative flex flex-col items-center gap-0.5 px-2 py-1 text-gray-400" data-view="view-services">
-                    <span class="text-lg">🤝</span>
-                    <span class="text-[9px] font-bold uppercase">Services</span>
-                </button>
-                <button class="nav-item relative flex flex-col items-center gap-0.5 px-2 py-1 text-gray-400" data-view="view-settings">
-                    <span class="text-lg">⚙️</span>
-                    <span class="text-[9px] font-bold uppercase">Settings</span>
-                </button>
-            </div>
-        </div>
-    </nav>
-
-</div><div id="toast-container"></div>
-
-
-<script>
-// ─────────────────────────────────────────────────
-// 0. GLOBAL STATE
-// ─────────────────────────────────────────────────
-let _db = null;           // Supabase client — named _db to avoid collision with window.supabase CDN
-
-let currentStudent = null;
-
-// ─────────────────────────────────────────────────
-// TOAST UTILITY (hoisted — used by all sections below)
-// ─────────────────────────────────────────────────
-function showToast(msg, type = 'info') {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = msg;
-    container.appendChild(toast);
-    setTimeout(() => toast.remove(), 3500);
-}
-
-
-// ─────────────────────────────────────────────────
-// 1. SUPABASE CONFIG FLOW
-// ─────────────────────────────────────────────────
-function saveConfig() {
-    const url = document.getElementById('cfg-url').value.trim();
-    const key = document.getElementById('cfg-key').value.trim();
-
-    if (!url || !key) {
-        showToast('Enter both your Supabase URL and Anon Key.', 'error');
-        return;
-    }
-    if (!url.startsWith('https://')) {
-        showToast('URL must start with https://', 'error');
-        return;
-    }
-
-    localStorage.setItem('znodeSupabaseUrl', url);
-    localStorage.setItem('znodeSupabaseKey', key);
-    initSupabase(url, key);
-}
-
-function initSupabase(url, key) {
-    try {
-        _db = window.supabase.createClient(url, key);
-        document.getElementById('config-modal').classList.add('hidden');
-        bootApp();
-    } catch (e) {
-        showToast('Failed to initialise Supabase: ' + e.message, 'error');
-    }
-}
-
-// ─────────────────────────────────────────────────
-// 2. APP BOOT — decide which screen to show
-// ─────────────────────────────────────────────────
-async function bootApp() {
-    // Check for a saved student session
-    const savedProfile = localStorage.getItem('znodeStudentProfile');
-    if (savedProfile) {
-        try {
-            currentStudent = JSON.parse(savedProfile);
-            // Optionally refresh from DB (silent, don't block UI)
-            refreshStudentProfile(currentStudent.email);
-            showApp(currentStudent);
-            return;
-        } catch(e) {
-            localStorage.removeItem('znodeStudentProfile');
-        }
-    }
-    // No session → show onboard
-    document.getElementById('screen-onboard').classList.remove('hidden');
-}
-
-async function refreshStudentProfile(email) {
-    if (!_db || !email) return;
-    const { data } = await _db
-        .from('students')
-        .select('*, institutions(name, country_code)')
-        .eq('email', email)
-        .single();
-    if (data) {
-        currentStudent = data;
-        localStorage.setItem('znodeStudentProfile', JSON.stringify(data));
-        populateDashboard(data);
-    }
-}
-
-// ─────────────────────────────────────────────────
-// 3. HANDLE SUBMIT — the full async pipeline
-// ─────────────────────────────────────────────────
-async function handleSubmit() {
-    if (!_db) {
-        showToast('Supabase not connected. Refresh and configure.', 'error');
-        return;
-    }
-
-    // ── Gather & validate inputs ──────────────────
-    const fullName  = document.getElementById('ob-fullname').value.trim();
-    const email     = document.getElementById('ob-email').value.trim().toLowerCase();
-    const matric    = document.getElementById('ob-matric').value.trim().toUpperCase();
-    const dept      = document.getElementById('ob-dept').value.trim();
-    const level     = document.getElementById('ob-level').value;
-
-    let hasError = false;
-    const setErr = (id, msg) => {
-        const el = document.getElementById(id);
-        el.textContent = msg; el.classList.toggle('hidden', !msg);
-        document.getElementById(id.replace('err-','ob-'))?.classList.toggle('error', !!msg);
-        if (msg) hasError = true;
-    };
-
-    setErr('err-fullname', fullName  ? '' : 'Full name is required.');
-    setErr('err-email',    email && email.includes('@') ? '' : 'Enter a valid institutional email.');
-    setErr('err-matric',   matric    ? '' : 'Matric number is required.');
-
-    if (hasError) return;
-
-    // ── Lock UI ───────────────────────────────────
-    const btn = document.getElementById('ob-submit-btn');
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spinner"></span> Verifying...`;
-
-    const statusBar  = document.getElementById('ob-status-bar');
-    const statusText = document.getElementById('ob-status-text');
-    const stepsEl    = document.getElementById('ob-steps');
-    statusBar.classList.remove('hidden');
-    stepsEl.innerHTML = '';
-
-    const addStep = (icon, text, ok = null) => {
-        const colour = ok === null ? 'text-white/60' : ok ? 'text-emerald-400' : 'text-amber-400';
-        const dot = ok === null ? '⏳' : ok ? '✅' : '⚠️';
-        stepsEl.innerHTML += `<div class="flex items-center gap-2 ${colour} text-[10px]"><span>${dot}</span><span>${text}</span></div>`;
-    };
-
-    try {
-        // ── STEP 1: Parse domain from email ──────────
-        statusText.textContent = 'Parsing institutional email…';
-        const domainParts = email.split('@');
-        if (domainParts.length !== 2) throw new Error('Invalid email format.');
-        const domainExtension = domainParts[1];   // e.g. "fulafia.edu.ng"
-        addStep('', `Domain detected: ${domainExtension}`);
-
-        // ── STEP 2: Look up institution ───────────────
-        statusText.textContent = 'Looking up institution…';
-        const { data: institution, error: instErr } = await _db
-            .from('institutions')
-            .select('id, name, country_code')
-            .eq('domain_extension', domainExtension)
-            .single();
-
-        if (instErr || !institution) {
-            addStep('', `Institution not found for domain: ${domainExtension}`, false);
-            // Proceed as PENDING with no institution_id
-            await registerStudent({ fullName, email, matric, dept, level, institution: null, verified: false });
-            return;
-        }
-        addStep('', `Institution: ${institution.name}`, true);
-
-        // ── STEP 3: Check whitelist ───────────────────
-        statusText.textContent = 'Checking institutional whitelist…';
-        const { data: whitelist, error: wlErr } = await _db
-            .from('institutional_whitelist')
-            .select('*')
-            .eq('institution_id', institution.id)
-            .eq('matric_number', matric)
-            .single();
-
-        if (wlErr || !whitelist) {
-            addStep('', `Matric not found in whitelist`, false);
-            await registerStudent({ fullName, email, matric, dept, level, institution, verified: false });
-            return;
-        }
-        addStep('', `Whitelist match found: ${whitelist.expected_full_name}`, true);
-
-        // ── STEP 4: Build passport & register VERIFIED ─
-        statusText.textContent = 'Generating Z-Node Passport…';
-        const matricSuffix = matric.replace(/\//g, '').slice(-6);
-        const passportNumber = `ZNP-${institution.country_code}-2026-${matricSuffix}`;
-        addStep('', `Passport: ${passportNumber}`, true);
-
-        await registerStudent({
-            fullName,
-            email,
-            matric,
-            dept:       whitelist.department,
-            level:      whitelist.academic_level,
-            institution,
-            verified:   true,
-            passportNumber,
-            whitelistName: whitelist.expected_full_name,
-        });
-
-    } catch (err) {
-        showToast(err.message || 'An unexpected error occurred.', 'error');
-        btn.disabled = false;
-        btn.innerHTML = 'Activate Z-Node Passport';
-        statusBar.classList.add('hidden');
-    }
-}
-
-// ── 3b. registerStudent: insert to DB & push to state ──
-async function registerStudent({ fullName, email, matric, dept, level, institution, verified, passportNumber, whitelistName }) {
-    const statusText = document.getElementById('ob-status-text');
-    statusText.textContent = 'Registering your profile…';
-
-    const insertPayload = {
-        full_name:           fullName,
-        email:               email,
-        matric_number:       matric,
-        passport_number:     passportNumber || `ZNP-PENDING-${Date.now()}`,
-        academic_department: dept || 'Not Specified',
-        academic_level:      level || 'Not Specified',
-        verification_status: verified ? 'VERIFIED' : 'PENDING',
-        institution_id:      institution?.id ?? null,
-    };
-
-    // Upsert on email (handles re-registrations gracefully)
-    const { data: student, error: insertErr } = await _db
-        .from('students')
-        .upsert(insertPayload, { onConflict: 'email', ignoreDuplicates: false })
-        .select('*, institutions(name, country_code)')
-        .single();
-
-    if (insertErr) {
-        showToast('DB error: ' + insertErr.message, 'error');
-        document.getElementById('ob-submit-btn').disabled = false;
-        document.getElementById('ob-submit-btn').innerHTML = 'Activate Z-Node Passport';
-        return;
-    }
-
-    // Save to global state + localStorage
-    currentStudent = student;
-    localStorage.setItem('znodeStudentProfile', JSON.stringify(student));
-
-    showToast(
-        verified ? `✅ Passport issued: ${passportNumber}` : '⏳ Profile created — pending manual review.',
-        verified ? 'success' : 'info'
-    );
-
-    setTimeout(() => showApp(student), 800);
-}
-
-// ─────────────────────────────────────────────────
-// 4. POPULATE DASHBOARD WITH LIVE PROFILE
-// ─────────────────────────────────────────────────
-function showApp(student) {
-    document.getElementById('screen-onboard').classList.add('hidden');
-    document.getElementById('screen-app').classList.remove('hidden');
-    populateDashboard(student);
-}
-
-function populateDashboard(student) {
-    const isVerified = student.verification_status === 'VERIFIED';
-    const initials   = (student.full_name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
-    const instName   = student.institutions?.name || 'Institution Pending';
-    const passport   = student.passport_number;
-
-    // ── HEADER badge ─────────────────────────────
-    const headerBadge = document.getElementById('header-badge');
-    headerBadge.innerHTML = isVerified
-        ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 backdrop-blur-md"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>VERIFIED</span>`
-        : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-700 border border-amber-500/20"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>PENDING</span>`;
-
-    // ── Student card ──────────────────────────────
-    document.getElementById('card-institution').textContent = instName;
-    document.getElementById('card-matric').textContent      = student.matric_number;
-    document.getElementById('card-avatar').textContent      = initials;
-
-    const avatarBadge = document.getElementById('card-avatar-badge');
-    avatarBadge.innerHTML = isVerified
-        ? `<svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`
-        : `<span class="text-[8px]">⏳</span>`;
-    avatarBadge.className = `absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center ${isVerified ? 'bg-emerald-500' : 'bg-amber-400'}`;
-
-    // ── Passport / Pending banners ────────────────
-    if (isVerified && !passport.startsWith('ZNP-PENDING')) {
-        document.getElementById('passport-card').classList.remove('hidden');
-        document.getElementById('pending-notice').classList.add('hidden');
-        document.getElementById('passport-number').textContent = passport;
-        document.getElementById('passport-dept').textContent   = student.academic_department;
-        document.getElementById('passport-level').textContent  = student.academic_level;
-    } else {
-        document.getElementById('passport-card').classList.add('hidden');
-        document.getElementById('pending-notice').classList.remove('hidden');
-    }
-
-    // ── Activity feed ─────────────────────────────
-    document.getElementById('activity-institution').textContent = instName;
-
-    // ── Identity tab ─────────────────────────────
-    document.getElementById('id-avatar').textContent    = initials;
-    document.getElementById('id-fullname').textContent  = student.full_name;
-    document.getElementById('id-dept').textContent      = student.academic_department;
-    document.getElementById('id-matric').textContent    = student.matric_number;
-    document.getElementById('id-inst-badge').textContent = `Institution: ${instName}`;
-
-    const statusBadge = document.getElementById('id-status-badge');
-    statusBadge.textContent = isVerified ? 'VERIFIED ✓' : 'PENDING ⏳';
-    statusBadge.className   = isVerified
-        ? 'px-2 py-0.5 rounded text-[9px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200'
-        : 'px-2 py-0.5 rounded text-[9px] font-medium bg-amber-50 text-amber-700 border border-amber-200';
-
-    // Passport number on identity tab
-    if (isVerified && !passport.startsWith('ZNP-PENDING')) {
-        document.getElementById('id-passport-block').classList.remove('hidden');
-        document.getElementById('id-passport-num').textContent = passport;
-    }
-
-    // ── Full name on home card (top of student card) ──────
-    // The card shows institution + matric already; also show student name
-    const nameEl = document.getElementById('card-student-name');
-    if (nameEl) nameEl.textContent = student.full_name;
-
-    // Verification checklist
-    const v = (text, ok) => ok
-        ? `<span class="text-xs font-bold text-emerald-600">${text} ✓</span>`
-        : `<span class="text-xs font-bold text-amber-500">${text} ⏳</span>`;
-
-    const hasInstitution = !!student.institution_id;
-    document.getElementById('vstatus-institution').innerHTML = hasInstitution ? v('Found', true)   : v('Not matched', false);
-    document.getElementById('vstatus-whitelist').innerHTML   = isVerified     ? v('Matched', true)  : v('Pending', false);
-    document.getElementById('vstatus-benefits').innerHTML    = isVerified     ? v('Unlocked', true) : v('Locked', false);
-}
-
-// ─────────────────────────────────────────────────
-// 5. SIGN OUT / RESET
-// ─────────────────────────────────────────────────
-function signOut() {
-    if (!confirm('Sign out and clear your local session?')) return;
-    localStorage.removeItem('znodeStudentProfile');
-    currentStudent = null;
-    document.getElementById('screen-app').classList.add('hidden');
-    document.getElementById('screen-onboard').classList.remove('hidden');
-
-    // Reset onboard form
-    ['ob-fullname','ob-email','ob-matric','ob-dept'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('ob-level').value = '';
-    document.getElementById('ob-submit-btn').disabled = false;
-    document.getElementById('ob-submit-btn').innerHTML = 'Activate Z-Node Passport';
-    document.getElementById('ob-status-bar').classList.add('hidden');
-}
-
-// [showToast hoisted to top — see section 0]
-
-// ─────────────────────────────────────────────────
-// 7. NAV TAB SWITCHING
-// ─────────────────────────────────────────────────
-document.querySelectorAll('.nav-item').forEach(button => {
-    button.addEventListener('click', function() {
-        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-        this.classList.add('active');
-        const targetView = this.dataset.view;
-        document.querySelectorAll('.view-section').forEach(section => section.classList.remove('active'));
-        document.getElementById(targetView).classList.add('active');
-        document.getElementById(targetView).querySelectorAll('.animate-scale-in, .animate-slide-in').forEach(el => {
-            el.style.animation = 'none';
-            setTimeout(() => { el.style.animation = ''; }, 10);
-        });
-    });
-});
-
-// Button touch feedback
-document.querySelectorAll('button').forEach(btn => {
-    btn.addEventListener('touchstart', function() { this.style.opacity = '0.85'; });
-    btn.addEventListener('touchend',   function() { this.style.opacity = '1'; });
-});
-
-// ─────────────────────────────────────────────────
-// 8. INIT — check for saved credentials
-// ─────────────────────────────────────────────────
-(function init() {
-    const url = localStorage.getItem('znodeSupabaseUrl');
-    const key = localStorage.getItem('znodeSupabaseKey');
-
-    if (url && key) {
-        // Pre-fill config inputs in case user wants to update later
-        document.getElementById('cfg-url').value = url;
-        document.getElementById('cfg-key').value = key;
-        initSupabase(url, key);
-    } else {
-        // Show config modal first
-        document.getElementById('config-modal').classList.remove('hidden');
-    }
+    initSupabase();
+    bootApp();
 })();
 </script>
 
