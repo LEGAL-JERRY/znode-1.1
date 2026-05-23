@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Z-Node | Institution Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#0a2225',
+                        'brand-light': '#113136',
+                        accent: '#10B981',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #F3F4F6; font-family: 'Inter', sans-serif; color: #1f2937; }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Modals and Overlays */
+        #config-modal, #loading-overlay {
+            position: fixed; inset: 0; z-index: 1000;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .hidden { display: none !important; }
+        
+        /* Input styling */
+        .input-field {
+            width: 100%; padding: 12px 16px; border-radius: 8px;
+            border: 1px solid #e5e7eb; background: #f9fafb;
+            font-size: 14px; outline: none; transition: border 0.2s;
+        }
+        .input-field:focus { border-color: #113136; }
+        
+        .btn-primary {
+            background: #113136; color: white; padding: 12px 24px;
+            border-radius: 8px; font-weight: 600; font-size: 14px;
+            cursor: pointer; transition: background 0.2s; width: 100%;
+            text-align: center; border: none;
+        }
+        .btn-primary:hover { background: #0a2225; }
+        
+        /* Tree View Styling */
+        .faculty-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; margin-bottom: 16px; }
+        .faculty-header { background: #113136; color: #fff; padding: 12px 20px; font-weight: 700; font-size: 15px; }
+        .dept-section { border-bottom: 1px solid #f3f4f6; }
+        .dept-header { background: #f8fafc; padding: 10px 20px; font-weight: 600; color: #334155; font-size: 14px; display: flex; justify-content: space-between; }
+        .level-header { padding: 8px 20px; font-weight: 600; color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .student-row { padding: 12px 20px; border-top: 1px solid #f3f4f6; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; align-items: center; transition: background 0.2s; }
+        .student-row:hover { background: #f8fafc; }
+        
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+        .badge-verified { background: #d1fae5; color: #065f46; }
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        
+        /* Spinner */
+        .spinner { border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 0 auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div id="config-modal" class="hidden">
+    <div class="glass-panel rounded-xl p-8 max-w-sm w-full mx-4">
+        <h2 class="text-xl font-bold text-gray-800 mb-2">System Config</h2>
+        <p class="text-xs text-gray-500 mb-6">Connect Z-Node Admin to your database.</p>
+        <div class="space-y-4 mb-6">
+            <input id="cfg-url" type="url" class="input-field" placeholder="Supabase Project URL" />
+            <input id="cfg-key" type="password" class="input-field" placeholder="Anon Public Key" />
+        </div>
+        <button onclick="saveConfig()" class="btn-primary">Connect Backend</button>
+    </div>
+</div>
+
+<div id="loading-overlay" class="hidden">
+    <div class="text-center">
+        <div class="spinner mb-3"></div>
+        <p class="text-white text-sm font-medium" id="loading-text">Loading...</p>
+    </div>
+</div>
+
+<div id="screen-login" class="min-h-screen flex items-center justify-center p-4 hidden">
+    <div class="glass-panel rounded-2xl p-8 max-w-md w-full shadow-2xl">
+        <div class="text-center mb-8">
+            <div class="w-12 h-12 bg-brand text-white rounded-lg flex items-center justify-center font-black text-2xl mx-auto mb-4">Z</div>
+            <h1 class="text-2xl font-black text-brand">Admin Portal</h1>
+            <p class="text-sm text-gray-500 mt-1">Institutional Access Only</p>
+        </div>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Username</label>
+                <input id="login-username" type="text" class="input-field" placeholder="e.g. admin_fulafia">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Password</label>
+                <input id="login-password" type="password" class="input-field" placeholder="••••••••">
+            </div>
+            <p id="login-error" class="text-red-500 text-xs hidden font-medium"></p>
+            <button onclick="handleLogin()" class="btn-primary mt-2">Secure Login</button>
+        </div>
+    </div>
+</div>
+
+<div id="screen-dashboard" class="hidden min-h-screen flex flex-col">
+    <header class="bg-brand text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-white/10 rounded flex items-center justify-center font-black">Z</div>
+                <div>
+                    <h1 id="dash-inst-name" class="font-bold text-sm tracking-wide">Loading Institution...</h1>
+                    <p class="text-[10px] text-white/50 uppercase tracking-widest">Master Control</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="text-right hidden sm:block">
+                    <p id="dash-admin-name" class="text-sm font-bold">Admin</p>
+                    <p class="text-[10px] text-accent">Active Session</p>
+                </div>
+                <button onclick="logout()" class="text-xs bg-red-500/20 text-red-300 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded transition">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="glass-panel p-5 rounded-xl border-l-4 border-brand">
+                <p class="text-xs text-gray-500 font-bold uppercase mb-1">Total Students</p>
+                <p id="stat-total" class="text-2xl font-black text-brand">0</p>
+            </div>
+            <div class="glass-panel p-5 rounded-xl border-l-4 border-accent">
+                <p class="text-xs text-gray-500 font-bold uppercase mb-1">Verified Passports</p>
+                <p id="stat-verified" class="text-2xl font-black text-brand">0</p>
+            </div>
+            <div class="glass-panel p-5 rounded-xl border-l-4 border-amber-500">
+                <p class="text-xs text-gray-500 font-bold uppercase mb-1">Pending Review</p>
+                <p id="stat-pending" class="text-2xl font-black text-brand">0</p>
+            </div>
+            <div class="glass-panel p-5 rounded-xl border-l-4 border-blue-500">
+                <p class="text-xs text-gray-500 font-bold uppercase mb-1">Faculties Onboarded</p>
+                <p id="stat-faculties" class="text-2xl font-black text-brand">0</p>
+            </div>
+        </div>
+
+        <div class="mb-4 flex justify-between items-end">
+            <h2 class="text-lg font-black text-brand">Student Directory</h2>
+            <button onclick="fetchAndRenderStudents()" class="text-xs font-bold text-brand hover:underline">↻ Refresh Data</button>
+        </div>
+        
+        <div class="hidden md:grid grid-cols-12 gap-4 px-5 py-3 bg-gray-200 rounded-t-xl text-xs font-bold text-gray-600 uppercase tracking-wide">
+            <div class="col-span-5">Student Identity</div>
+            <div class="col-span-3">Matric Number</div>
+            <div class="col-span-2">Passport ID</div>
+            <div class="col-span-2 text-right">Status</div>
+        </div>
+
+        <div id="tree-container" class="space-y-4">
+            </div>
+
+    </main>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// 1. STATE & UTILS
+// ════════════════════════════════════════════════════════
+let _db = null;
+let currentAdmin = null;
+let currentInstitution = null;
+
+const showEl = (id) => document.getElementById(id).classList.remove('hidden');
+const hideEl = (id) => document.getElementById(id).classList.add('hidden');
+const setHtml = (id, html) => document.getElementById(id).innerHTML = html;
+
+// SHA-256 Hashing helper
+async function hashPassword(password) {
+    const msgBuffer = new TextEncoder().encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ════════════════════════════════════════════════════════
+// 2. SUPABASE INITIALIZATION
+// ════════════════════════════════════════════════════════
+function saveConfig() {
+    const url = document.getElementById('cfg-url').value.trim();
+    const key = document.getElementById('cfg-key').value.trim();
+    if (!url || !key) return alert('Both URL and Key are required.');
+    
+    localStorage.setItem('znodeAdminUrl', url);
+    localStorage.setItem('znodeAdminKey', key);
+    initApp(url, key);
+}
+
+function initApp(url, key) {
+    try {
+        _db = window.supabase.createClient(url, key);
+        hideEl('config-modal');
+        checkSession();
+    } catch (e) {
+        alert('Supabase Connection Failed. Check your keys.');
+        localStorage.removeItem('znodeAdminUrl');
+        localStorage.removeItem('znodeAdminKey');
+    }
+}
+
+// ════════════════════════════════════════════════════════
+// 3. AUTHENTICATION FLOW
+// ════════════════════════════════════════════════════════
+function checkSession() {
+    const saved = localStorage.getItem('znodeAdminSession');
+    if (saved) {
+        currentAdmin = JSON.parse(saved);
+        bootDashboard();
+    } else {
+        showEl('screen-login');
+    }
+}
+
+async function handleLogin() {
+    const userIn = document.getElementById('login-username').value.trim();
+    const passIn = document.getElementById('login-password').value.trim();
+    const errEl  = document.getElementById('login-error');
+    
+    if(!userIn || !passIn) {
+        errEl.textContent = "Please enter both username and password.";
+        showEl('login-error');
+        return;
+    }
+
+    hideEl('login-error');
+    showEl('loading-overlay');
+    document.getElementById('loading-text').textContent = "Authenticating...";
+
+    const hashedInput = await hashPassword(passIn);
+
+    // Query DB
+    const { data: admin, error } = await _db
+        .from('institution_admins')
+        .select('*')
+        .eq('username', userIn)
+        .eq('password_hash', hashedInput)
+        .single();
+
+    hideEl('loading-overlay');
+
+    if (error || !admin) {
+        errEl.textContent = "Invalid credentials or unauthorized.";
+        showEl('login-error');
+        return;
+    }
+
+    if (!admin.is_active) {
+        errEl.textContent = "This admin account has been deactivated.";
+        showEl('login-error');
+        return;
+    }
+
+    // Success
+    currentAdmin = admin;
+    localStorage.setItem('znodeAdminSession', JSON.stringify(admin));
+    hideEl('screen-login');
+    bootDashboard();
+}
+
+function logout() {
+    localStorage.removeItem('znodeAdminSession');
+    currentAdmin = null;
+    hideEl('screen-dashboard');
+    showEl('screen-login');
+    document.getElementById('login-password').value = '';
+}
+
+// ════════════════════════════════════════════════════════
+// 4. DASHBOARD DATA LAYER
+// ════════════════════════════════════════════════════════
+async function bootDashboard() {
+    showEl('screen-dashboard');
+    setHtml('dash-admin-name', currentAdmin.full_name);
+    
+    // Fetch Institution Name
+    const { data: inst } = await _db
+        .from('institutions')
+        .select('name')
+        .eq('id', currentAdmin.institution_id)
+        .single();
+        
+    if (inst) {
+        setHtml('dash-inst-name', inst.name);
+    }
+
+    fetchAndRenderStudents();
+}
+
+async function fetchAndRenderStudents() {
+    showEl('loading-overlay');
+    document.getElementById('loading-text').textContent = "Fetching Registry...";
+
+    const { data: students, error } = await _db
+        .from('students')
+        .select('*')
+        .eq('institution_id', currentAdmin.institution_id)
+        .order('created_at', { ascending: false });
+
+    hideEl('loading-overlay');
+
+    if (error) {
+        alert('Error fetching students: ' + error.message);
+        return;
+    }
+
+    updateStats(students || []);
+    renderTree(students || []);
+}
+
+function updateStats(students) {
+    const verified = students.filter(s => s.is_verified).length;
+    
+    // Extract unique faculties using Set
+    const uniqueFaculties = new Set(students.map(s => s.faculty).filter(Boolean));
+
+    setHtml('stat-total', students.length);
+    setHtml('stat-verified', verified);
+    setHtml('stat-pending', students.length - verified);
+    setHtml('stat-faculties', uniqueFaculties.size);
+}
+
+// ════════════════════════════════════════════════════════
+// 5. RENDERING ENGINE (FACULTY > DEPT > LEVEL)
+// ════════════════════════════════════════════════════════
+function renderTree(students) {
+    const container = document.getElementById('tree-container');
+    if (students.length === 0) {
+        container.innerHTML = `<div class="text-center p-10 bg-white rounded-xl border border-gray-200"><p class="text-gray-500">No students registered to this institution yet.</p></div>`;
+        return;
+    }
+
+    // 1. Build the nested object tree
+    const tree = {};
+    students.forEach(student => {
+        const fac = student.faculty || 'Unspecified Faculty';
+        const dep = student.department || 'Unspecified Department';
+        const lvl = student.academic_level || 'Unknown Level';
+
+        if (!tree[fac]) tree[fac] = {};
+        if (!tree[fac][dep]) tree[fac][dep] = {};
+        if (!tree[fac][dep][lvl]) tree[fac][dep][lvl] = [];
+
+        tree[fac][dep][lvl].push(student);
+    });
+
+    // 2. Generate HTML from tree
+    let html = '';
+    
+    // Iterate Faculties
+    Object.keys(tree).sort().forEach(faculty => {
+        html += `<div class="faculty-card shadow-sm">
+                    <div class="faculty-header flex justify-between">
+                        <span>🏛️ ${faculty}</span>
+                    </div>`;
+        
+        // Iterate Departments
+        Object.keys(tree[faculty]).sort().forEach(dept => {
+            let deptTotal = 0;
+            // Calculate total students in this dept for the badge
+            Object.values(tree[faculty][dept]).forEach(arr => deptTotal += arr.length);
+
+            html += `<div class="dept-section">
+                        <div class="dept-header">
+                            <span>📚 ${dept}</span>
+                            <span class="text-xs bg-gray-200 px-2 py-0.5 rounded-full">${deptTotal} Students</span>
+                        </div>`;
+            
+            // Iterate Levels
+            Object.keys(tree[faculty][dept]).sort().forEach(level => {
+                const studentsInLevel = tree[faculty][dept][level];
+                
+                html += `<div class="bg-white">
+                            <div class="level-header bg-gray-50/50 border-y border-gray-100">Level: ${level}</div>`;
+                
+                // Print Students
+                studentsInLevel.forEach(st => {
+                    const statusBadge = st.is_verified 
+                        ? `<span class="badge badge-verified">VERIFIED</span>` 
+                        : `<span class="badge badge-pending">PENDING</span>`;
+                    
+                    const passport = st.znode_passport_id || st.passport_number || 'Awaiting Issuance';
+                        
+                    html += `
+                        <div class="student-row md:grid md:grid-cols-12 flex flex-col items-start px-5 py-3 border-b border-gray-50 last:border-0">
+                            <div class="col-span-5 w-full flex items-center gap-3 mb-2 md:mb-0">
+                                <div class="w-8 h-8 rounded bg-brand/10 text-brand flex items-center justify-center font-bold text-xs uppercase">
+                                    ${st.full_name.charAt(0)}
+                                </div>
+                                <div>
+                                    <p class="font-bold text-sm text-gray-800">${st.full_name}</p>
+                                    <p class="text-[10px] text-gray-500">${st.email}</p>
+                                </div>
+                            </div>
+                            <div class="col-span-3 w-full mb-1 md:mb-0">
+                                <span class="md:hidden text-[10px] font-bold uppercase text-gray-400 mr-2">Matric:</span>
+                                <span class="text-sm font-mono text-gray-600">${st.matric_number}</span>
+                            </div>
+                            <div class="col-span-2 w-full mb-2 md:mb-0">
+                                <span class="md:hidden text-[10px] font-bold uppercase text-gray-400 mr-2">Passport:</span>
+                                <span class="text-[11px] font-mono font-bold ${passport.startsWith('Awaiting') ? 'text-gray-400' : 'text-brand'}">${passport}</span>
+                            </div>
+                            <div class="col-span-2 w-full text-left md:text-right">
+                                ${statusBadge}
+                            </div>
+                        </div>`;
+                });
+                
+                html += `</div>`; // End Level
+            });
+            html += `</div>`; // End Dept
+        });
+        html += `</div>`; // End Faculty
+    });
+
+    container.innerHTML = html;
+}
+
+// ════════════════════════════════════════════════════════
+// INIT SCRIPT
+// ════════════════════════════════════════════════════════
+(function init() {
+    const url = localStorage.getItem('znodeAdminUrl');
+    const key = localStorage.getItem('znodeAdminKey');
+    if (url && key) {
+        document.getElementById('cfg-url').value = url;
+        document.getElementById('cfg-key').value = key;
+        initApp(url, key);
+    } else {
+        showEl('config-modal');
+    }
+})();
+</script>
+
+</body>
+</html>
