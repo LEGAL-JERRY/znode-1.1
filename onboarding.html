@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Z-Node // Join the Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+    --bg: #0f172a;
+    --panel-bg: rgba(30, 41, 59, 0.75);
+    --input-bg: rgba(15, 23, 42, 0.6);
+    --chip-bg: rgba(51, 65, 85, 0.5);
+    --border-light: rgba(14, 165, 233, 0.2);
+    --border-strong: rgba(14, 165, 233, 0.6);
+    --text-main: #ffffff;
+    --text-muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent-glow: rgba(56, 189, 248, 0.15);
+    --radius: 20px;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+[data-theme="midnight"] { --bg:#050505;--panel-bg:rgba(20,20,20,0.8);--input-bg:rgba(10,10,10,0.6);--chip-bg:rgba(30,30,30,0.5);--border-light:rgba(255,255,255,0.1);--border-strong:rgba(255,255,255,0.5);--text-main:#fff;--text-muted:#a3a3a3;--accent:#f5f5f5;--accent-glow:rgba(255,255,255,0.1); }
+[data-theme="sunrise"] { --bg:#3b0764;--panel-bg:rgba(76,29,149,0.7);--input-bg:rgba(59,7,100,0.6);--chip-bg:rgba(91,33,182,0.5);--border-light:rgba(249,115,22,0.25);--border-strong:rgba(249,115,22,0.7);--text-main:#fff;--text-muted:#d8b4fe;--accent:#f97316;--accent-glow:rgba(249,115,22,0.15); }
+[data-theme="mint"] { --bg:#022c22;--panel-bg:rgba(6,78,59,0.7);--input-bg:rgba(2,44,34,0.6);--chip-bg:rgba(4,120,87,0.4);--border-light:rgba(52,211,153,0.25);--border-strong:rgba(52,211,153,0.7);--text-main:#fff;--text-muted:#6ee7b7;--accent:#34d399;--accent-glow:rgba(52,211,153,0.15); }
+[data-theme="pink"] { --bg:#500724;--panel-bg:rgba(136,19,55,0.65);--input-bg:rgba(80,7,36,0.6);--chip-bg:rgba(159,18,57,0.4);--border-light:rgba(251,113,133,0.3);--border-strong:rgba(251,113,133,0.8);--text-main:#fff;--text-muted:#fda4af;--accent:#fb7185;--accent-glow:rgba(251,113,133,0.2); }
+
+* { margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif; }
+body { background-color:var(--bg);color:var(--text-main);min-height:100vh;overflow-x:hidden;transition:background-color 0.5s var(--ease); }
+
+.stealth-grid { position:fixed;inset:0;background-image:linear-gradient(var(--border-light) 1px,transparent 1px),linear-gradient(90deg,var(--border-light) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(circle at 50% 50%,black 30%,transparent 85%);pointer-events:none;z-index:1; }
+
+.onboarding-container { position:relative;max-width:540px;margin:40px auto;padding:0 20px;z-index:10;transition:opacity 0.4s var(--ease),transform 0.4s var(--ease); }
+
+.global-progress-bar-wrapper { width:100%;height:6px;background:rgba(255,255,255,0.1);border-radius:10px;margin-bottom:24px;overflow:hidden; }
+.global-progress-fill { height:100%;width:16.6%;background:var(--accent);box-shadow:0 0 10px var(--accent);border-radius:10px;transition:width 0.4s var(--ease); }
+
+.main-section-header { margin-bottom:24px; }
+.main-section-header .eyebrow { font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:6px; }
+.main-section-header h1 { font-size:28px;font-weight:800;line-height:1.2;margin-bottom:6px; }
+.main-section-header .motto-text { font-size:14px;color:var(--text-muted);line-height:1.4; }
+
+.interaction-box { background:var(--panel-bg);border:1px solid var(--border-strong);border-radius:var(--radius);padding:32px;backdrop-filter:blur(20px);box-shadow:0 30px 60px rgba(0,0,0,0.3);transition:border-color 0.5s var(--ease);position:relative; }
+.subsection-progress-bar-wrapper { position:absolute;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,0.05);border-top-left-radius:var(--radius);border-top-right-radius:var(--radius);overflow:hidden; }
+.subsection-progress-fill { height:100%;width:16.6%;background:var(--accent);transition:width 0.3s var(--ease); }
+
+.box-content-viewport { transition:opacity 0.2s var(--ease); }
+.human-text-display { font-size:15px;line-height:1.6;margin-bottom:20px;font-weight:500; }
+.booring-meta-tag { font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);text-transform:uppercase;margin-bottom:12px;font-weight:700;letter-spacing:0.5px;display:block; }
+
+.input-field { width:100%;padding:14px 16px;border-radius:12px;background:var(--input-bg);border:1px solid var(--border-light);color:var(--text-main);font-size:14px;margin-bottom:12px;outline:none;transition:border-color 0.3s;font-weight:500; }
+.input-field:focus { border-color:var(--accent); }
+input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1);opacity:0.6;cursor:pointer; }
+.inline-add-row { display:flex;gap:8px;margin-bottom:16px; }
+.inline-add-row .input-field { margin-bottom:0; }
+.chip-grid { display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;max-height:260px;overflow-y:auto;padding-right:4px; }
+.chip { padding:12px 16px;border-radius:12px;border:1px solid var(--border-light);background:var(--chip-bg);color:var(--text-muted);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;flex-direction:column;gap:2px; }
+.chip .acronym { font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text-main); }
+.chip .full-name { font-size:11px;font-weight:400;opacity:0.8; }
+.chip.active { background:var(--accent);border-color:var(--accent);color:#000 !important; }
+.chip.active .acronym,.chip.active .full-name { color:#000 !important; }
+[data-theme="sunrise"] .chip.active,[data-theme="pink"] .chip.active { color:#fff !important; }
+[data-theme="sunrise"] .chip.active *,[data-theme="pink"] .chip.active * { color:#fff !important; }
+
+.nitch-sub-panel { background:rgba(15,23,42,0.4);border:1px dashed var(--border-light);padding:16px;border-radius:12px;margin-top:14px;animation:fadeInSlide 0.3s var(--ease) forwards; }
+@keyframes fadeInSlide { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+.legal-scroll-area { background:var(--input-bg);border:1px solid var(--border-light);padding:16px;border-radius:12px;font-size:12px;line-height:1.6;color:var(--text-muted);height:180px;overflow-y:scroll;margin-bottom:16px; }
+.legal-scroll-area h4 { color:var(--text-main);font-size:13px;margin:12px 0 4px 0;font-weight:700; }
+
+.social-input-container { background:rgba(15,23,42,0.3);border:1px dashed var(--border-light);border-radius:12px;padding:16px;margin-top:12px; }
+.pin-matrix-row { display:flex;gap:8px;justify-content:space-between;margin:20px 0; }
+.pin-cell { width:48px;height:54px;text-align:center;font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace;border-radius:10px;background:var(--input-bg);border:1px solid var(--border-light);color:var(--text-main);outline:none;transition:border-color 0.2s; }
+.pin-cell:focus { border-color:var(--accent);box-shadow:0 0 8px var(--accent-glow); }
+
+.image-dropzone-wrapper { display:flex;flex-direction:column;align-items:center;justify-content:center;height:170px;width:100%;border:2px dashed var(--border-strong);background:var(--input-bg);border-radius:12px;cursor:pointer;transition:all 0.2s var(--ease);text-align:center;padding:24px;margin-bottom:16px; }
+.image-dropzone-wrapper:hover { border-color:var(--accent);background:rgba(255,255,255,0.02); }
+.preview-cluster-frame { display:flex;justify-content:center;align-items:center;margin-top:14px; }
+.avatar-preview-node { width:90px;height:90px;border-radius:50%;border:2px solid var(--border-strong);object-fit:cover;background:var(--chip-bg);box-shadow:0 0 15px var(--accent-glow); }
+
+.action-row { margin-top:24px;display:flex;gap:12px; }
+.btn { padding:14px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;flex:1;transition:all 0.2s;text-align:center;display:inline-block; }
+.btn-primary { background:var(--accent);color:#000; }
+[data-theme="sunrise"] .btn-primary,[data-theme="pink"] .btn-primary { color:#fff; }
+.btn-primary:disabled { opacity:0.5;cursor:not-allowed; }
+.btn-secondary { background:var(--chip-bg);color:var(--text-main);border:1px solid var(--border-light);max-width:110px; }
+.btn-action-small { padding:0 16px;border-radius:12px;background:var(--chip-bg);border:1px solid var(--border-light);color:var(--text-main);font-weight:700;cursor:pointer; }
+
+.welcome-interstitial-stage { position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:40px;z-index:100;opacity:0;visibility:hidden;transform:scale(0.96);transition:opacity 0.6s var(--ease),transform 0.6s var(--ease),visibility 0.6s;background:var(--bg); }
+.welcome-interstitial-stage.active { opacity:1;visibility:visible;transform:scale(1); }
+.welcome-interstitial-stage h1 { font-size:clamp(32px,6vw,48px);font-weight:900;letter-spacing:-2.5px;line-height:1.1;margin-bottom:20px;color:var(--text-main);max-width:600px; }
+.welcome-interstitial-stage p { font-size:15px;color:var(--text-muted);max-width:520px;line-height:1.6;margin-bottom:32px; }
+.welcome-interstitial-stage .btn-wrap { display:flex;justify-content:center;width:100%; }
+
+/* Toast */
+.toast-container { position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px; }
+.toast { padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;backdrop-filter:blur(20px);animation:toastIn 0.3s var(--ease);max-width:320px; }
+.toast-success { background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);color:#6ee7b7; }
+.toast-error { background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#fca5a5; }
+.toast-info { background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.4);color:#7dd3fc; }
+@keyframes toastIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+
+/* Themes grid */
+.theme-grid { display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:8px; }
+.theme-swatch { height:60px;border-radius:12px;border:2px solid transparent;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden; }
+.theme-swatch.selected { border-color:var(--accent);box-shadow:0 0 12px var(--accent-glow); }
+.theme-swatch span { position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:9px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.8);text-transform:uppercase; }
+
+/* Image compress indicator */
+.compress-badge { display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--accent);font-family:'JetBrains Mono',monospace;margin-top:6px; }
+</style>
+</head>
+<body data-theme="ocean">
+
+<div class="stealth-grid"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="onboarding-container" id="onboardingPortal">
+    <div class="global-progress-bar-wrapper"><div class="global-progress-fill" id="globalProgressFill"></div></div>
+    <div class="main-section-header" id="mainHeaderBlock">
+        <div class="eyebrow" id="sectionMetaLabel">STAGE 1 OF 6</div>
+        <h1 id="sectionMainTitle">Loading...</h1>
+        <div class="motto-text" id="sectionMottoTitle">Loading...</div>
+    </div>
+    <div class="interaction-box">
+        <div class="subsection-progress-bar-wrapper"><div class="subsection-progress-fill" id="subProgressFill"></div></div>
+        <div class="box-content-viewport" id="boxViewport"></div>
+        <div class="action-row">
+            <button class="btn btn-secondary" id="prevBtn">Back</button>
+            <button class="btn btn-primary" id="nextBtn">Proceed</button>
+        </div>
+    </div>
+</div>
+
+<div class="welcome-interstitial-stage" id="welcomeOverlay">
+    <h1 id="welcomeTitle">Welcome!</h1>
+    <p>We will be needing some vital information to create a digital identity for you. Spend a minute or two filling this up — trust me, it will be worth it!</p>
+    <div class="btn-wrap"><button class="btn btn-primary" id="interstitialContinueBtn" style="max-width:140px;">Let's Go</button></div>
+</div>
+
+<div class="welcome-interstitial-stage" id="storyOverlay">
+    <h1>Pheew, it's been a long journey...</h1>
+    <p>But the story is supposed to be your story, so tell us about yourself.</p>
+    <div class="btn-wrap"><button class="btn btn-primary" id="storyContinueBtn" style="max-width:180px;">Tell My Story</button></div>
+</div>
+
+<!-- Submitting overlay -->
+<div class="welcome-interstitial-stage" id="submittingOverlay">
+    <h1 id="submitTitle">Creating your identity...</h1>
+    <p id="submitMsg">Compressing your photo and uploading your profile to the Z-Node network. Hold tight.</p>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════
+// SUPABASE CONFIG — paste your real keys here
+// ════════════════════════════════════════════════════
+const SUPABASE_URL  = "https://yohndnmwvgcwadkytmix.supabase.co";
+const SUPABASE_ANON = "YOUR_SUPABASE_ANON_KEY_HERE"; // replace with eyJ... key from Supabase dashboard > Settings > API
+
+const { createClient } = supabase;
+const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ════════════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════════════
+function showToast(msg, type = 'info') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast toast-${type}`;
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3800);
+}
+
+// ════════════════════════════════════════════════════
+// IMAGE COMPRESSION — canvas resize to max 400px, JPEG 0.82
+// ════════════════════════════════════════════════════
+function compressImage(file, maxDim = 400, quality = 0.82) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                let w = img.width, h = img.height;
+                if (w > maxDim || h > maxDim) {
+                    if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+                    else       { w = Math.round(w * maxDim / h); h = maxDim; }
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                canvas.toBlob((blob) => {
+                    resolve({ blob, dataUrl: canvas.toDataURL('image/jpeg', quality), w, h, size: blob.size });
+                }, 'image/jpeg', quality);
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// ════════════════════════════════════════════════════
+// SUPABASE: Upload photo to storage bucket "avatars"
+// ════════════════════════════════════════════════════
+async function uploadAvatar(blob, username) {
+    const fileName = `${username}_${Date.now()}.jpg`;
+    const { data, error } = await _db.storage
+        .from('avatars')
+        .upload(fileName, blob, { contentType: 'image/jpeg', upsert: true });
+    if (error) throw new Error('Photo upload failed: ' + error.message);
+    const { data: { publicUrl } } = _db.storage.from('avatars').getPublicUrl(fileName);
+    return publicUrl;
+}
+
+// ════════════════════════════════════════════════════
+// SUPABASE: Hash password (SHA-256 + salt)
+// ════════════════════════════════════════════════════
+async function hashPassword(pw) {
+    const enc = new TextEncoder();
+    const buf = await crypto.subtle.digest('SHA-256', enc.encode(pw + 'znode_salt_2026'));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// ════════════════════════════════════════════════════
+// SUPABASE: Final submit — insert student row
+// ════════════════════════════════════════════════════
+async function submitToSupabase() {
+    const s = userProfileState;
+
+    // 1. Validate essentials
+    if (!s.username || !s.emailAddress || !s.accountPassword) {
+        showToast('Missing username, email, or password.', 'error'); return false;
+    }
+
+    // 2. Show submitting screen
+    const overlay = document.getElementById('submittingOverlay');
+    overlay.classList.add('active');
+
+    try {
+        // 3. Check username uniqueness
+        document.getElementById('submitMsg').textContent = 'Checking username availability...';
+        const { data: existing } = await _db.from('students').select('id').eq('username', s.username).maybeSingle();
+        if (existing) { overlay.classList.remove('active'); showToast('@' + s.username + ' is already taken.', 'error'); return false; }
+
+        // 4. Hash password
+        document.getElementById('submitMsg').textContent = 'Securing credentials...';
+        const pwdHash = await hashPassword(s.accountPassword);
+
+        // 5. Upload avatar if present
+        let avatarUrl = null;
+        if (s.studentImageBlob) {
+            document.getElementById('submitMsg').textContent = 'Uploading your photo...';
+            avatarUrl = await uploadAvatar(s.studentImageBlob, s.username);
+        }
+
+        // 6. Look up institution
+        document.getElementById('submitMsg').textContent = 'Linking institution...';
+        let institutionId = null;
+        const { data: instRow } = await _db.from('institutions').select('id').eq('short_name', s.selectedUni).maybeSingle();
+        if (instRow) institutionId = instRow.id;
+
+        // 7. Generate passport ID
+        const suffix = (s.matricNumber || s.username).replace(/[^a-zA-Z0-9]/g,'').slice(-6).toUpperCase();
+        const uniData = nigerianUniversitiesData.find(u => u.shortName === s.selectedUni);
+        const passportId = `ZNP-${s.selectedUni || 'ZND'}-2026-${suffix}`;
+
+        // 8. Insert student record
+        document.getElementById('submitMsg').textContent = 'Creating your Z-Node profile...';
+        const payload = {
+            username:          s.username,
+            full_name:         s.fullName,
+            email:             s.emailAddress,
+            password_hash:     pwdHash,
+            avatar_url:        avatarUrl,
+            institution_id:    institutionId,
+            faculty:           s.selectedFaculty || null,
+            department:        s.selectedDept || null,
+            matric_number:     s.matricNumber || null,
+            academic_level:    s.academicLevel || null,
+            phone:             s.phoneNumber || null,
+            znode_passport_id: passportId,
+            theme:             s.theme,
+            religion:          s.religion || null,
+            tribe:             s.tribe || null,
+            state_of_origin:   s.stateOfOrigin || null,
+            lga:               s.lga || null,
+            dob:               s.dob || null,
+            gender:            s.gender || null,
+            eternal_statement: s.eternalStatement || null,
+            known_for:         s.knownFor,
+            aspirations:       s.aspirations,
+            hobbies:           s.hobbies,
+            study_habit:       s.studyHabit || null,
+            keeps_notes:       s.keepNotes || null,
+            socials:           s.socials,
+            nitch_type:        s.nitchType || 'solo',
+            nitch_name:        s.nitchName || null,
+            is_verified:       false,
+        };
+
+        const { data: student, error: insertErr } = await _db.from('students').insert(payload).select().maybeSingle();
+        if (insertErr) {
+            if (insertErr.code === '23505') throw new Error('An account with this email or matric already exists.');
+            throw new Error(insertErr.message);
+        }
+
+        // 9. Save session and redirect to app
+        localStorage.setItem('znodeStudentProfile', JSON.stringify(student));
+        document.getElementById('submitTitle').textContent = '🎉 You\'re in!';
+        document.getElementById('submitMsg').textContent = 'Redirecting to your Z-Node dashboard...';
+        showToast('Welcome to Z-Node, ' + s.username + '!', 'success');
+        setTimeout(() => { window.location.href = 'app.html'; }, 1800);
+        return true;
+
+    } catch (err) {
+        overlay.classList.remove('active');
+        showToast(err.message, 'error');
+        return false;
+    }
+}
+
+// ════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════
+const userProfileState = {
+    theme: "ocean", username: "", fullName: "", emailAddress: "",
+    religion: "", tribe: "", stateOfOrigin: "", lga: "", dob: "", gender: "",
+    eternalStatement: "", selectedUni: "", selectedFaculty: "", selectedDept: "",
+    matricNumber: "", academicLevel: "", phoneNumber: "",
+    nitchType: "", nitchName: "", nitchPassword: "", nitchLimit: 5,
+    accountPassword: "", knownFor: [], aspirations: [], hobbies: [],
+    studyHabit: "", keepNotes: "",
+    socials: { x: "", instagram: "", linkedin: "", github: "" },
+    activeSocialPlatform: "x", emailPin: "",
+    studentImage: null, studentImageBlob: null,
+};
+
+const nigerianUniversitiesData = [
+    { shortName:"FULAFIA", fullName:"Federal University of Lafia" },
+    { shortName:"UNILAG",  fullName:"University of Lagos" },
+    { shortName:"ABU",     fullName:"Ahmadu Bello University, Zaria" },
+    { shortName:"UI",      fullName:"University of Ibadan" },
+    { shortName:"OAU",     fullName:"Obafemi Awolowo University, Ile-Ife" },
+    { shortName:"UNIBEN",  fullName:"University of Benin" },
+    { shortName:"BUK",     fullName:"Bayero University, Kano" },
+    { shortName:"UNN",     fullName:"University of Nigeria, Nsukka" },
+    { shortName:"UNILORIN",fullName:"University of Ilorin" },
+    { shortName:"FUTMINNA",fullName:"Federal University of Technology, Minna" },
+    { shortName:"UNIPORT", fullName:"University of Port Harcourt" },
+    { shortName:"UNICAL",  fullName:"University of Calabar" },
+    { shortName:"LASU",    fullName:"Lagos State University" },
+    { shortName:"CU",      fullName:"Covenant University" },
+    { shortName:"BABCOCK", fullName:"Babcock University" },
+    { shortName:"LAUTECH", fullName:"Ladoke Akintola University of Technology" },
+    { shortName:"FUTA",    fullName:"Federal University of Technology, Akure" },
+    { shortName:"FUTO",    fullName:"Federal University of Technology, Owerri" },
+    { shortName:"UNIZIK",  fullName:"Nnamdi Azikiwe University" },
+    { shortName:"UNIJOS",  fullName:"University of Jos" },
+];
+
+const facultyDepartmentMapping = {
+    "Social Sciences":      ["Economics","Political Science","Sociology","Mass Communication"],
+    "Sciences":             ["Computer Science","Microbiology","Biochemistry","Physics","Mathematics"],
+    "Engineering":          ["Electrical Engineering","Mechanical Engineering","Civil Engineering","Computer Engineering"],
+    "Arts & Humanities":    ["History","English","Theatre Arts","Philosophy"],
+    "Management Sciences":  ["Accounting","Business Administration","Banking & Finance"],
+    "Law":                  ["Law"],
+    "Medicine":             ["Medicine & Surgery","Pharmacy","Nursing","Medical Lab Science"],
+};
+
+const careerAspirationsMapping = {
+    "Economics":           ["Data Analyst","Investment Banker","Financial Consultant","Economic Researcher","Policy Advisor","Risk Analyst","Actuary","Asset Manager"],
+    "Computer Science":    ["Software Engineer","Systems Architect","DevOps Specialist","AI/ML Engineer","Cybersecurity Analyst","Product Manager","Database Administrator"],
+    "Computer Engineering":["Hardware Architect","Embedded Systems Engineer","Robotics Specialist","Firmware Engineer","IoT Infrastructure Lead"],
+    "Accounting":          ["Chartered Accountant","Forensic Auditor","Tax Consultant","Financial Controller","Budget Analyst"],
+    "Mass Communication":  ["Journalist","PR Specialist","Content Strategist","Broadcaster","Media Director","Copywriter"],
+    "Business Administration":["Operations Manager","Management Consultant","HR Director","Entrepreneur","Venture Capitalist"],
+};
+const genericCareerPool = ["Software Developer","Digital Marketer","Business Strategist","Creative Director","Project Manager","Data Scientist","UI/UX Designer","Tech Consultant"];
+const staticHobbiesOptions = ["Watching Football","Video Games","Reading Novels","Listening to Afrobeat & Hip-hop","Cooking","Traveling","Gym & Fitness"];
+const staticKnownForOptions = ["Coding","Chess","Music","Graphics Design","Content Creation","Photography","Public Speaking","Gaming"];
+
+const architecturalData = [
+    { mainTitle:"Pick your vibe", motto:"Tell us the theme that best fits your personality.", subSteps:[{id:"vibe_select",label:"Let's calibrate your environment. Pick a vibe blueprint.",type:"themes"}] },
+    { mainTitle:"Identifying you", motto:"Tell us what they call you.", subSteps:[
+        {id:"user_handle",   label:"What will we call you?",       type:"input_node", placeholder:"Username",         stateKey:"username"},
+        {id:"user_fullname", label:"What do they call you?",       type:"input_node", placeholder:"Full name",         stateKey:"fullName"},
+        {id:"user_religion", label:"What is your Religion?",       type:"input_node", placeholder:"Religion",          stateKey:"religion"},
+        {id:"user_tribe",    label:"What is your Tribe?",          type:"input_node", placeholder:"Tribe",             stateKey:"tribe"},
+        {id:"user_state",    label:"State of Origin?",             type:"input_node", placeholder:"State of Origin",   stateKey:"stateOfOrigin"},
+        {id:"user_lga",      label:"Local Government Area (LGA)?", type:"input_node", placeholder:"LGA",               stateKey:"lga"},
+        {id:"user_dob",      label:"Date of Birth?",               type:"date_node",                                   stateKey:"dob"},
+        {id:"user_gender",   label:"Select your Gender Identity",  type:"single_select_bubble", choices:["Male","Female","Prefer not to say"], stateKey:"gender"},
+        {id:"user_eternal",  label:"Add a statement that will speak for you forever.",type:"input_node",placeholder:"Your eternal statement...",stateKey:"eternalStatement"},
+    ]},
+    { mainTitle:"Compliance & Dreams", motto:"Tell us if you align with our metric blueprint.", subSteps:[{id:"legal_book",label:"Accept terms and explore our roadmap.",type:"legal_manifesto"}] },
+    { mainTitle:"Your institution", motto:"Tell us what tertiary institution is currently stressing you out.", subSteps:[
+        {id:"uni_search_step",    label:"Which tertiary institution?",                      type:"uni_engine_search"},
+        {id:"faculty_step",       label:"Where is your real problem originating from?",     type:"faculty_selector"},
+        {id:"dept_step",          label:"Omoh, the real stress point.",                     type:"department_selector"},
+        {id:"contact_level_step", label:"Configure your identity tracking markers below.",  type:"contact_fields"},
+        {id:"nitch_step",         label:"Define your isolation node or group compound.",    type:"nitch_engine"},
+        {id:"matric_step",        label:"Your matriculation number.",                       type:"matric_node"},
+        {id:"secure_pass_step",   label:"Lastly, create a secure password for your account.", type:"account_password_node"},
+    ]},
+    { mainTitle:"Your identity", motto:"Tell us about your story and lifestyle.", subSteps:[
+        {id:"known_for_step",    label:"What are you known for?",           type:"multi_select_custom",      pool:staticKnownForOptions,  stateKey:"knownFor"},
+        {id:"aspirations_step",  label:"Professional aspirations",          type:"multi_select_aspirations",                              stateKey:"aspirations"},
+        {id:"hobbies_step",      label:"Hobbies",                           type:"multi_select_custom",      pool:staticHobbiesOptions,   stateKey:"hobbies"},
+        {id:"study_habits_step", label:"When do you read for exams?",       type:"single_select_bubble",     choices:["Week before","Days before","Hours before","Omoh"], stateKey:"studyHabit"},
+        {id:"notes_step",        label:"Do you keep notes?",                type:"single_select_bubble",     choices:["Yes","No","Omoh"], stateKey:"keepNotes"},
+    ]},
+    { mainTitle:"Complete registration", motto:"Tell us where to reach you online and verify your identity.", subSteps:[
+        {id:"social_handles_step",    label:"Add your social handle parameters.",                                       type:"social_media_matrix"},
+        {id:"email_verification_step",label:"Verify your email to finalize your deployment.",                          type:"email_verify_node"},
+        {id:"student_image_step",     label:"Show us a pretty face! Upload your profile photo.",                       type:"image_upload_node"},
+    ]},
+];
+
+let mainIndex = 0, subIndex = 0;
+const onboardingPortal    = document.getElementById('onboardingPortal');
+const sectionMetaLabel    = document.getElementById('sectionMetaLabel');
+const sectionMainTitle    = document.getElementById('sectionMainTitle');
+const sectionMottoTitle   = document.getElementById('sectionMottoTitle');
+const boxViewport         = document.getElementById('boxViewport');
+const mainHeaderBlock     = document.getElementById('mainHeaderBlock');
+const globalProgressFill  = document.getElementById('globalProgressFill');
+const subProgressFill     = document.getElementById('subProgressFill');
+const prevBtn             = document.getElementById('prevBtn');
+const nextBtn             = document.getElementById('nextBtn');
+const welcomeOverlay      = document.getElementById('welcomeOverlay');
+const welcomeTitle        = document.getElementById('welcomeTitle');
+const storyOverlay        = document.getElementById('storyOverlay');
+
+function switchTheme(name) {
+    userProfileState.theme = name;
+    document.body.setAttribute('data-theme', name);
+}
+
+function renderStep() {
+    const currentMain = architecturalData[mainIndex];
+    const currentSub  = currentMain.subSteps[subIndex];
+    const totalSubs   = currentMain.subSteps.length;
+
+    const globalPct  = ((mainIndex / architecturalData.length) + (subIndex / totalSubs / architecturalData.length)) * 100;
+    globalProgressFill.style.width = Math.max(5, globalPct) + '%';
+    subProgressFill.style.width    = ((subIndex + 1) / totalSubs * 100) + '%';
+
+    sectionMetaLabel.textContent  = `STAGE ${mainIndex + 1} OF ${architecturalData.length}`;
+    sectionMainTitle.textContent  = currentMain.mainTitle;
+    sectionMottoTitle.textContent = currentMain.motto;
+
+    boxViewport.innerHTML = '';
+    nextBtn.textContent   = (mainIndex === architecturalData.length - 1 && subIndex === currentMain.subSteps.length - 1)
+        ? 'Complete Registration' : 'Proceed';
+
+    const label = document.createElement('span');
+    label.className    = 'booring-meta-tag';
+    label.textContent  = currentSub.label;
+    boxViewport.appendChild(label);
+
+    // ── RENDER BY TYPE ──
+    if (currentSub.type === "themes") {
+        const themes = [
+            { id:"ocean",    label:"Ocean",    colors:["#0f172a","#38bdf8"] },
+            { id:"midnight", label:"Night",    colors:["#050505","#f5f5f5"] },
+            { id:"sunrise",  label:"Sunrise",  colors:["#3b0764","#f97316"] },
+            { id:"mint",     label:"Mint",     colors:["#022c22","#34d399"] },
+            { id:"pink",     label:"Pink",     colors:["#500724","#fb7185"] },
+        ];
+        const grid = document.createElement('div'); grid.className = 'theme-grid';
+        themes.forEach(t => {
+            const sw = document.createElement('div');
+            sw.className = `theme-swatch ${userProfileState.theme === t.id ? 'selected' : ''}`;
+            sw.style.background = `linear-gradient(135deg, ${t.colors[0]}, ${t.colors[1]})`;
+            sw.innerHTML = `<span>${t.label}</span>`;
+            sw.onclick = () => { document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('selected')); sw.classList.add('selected'); switchTheme(t.id); };
+            grid.appendChild(sw);
+        });
+        boxViewport.appendChild(grid);
+
+    } else if (currentSub.type === "input_node") {
+        const el = document.createElement('input');
+        el.className   = 'input-field'; el.type = 'text';
+        el.placeholder = currentSub.placeholder;
+        el.id          = `field_${currentSub.id}`;
+        el.value       = userProfileState[currentSub.stateKey] || '';
+        boxViewport.appendChild(el);
+
+    } else if (currentSub.type === "date_node") {
+        const el = document.createElement('input');
+        el.className = 'input-field'; el.type = 'date';
+        el.id        = `field_${currentSub.id}`;
+        el.value     = userProfileState[currentSub.stateKey] || '';
+        boxViewport.appendChild(el);
+
+    } else if (currentSub.type === "single_select_bubble") {
+        const grid = document.createElement('div'); grid.className = 'chip-grid';
+        currentSub.choices.forEach(choice => {
+            const chip = document.createElement('div');
+            chip.className = `chip ${userProfileState[currentSub.stateKey] === choice ? 'active' : ''}`;
+            chip.innerHTML = `<span class="acronym">${choice}</span>`;
+            chip.onclick   = () => { grid.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); chip.classList.add('active'); userProfileState[currentSub.stateKey] = choice; };
+            grid.appendChild(chip);
+        });
+        boxViewport.appendChild(grid);
+
+    } else if (currentSub.type === "legal_manifesto") {
+        const area = document.createElement('div'); area.className = 'legal-scroll-area';
+        area.innerHTML = `<h4>Terms of Use</h4><p>By creating a Z-Node account you agree to use the platform responsibly. Your data is stored securely and used only to power your digital identity on the network.</p><h4>Privacy Policy</h4><p>Z-Node collects your academic and personal information to verify your identity and connect you with your cohort. We do not sell your data to third parties.</p><h4>Community Standards</h4><p>Be respectful to your fellow students. Harassment, spam, or misrepresentation will result in immediate account suspension and review by your institution admin.</p><h4>Data Retention</h4><p>Your profile remains active as long as you are a registered student or graduate on the platform. You may request account deletion at any time.</p>`;
+        const agree = document.createElement('div');
+        agree.style.cssText = 'display:flex;align-items:center;gap:10px;margin-top:8px;';
+        agree.innerHTML = `<input type="checkbox" id="legalCheck" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;"><label for="legalCheck" style="font-size:13px;color:var(--text-muted);cursor:pointer;">I have read and agree to the Z-Node Terms and Privacy Policy.</label>`;
+        boxViewport.appendChild(area);
+        boxViewport.appendChild(agree);
+
+    } else if (currentSub.type === "uni_engine_search") {
+        const searchInput = document.createElement('input');
+        searchInput.className = 'input-field'; searchInput.placeholder = 'Search university...';
+        searchInput.value = userProfileState.selectedUni || '';
+        boxViewport.appendChild(searchInput);
+        const grid = document.createElement('div'); grid.className = 'chip-grid';
+        boxViewport.appendChild(grid);
+        function filterUnis(str) {
+            grid.innerHTML = '';
+            const q = str.toLowerCase().trim();
+            const matched = nigerianUniversitiesData.filter(u => u.shortName.toLowerCase().includes(q) || u.fullName.toLowerCase().includes(q) || !q);
+            matched.forEach(uni => {
+                const chip = document.createElement('div');
+                chip.className = `chip ${userProfileState.selectedUni === uni.shortName ? 'active' : ''}`;
+                chip.innerHTML = `<span class="acronym">${uni.shortName}</span><span class="full-name">${uni.fullName}</span>`;
+                chip.onclick   = () => { grid.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); chip.classList.add('active'); userProfileState.selectedUni = uni.shortName; searchInput.value = uni.shortName; };
+                grid.appendChild(chip);
+            });
+        }
+        searchInput.addEventListener('input', e => filterUnis(e.target.value));
+        filterUnis('');
+
+    } else if (currentSub.type === "faculty_selector") {
+        const grid = document.createElement('div'); grid.className = 'chip-grid';
+        Object.keys(facultyDepartmentMapping).forEach(fac => {
+            const chip = document.createElement('div');
+            chip.className = `chip ${userProfileState.selectedFaculty === fac ? 'active' : ''}`;
+            chip.innerHTML = `<span class="acronym">${fac}</span>`;
+            chip.onclick   = () => { grid.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); chip.classList.add('active'); if (userProfileState.selectedFaculty !== fac) { userProfileState.selectedFaculty = fac; userProfileState.selectedDept = ''; } };
+            grid.appendChild(chip);
+        });
+        boxViewport.appendChild(grid);
+
+    } else if (currentSub.type === "department_selector") {
+        const depts = facultyDepartmentMapping[userProfileState.selectedFaculty] || [];
+        if (!depts.length) {
+            const notice = document.createElement('p'); notice.style.color = 'var(--text-muted)'; notice.textContent = 'Please go back and select a Faculty first.';
+            boxViewport.appendChild(notice);
+        } else {
+            const grid = document.createElement('div'); grid.className = 'chip-grid';
+            depts.forEach(d => {
+                const chip = document.createElement('div');
+                chip.className = `chip ${userProfileState.selectedDept === d ? 'active' : ''}`;
+                chip.innerHTML = `<span class="acronym">${d}</span>`;
+                chip.onclick   = () => { grid.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); chip.classList.add('active'); userProfileState.selectedDept = d; };
+                grid.appendChild(chip);
+            });
+            boxViewport.appendChild(grid);
+        }
+
+    } else if (currentSub.type === "contact_fields") {
+        const lv = document.createElement('input'); lv.className = 'input-field'; lv.placeholder = 'Level (e.g. 400 Level)'; lv.id = 'lvlField'; lv.value = userProfileState.academicLevel || '';
+        const ph = document.createElement('input'); ph.className = 'input-field'; ph.placeholder = 'Phone Number'; ph.id = 'phoneField'; ph.type = 'tel'; ph.value = userProfileState.phoneNumber || '';
+        const em = document.createElement('input'); em.className = 'input-field'; em.placeholder = 'Email Address'; em.id = 'emailField'; em.type = 'email'; em.value = userProfileState.emailAddress || '';
+        boxViewport.appendChild(lv); boxViewport.appendChild(ph); boxViewport.appendChild(em);
+
+    } else if (currentSub.type === "nitch_engine") {
+        const grid = document.createElement('div'); grid.className = 'chip-grid';
+        const opts = [{id:'create',label:'Create Nitch'},{id:'join',label:'Join Nitch'},{id:'solo',label:'Boring Solo'}];
+        const subPanel = document.createElement('div'); subPanel.id = 'nitchDynamicPanel';
+        opts.forEach(opt => {
+            const chip = document.createElement('div');
+            chip.className = `chip ${userProfileState.nitchType === opt.id ? 'active' : ''}`;
+            chip.innerHTML = `<span class="acronym">${opt.label}</span>`;
+            chip.onclick   = () => { grid.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); chip.classList.add('active'); userProfileState.nitchType = opt.id; renderNitchPanel(opt.id, subPanel); };
+            grid.appendChild(chip);
+        });
+        boxViewport.appendChild(grid); boxViewport.appendChild(subPanel);
+        renderNitchPanel(userProfileState.nitchType, subPanel);
+
+    } else if (currentSub.type === "matric_node") {
+        const el = document.createElement('input'); el.className = 'input-field'; el.placeholder = 'Matriculation Number'; el.id = 'matricInputNode'; el.value = userProfileState.matricNumber || '';
+        boxViewport.appendChild(el);
+
+    } else if (currentSub.type === "account_password_node") {
+        const f = document.createElement('input'); f.className = 'input-field'; f.type = 'password'; f.placeholder = 'Create a secure password'; f.id = 'accountPasswordFieldNode'; f.value = userProfileState.accountPassword || '';
+        const f2 = document.createElement('input'); f2.className = 'input-field'; f2.type = 'password'; f2.placeholder = 'Confirm password'; f2.id = 'confirmPasswordFieldNode';
+        boxViewport.appendChild(f); boxViewport.appendChild(f2);
+
+    } else if (currentSub.type === "multi_select_custom") {
+        const addRow = document.createElement('div'); addRow.className = 'inline-add-row';
+        const customInput = document.createElement('input'); customInput.className = 'input-field'; customInput.placeholder = 'Add your own...';
+        const addBtn = document.createElement('button'); addBtn.className = 'btn-action-small'; addBtn.textContent = '+';
+        addRow.appendChild(customInput); addRow.appendChild(addBtn);
+        const grid = document.createElement('div'); grid.className = 'chip-grid';
+        boxViewport.appendChild(addRow); boxViewport.appendChild(grid);
+        const activeArray = userProfileState[currentSub.stateKey];
+        function renderChips() {
+            grid.innerHTML = '';
+            const pool = [...currentSub.pool];
+            activeArray.forEach(v => { if (!pool.includes(v)) pool.push(v); });
+            pool.forEach(item => {
+                const chip = document.createElement('div');
+                chip.className = `chip ${activeArray.includes(item) ? 'active' : ''}`;
+                chip.innerHTML = `<span class="acronym">${item}</span>`;
+                chip.onclick   = () => { if (activeArray.includes(item)) activeArray.splice(activeArray.indexOf(item),1); else activeArray.push(item); chip.classList.toggle('active'); };
+                grid.appendChild(chip);
+            });
+        }
+        addBtn.onclick = () => { const v = customInput.value.trim(); if (v && !activeArray.includes(v)) { activeArray.push(v); customInput.value = ''; renderChips(); } };
+        renderChips();
+
+    } else if (currentSub.type === "multi_select_aspirations") {
+        const grid = document.createElement('div'); grid.className = 'chip-grid'; boxViewport.appendChild(grid);
+        const pool = careerAspirationsMapping[userProfileState.selectedDept] || genericCareerPool;
+        const arr  = userProfileState[currentSub.stateKey];
+        pool.forEach(c => {
+            const chip = document.createElement('div');
+            chip.className = `chip ${arr.includes(c) ? 'active' : ''}`;
+            chip.innerHTML = `<span class="acronym">${c}</span>`;
+            chip.onclick   = () => { if (arr.includes(c)) arr.splice(arr.indexOf(c),1); else arr.push(c); chip.classList.toggle('active'); };
+            grid.appendChild(chip);
+        });
+
+    } else if (currentSub.type === "social_media_matrix") {
+        const nets = [{id:'x',label:'X (Twitter)',prefix:'x.com/'},{id:'instagram',label:'Instagram',prefix:'instagram.com/'},{id:'linkedin',label:'LinkedIn',prefix:'linkedin.com/in/'},{id:'github',label:'GitHub',prefix:'github.com/'}];
+        const pg = document.createElement('div'); pg.className = 'chip-grid';
+        const sub = document.createElement('div'); sub.className = 'social-input-container';
+        nets.forEach(net => {
+            const chip = document.createElement('div');
+            chip.className = `chip ${userProfileState.activeSocialPlatform === net.id ? 'active' : ''}`;
+            chip.innerHTML = `<span class="acronym">${net.label}</span>`;
+            chip.onclick   = () => { captureActiveSocialData(); pg.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); chip.classList.add('active'); userProfileState.activeSocialPlatform = net.id; renderSocialField(net, sub); };
+            pg.appendChild(chip);
+        });
+        function renderSocialField(net, container) {
+            container.innerHTML = `<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;font-family:'JetBrains Mono',monospace;">${net.prefix}</div><input type="text" class="input-field" placeholder="Enter handle..." id="socialInputFieldNode" value="${userProfileState.socials[net.id]||''}">`;
+        }
+        boxViewport.appendChild(pg); boxViewport.appendChild(sub);
+        const initNet = nets.find(n => n.id === userProfileState.activeSocialPlatform) || nets[0];
+        renderSocialField(initNet, sub);
+
+    } else if (currentSub.type === "email_verify_node") {
+        const info = document.createElement('p'); info.style.cssText = 'font-size:13px;color:var(--text-muted);margin-bottom:14px;'; info.innerHTML = `A 6-digit code has been sent to <strong style="color:var(--text-main);">${userProfileState.emailAddress || 'your email'}</strong>.`;
+        const row = document.createElement('div'); row.className = 'pin-matrix-row';
+        for (let i = 0; i < 6; i++) {
+            const cell = document.createElement('input'); cell.type = 'text'; cell.maxLength = 1; cell.className = 'pin-cell'; cell.id = `pin_cell_${i}`;
+            if (userProfileState.emailPin[i]) cell.value = userProfileState.emailPin[i];
+            cell.addEventListener('input', e => { if (e.target.value && i < 5) document.getElementById(`pin_cell_${i+1}`).focus(); });
+            cell.addEventListener('keydown', e => { if (e.key === 'Backspace' && !e.target.value && i > 0) document.getElementById(`pin_cell_${i-1}`).focus(); });
+            row.appendChild(cell);
+        }
+        boxViewport.appendChild(info); boxViewport.appendChild(row);
+
+    } else if (currentSub.type === "image_upload_node") {
+        const dropzone = document.createElement('label'); dropzone.className = 'image-dropzone-wrapper';
+        const textWrap = document.createElement('div'); textWrap.id = 'dropzoneText';
+        textWrap.innerHTML = `<div style="font-size:24px;color:var(--accent);margin-bottom:6px;">+</div><p style="font-size:13px;color:var(--text-muted);">${userProfileState.studentImage ? 'Image compressed ✓ — click to replace.' : 'Drop your photo here or click to browse'}</p><p style="font-size:11px;color:var(--text-muted);opacity:0.6;">PNG, JPG or WebP — auto-compressed to ≤400px</p>`;
+        const fileInput = document.createElement('input'); fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.style.display = 'none';
+        const preview = document.createElement('div'); preview.className = 'preview-cluster-frame';
+        if (userProfileState.studentImage) { const img = document.createElement('img'); img.src = userProfileState.studentImage; img.className = 'avatar-preview-node'; preview.appendChild(img); }
+        const badge = document.createElement('div'); badge.className = 'compress-badge'; badge.id = 'compressBadge';
+        if (userProfileState.studentImageBlob) badge.textContent = `✓ Compressed — ${(userProfileState.studentImageBlob.size/1024).toFixed(0)} KB`;
+
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            badge.textContent = '⏳ Compressing...';
+            try {
+                const result = await compressImage(file);
+                userProfileState.studentImage     = result.dataUrl;
+                userProfileState.studentImageBlob = result.blob;
+                preview.innerHTML = '';
+                const img = document.createElement('img'); img.src = result.dataUrl; img.className = 'avatar-preview-node';
+                preview.appendChild(img);
+                textWrap.querySelector('p').textContent = 'Image compressed ✓ — click to replace.';
+                badge.textContent = `✓ Compressed — ${(result.blob.size/1024).toFixed(0)} KB (${result.w}×${result.h}px)`;
+                showToast('Photo compressed successfully!', 'success');
+            } catch (err) {
+                badge.textContent = '⚠ Compression failed';
+                showToast('Could not process image: ' + err.message, 'error');
+            }
+        });
+        dropzone.appendChild(textWrap); dropzone.appendChild(fileInput);
+        boxViewport.appendChild(dropzone); boxViewport.appendChild(preview); boxViewport.appendChild(badge);
+    }
+
+    prevBtn.style.visibility = (mainIndex === 0 && subIndex === 0) ? 'hidden' : 'visible';
+}
+
+function renderNitchPanel(type, container) {
+    container.innerHTML = ''; if (!type || type === 'solo') { container.style.display = 'none'; return; }
+    container.className = 'nitch-sub-panel'; container.style.display = 'block';
+    if (type === 'create') {
+        container.innerHTML = `<input type="text" class="input-field" placeholder="Nitch Group Name" id="nName" style="margin-bottom:10px;"><input type="password" class="input-field" placeholder="Custom Nitch Password" id="nPass" style="margin-bottom:10px;"><input type="number" class="input-field" placeholder="Member limit (Max 5)" id="nLimit" min="1" max="5" value="${userProfileState.nitchLimit||5}">`;
+    } else if (type === 'join') {
+        container.innerHTML = `<input type="text" class="input-field" placeholder="Target Nitch Group Name" id="nName" style="margin-bottom:10px;"><input type="password" class="input-field" placeholder="Enter Nitch Password" id="nPass">`;
+    }
+}
+
+function captureActiveSocialData() {
+    const el = document.getElementById('socialInputFieldNode');
+    if (el) userProfileState.socials[userProfileState.activeSocialPlatform] = el.value.trim();
+}
+
+function captureActiveStepData() {
+    const s = architecturalData[mainIndex].subSteps[subIndex];
+    if (s.type === 'input_node' || s.type === 'date_node') {
+        const el = document.getElementById(`field_${s.id}`);
+        if (el) userProfileState[s.stateKey] = el.value.trim();
+    }
+    if (s.type === 'contact_fields') {
+        const lv = document.getElementById('lvlField');   if (lv) userProfileState.academicLevel = lv.value.trim();
+        const ph = document.getElementById('phoneField'); if (ph) userProfileState.phoneNumber   = ph.value.trim();
+        const em = document.getElementById('emailField'); if (em) userProfileState.emailAddress   = em.value.trim();
+    }
+    if (s.type === 'matric_node') {
+        const el = document.getElementById('matricInputNode'); if (el) userProfileState.matricNumber = el.value.trim();
+    }
+    if (s.type === 'account_password_node') {
+        const pw = document.getElementById('accountPasswordFieldNode');
+        const pw2 = document.getElementById('confirmPasswordFieldNode');
+        if (pw && pw2) {
+            if (pw.value !== pw2.value) { showToast('Passwords do not match.', 'error'); throw new Error('pwd mismatch'); }
+            userProfileState.accountPassword = pw.value;
+        }
+    }
+    if (s.type === 'nitch_engine') {
+        const n = document.getElementById('nName'); const p = document.getElementById('nPass'); const l = document.getElementById('nLimit');
+        if (n) userProfileState.nitchName = n.value; if (p) userProfileState.nitchPassword = p.value; if (l) userProfileState.nitchLimit = l.value;
+    }
+    if (s.type === 'social_media_matrix') captureActiveSocialData();
+    if (s.type === 'email_verify_node') {
+        let pin = '';
+        for (let i = 0; i < 6; i++) { const c = document.getElementById(`pin_cell_${i}`); if (c) pin += c.value; }
+        userProfileState.emailPin = pin;
+    }
+}
+
+async function processNext() {
+    try { captureActiveStepData(); } catch(e) { return; }
+    const currentMain = architecturalData[mainIndex];
+
+    // Interstitial after "Identifying you"
+    if (mainIndex === 1 && subIndex === currentMain.subSteps.length - 1) {
+        onboardingPortal.style.opacity = '0'; onboardingPortal.style.transform = 'translateY(12px)';
+        setTimeout(() => { onboardingPortal.style.display = 'none'; welcomeTitle.textContent = `Welcome, ${userProfileState.username || 'friend'}!`; welcomeOverlay.classList.add('active'); }, 400);
+        return;
+    }
+
+    // Interstitial after "Your institution"
+    if (mainIndex === 3 && subIndex === currentMain.subSteps.length - 1) {
+        onboardingPortal.style.opacity = '0'; onboardingPortal.style.transform = 'translateY(12px)';
+        setTimeout(() => { onboardingPortal.style.display = 'none'; storyOverlay.classList.add('active'); }, 400);
+        return;
+    }
+
+    // Final step — submit to Supabase
+    if (mainIndex === architecturalData.length - 1 && subIndex === currentMain.subSteps.length - 1) {
+        await submitToSupabase();
+        return;
+    }
+
+    const isNewSection = (subIndex === currentMain.subSteps.length - 1);
+    boxViewport.style.opacity = 0; if (isNewSection) mainHeaderBlock.style.opacity = 0;
+    setTimeout(() => {
+        if (subIndex < currentMain.subSteps.length - 1) { subIndex++; }
+        else { mainIndex++; subIndex = 0; }
+        renderStep();
+        boxViewport.style.opacity = 1; if (isNewSection) mainHeaderBlock.style.opacity = 1;
+    }, 220);
+}
+
+function processBack() {
+    const isNewSection = (subIndex === 0);
+    boxViewport.style.opacity = 0; if (isNewSection) mainHeaderBlock.style.opacity = 0;
+    setTimeout(() => {
+        if (subIndex > 0) { subIndex--; }
+        else if (mainIndex > 0) { mainIndex--; subIndex = architecturalData[mainIndex].subSteps.length - 1; }
+        renderStep();
+        boxViewport.style.opacity = 1; if (isNewSection) mainHeaderBlock.style.opacity = 1;
+    }, 220);
+}
+
+document.getElementById('interstitialContinueBtn').addEventListener('click', () => {
+    welcomeOverlay.classList.remove('active');
+    setTimeout(() => { mainIndex = 2; subIndex = 0; onboardingPortal.style.display = 'block'; renderStep(); setTimeout(() => { onboardingPortal.style.opacity = '1'; onboardingPortal.style.transform = 'translateY(0)'; }, 50); }, 400);
+});
+document.getElementById('storyContinueBtn').addEventListener('click', () => {
+    storyOverlay.classList.remove('active');
+    setTimeout(() => { mainIndex = 4; subIndex = 0; onboardingPortal.style.display = 'block'; renderStep(); setTimeout(() => { onboardingPortal.style.opacity = '1'; onboardingPortal.style.transform = 'translateY(0)'; }, 50); }, 400);
+});
+
+nextBtn.addEventListener('click', processNext);
+prevBtn.addEventListener('click', processBack);
+
+// If already logged in, skip to app
+if (localStorage.getItem('znodeStudentProfile')) {
+    window.location.href = 'app.html';
+}
+renderStep();
+</script>
+</body>
+</html>

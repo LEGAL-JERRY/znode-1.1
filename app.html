@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Z-Node // Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-base: #000c0a;
+            --bg-surface: #021a15;
+            --glass-bg: rgba(2, 26, 21, 0.65);
+            --glass-border: rgba(52, 211, 153, 0.12);
+            --border-strong: rgba(52, 211, 153, 0.4);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #10b981;
+            --accent-glow: rgba(16, 185, 129, 0.25);
+            --radius-xl: 24px; --radius-lg: 16px; --radius-md: 12px;
+            --ease: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            width:100vw; height:100vh; overflow:hidden;
+            background-color:var(--bg-base); color:var(--text-main);
+            font-family:'Plus Jakarta Sans', sans-serif;
+            display:grid; grid-template-columns:280px 1fr;
+        }
+
+        /* ── SIDEBAR ── */
+        .desktop-sidebar { background:var(--glass-bg); border-right:1px solid var(--glass-border); padding:32px 24px; display:flex; flex-direction:column; backdrop-filter:blur(20px); z-index:10; }
+        .brand-logo-cluster { display:flex; align-items:center; gap:12px; margin-bottom:60px; padding-left:12px; }
+        .brand-logo-text { font-family:'Clash Display',sans-serif; font-size:20px; font-weight:700; background:linear-gradient(90deg,#fff,var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:0.5px; }
+        .nav-menu { display:flex; flex-direction:column; gap:8px; flex-grow:1; }
+        .nav-item { display:flex; align-items:center; gap:16px; padding:14px 18px; border-radius:var(--radius-md); color:var(--text-muted); font-weight:600; font-size:15px; cursor:pointer; transition:all 0.3s var(--ease); border:1px solid transparent; }
+        .nav-item svg { width:22px; height:22px; transition:stroke 0.3s var(--ease); }
+        .nav-item:hover { color:var(--text-main); background:rgba(255,255,255,0.03); }
+        .nav-item.active-nav { background:rgba(16,185,129,0.08); border-color:var(--glass-border); color:var(--accent); }
+        .nav-item.active-nav svg { stroke:var(--accent); filter:drop-shadow(0 2px 8px var(--accent-glow)); }
+        .sidebar-user-widget { display:flex; align-items:center; gap:14px; padding:16px; background:var(--bg-surface); border:1px solid var(--glass-border); border-radius:var(--radius-lg); cursor:pointer; transition:transform 0.2s var(--ease); }
+        .sidebar-user-widget:hover { transform:translateY(-2px); border-color:var(--border-strong); }
+        .sidebar-avatar { width:44px; height:44px; border-radius:50%; object-fit:cover; border:2px solid var(--border-strong); background:var(--bg-surface); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; color:var(--accent); flex-shrink:0; }
+        .sidebar-avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
+        .user-widget-info h4 { font-family:'Clash Display',sans-serif; font-size:15px; margin-bottom:2px; }
+        .user-widget-info p { font-family:'Space Mono',monospace; font-size:10px; color:var(--accent); text-transform:uppercase; }
+
+        /* ── MAIN CONTENT ── */
+        .desktop-main-content { position:relative; height:100vh; overflow-y:auto; }
+        .view-container { position:absolute; top:0; left:0; width:100%; min-height:100%; padding:48px 64px; opacity:0; visibility:hidden; transform:translateY(15px); transition:opacity 0.4s var(--ease),transform 0.4s var(--ease),visibility 0.4s; }
+        .view-container.active-view { opacity:1; visibility:visible; transform:translateY(0); }
+        .view-header { margin-bottom:40px; }
+        .view-header h1 { font-family:'Clash Display',sans-serif; font-size:36px; font-weight:700; letter-spacing:-0.5px; }
+        .view-header p { font-family:'Space Mono',monospace; font-size:13px; color:var(--text-muted); margin-top:8px; }
+
+        /* ── PROFILE VIEW ── */
+        .profile-grid-layout { display:grid; grid-template-columns:350px 1fr; gap:40px; align-items:start; }
+        .profile-photo-card { background:var(--bg-surface); border:1px solid var(--glass-border); border-radius:var(--radius-xl); padding:12px; position:relative; }
+        .profile-photo-card img { width:100%; height:400px; object-fit:cover; border-radius:var(--radius-lg); }
+        .profile-photo-placeholder { width:100%; height:400px; border-radius:var(--radius-lg); background:var(--bg-surface); display:flex; align-items:center; justify-content:center; font-size:80px; color:var(--accent); }
+        .cohort-badge { position:absolute; top:24px; right:24px; background:rgba(16,185,129,0.15); backdrop-filter:blur(10px); color:var(--accent); border:1px solid var(--border-strong); font-size:11px; padding:8px 16px; border-radius:20px; font-family:'Space Mono',monospace; font-weight:700; }
+        .verified-badge { position:absolute; top:24px; left:24px; padding:6px 14px; border-radius:20px; font-size:10px; font-family:'Space Mono',monospace; font-weight:700; }
+        .verified-badge.ok  { background:rgba(16,185,129,0.15); color:#6ee7b7; border:1px solid rgba(16,185,129,0.3); }
+        .verified-badge.pending { background:rgba(245,158,11,0.15); color:#fcd34d; border:1px solid rgba(245,158,11,0.3); }
+        .profile-details-card { background:rgba(2,26,21,0.4); border:1px solid var(--glass-border); border-radius:var(--radius-xl); padding:40px; }
+        .profile-details-card h2 { font-family:'Clash Display',sans-serif; font-size:42px; margin-bottom:8px; }
+        .profile-details-card .meta { font-family:'Space Mono',monospace; font-size:13px; color:var(--accent); letter-spacing:1px; margin-bottom:32px; display:inline-block; padding-bottom:16px; border-bottom:1px dashed var(--glass-border); }
+        .profile-details-card .bio { font-size:16px; line-height:1.7; color:var(--text-muted); margin-bottom:40px; }
+        .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+        .stat-box { background:var(--bg-surface); border:1px solid var(--glass-border); padding:20px; border-radius:var(--radius-md); }
+        .stat-box h5 { font-family:'Space Mono',monospace; font-size:11px; color:var(--text-muted); margin-bottom:8px; }
+        .stat-box p { font-family:'Clash Display',sans-serif; font-size:24px; color:var(--text-main); }
+
+        /* Like button */
+        .like-section { margin-top:24px; display:flex; align-items:center; gap:16px; }
+        .like-btn { display:flex; align-items:center; gap:8px; padding:12px 24px; border-radius:12px; border:1px solid var(--border-strong); background:rgba(16,185,129,0.08); color:var(--accent); font-family:'Space Mono',monospace; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s var(--ease); }
+        .like-btn:hover { background:rgba(16,185,129,0.18); transform:scale(1.03); }
+        .like-btn.liked { background:var(--accent); color:#000; }
+        .like-count-label { font-family:'Space Mono',monospace; font-size:12px; color:var(--text-muted); }
+
+        /* ── NETWORK GRID ── */
+        .network-grid-mesh { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:24px; padding-bottom:40px; }
+        .magazine-card { position:relative; height:380px; border-radius:var(--radius-lg); overflow:hidden; cursor:pointer; border:1px solid var(--glass-border); transition:transform 0.4s var(--ease),box-shadow 0.4s var(--ease); }
+        .magazine-card:hover { transform:translateY(-8px); box-shadow:0 20px 40px rgba(0,0,0,0.6); border-color:var(--border-strong); }
+        .magazine-card img { width:100%; height:100%; object-fit:cover; filter:grayscale(100%) contrast(1.1); transition:filter 0.5s var(--ease),transform 0.8s var(--ease); }
+        .magazine-card:hover img { filter:grayscale(0%) contrast(1.05); transform:scale(1.05); }
+        .card-placeholder { width:100%; height:100%; background:var(--bg-surface); display:flex; align-items:center; justify-content:center; font-size:60px; color:var(--accent); }
+        .magazine-overlay { position:absolute; bottom:0; left:0; width:100%; height:60%; background:linear-gradient(to top,#000c0a 0%,rgba(0,12,10,0.8) 40%,transparent 100%); display:flex; flex-direction:column; justify-content:flex-end; padding:24px; }
+        .magazine-overlay h3 { font-family:'Clash Display',sans-serif; font-size:22px; color:#fff; margin-bottom:4px; }
+        .magazine-overlay p { font-family:'Space Mono',monospace; font-size:11px; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; }
+        .card-like-badge { position:absolute; top:16px; right:16px; background:rgba(0,12,10,0.7); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:20px; padding:6px 12px; font-family:'Space Mono',monospace; font-size:11px; color:var(--accent); display:flex; align-items:center; gap:4px; }
+
+        /* Department Stars banner */
+        .stars-banner { background:rgba(16,185,129,0.05); border:1px solid var(--glass-border); border-radius:var(--radius-lg); padding:24px; margin-bottom:32px; }
+        .stars-banner h3 { font-family:'Clash Display',sans-serif; font-size:18px; margin-bottom:16px; color:var(--accent); }
+        .stars-row { display:flex; gap:12px; flex-wrap:wrap; }
+        .star-chip { display:flex; align-items:center; gap:10px; padding:10px 16px; background:var(--bg-surface); border:1px solid var(--glass-border); border-radius:12px; }
+        .star-chip span { font-size:11px; font-family:'Space Mono',monospace; color:var(--text-muted); }
+        .star-chip strong { font-size:13px; color:var(--text-main); }
+
+        /* ── LOADING ── */
+        .loading-shimmer { background:linear-gradient(90deg,var(--bg-surface) 25%,rgba(16,185,129,0.05) 50%,var(--bg-surface) 75%); background-size:400% 100%; animation:shimmer 1.5s infinite; border-radius:var(--radius-md); }
+        @keyframes shimmer { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
+
+        /* ── CONFIG ── */
+        .config-grid-layout { display:grid; grid-template-columns:repeat(auto-fill,minmax(400px,1fr)); gap:24px; }
+        .config-card { background:var(--bg-surface); border:1px solid var(--glass-border); padding:32px; border-radius:var(--radius-lg); }
+        .config-card h3 { font-family:'Clash Display',sans-serif; font-size:20px; margin-bottom:12px; display:flex; align-items:center; gap:10px; }
+        .config-card h3 svg { width:20px; height:20px; stroke:var(--accent); }
+        .config-card p { color:var(--text-muted); font-size:14px; line-height:1.6; margin-bottom:20px; }
+        .config-toggle { display:flex; justify-content:space-between; align-items:center; padding-top:16px; border-top:1px solid var(--glass-border); }
+        .config-toggle span { font-family:'Space Mono',monospace; font-size:11px; color:var(--text-muted); }
+        .status-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent-glow); animation:pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+        /* ── TOAST ── */
+        .toast-container { position:fixed; bottom:24px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
+        .toast { padding:12px 18px; border-radius:12px; font-size:13px; font-weight:600; backdrop-filter:blur(20px); animation:toastIn 0.3s ease; max-width:320px; }
+        .toast-success { background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#6ee7b7; }
+        .toast-error   { background:rgba(239,68,68,0.15);   border:1px solid rgba(239,68,68,0.4);   color:#fca5a5; }
+        @keyframes toastIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+        .sign-out-btn { margin-top:12px; width:100%; padding:10px; border-radius:10px; border:1px solid rgba(239,68,68,0.3); background:rgba(239,68,68,0.08); color:#fca5a5; font-family:'Space Mono',monospace; font-size:11px; cursor:pointer; transition:all 0.2s; }
+        .sign-out-btn:hover { background:rgba(239,68,68,0.15); }
+
+        /* Pending notice */
+        .pending-notice { background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.3); border-radius:var(--radius-md); padding:16px 20px; margin-bottom:24px; font-size:13px; color:#fcd34d; font-family:'Space Mono',monospace; line-height:1.6; }
+    </style>
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- SIDEBAR -->
+<aside class="desktop-sidebar">
+    <div class="brand-logo-cluster">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:28px;height:28px;color:var(--accent)"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span class="brand-logo-text">Z-NODE</span>
+    </div>
+
+    <nav class="nav-menu">
+        <div class="nav-item active-nav" data-target="view-profile">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Identity Node
+        </div>
+        <div class="nav-item" data-target="view-network">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Network Directory
+        </div>
+        <div class="nav-item" data-target="view-config">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            System Config
+        </div>
+    </nav>
+
+    <div class="sidebar-user-widget" id="sidebarUserWidget">
+        <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+        <div class="user-widget-info">
+            <h4 id="sidebarName">Loading...</h4>
+            <p id="sidebarStatus">Connecting...</p>
+        </div>
+    </div>
+    <button class="sign-out-btn" onclick="signOut()">🚪 Sign Out</button>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="desktop-main-content">
+
+    <!-- VIEW 1: MY PROFILE -->
+    <section class="view-container active-view" id="view-profile">
+        <div class="view-header">
+            <h1>Identity Node</h1>
+            <p id="profileSubtitle">LOADING YOUR PROFILE...</p>
+        </div>
+
+        <div id="pendingNotice" class="pending-notice" style="display:none;">
+            ⏳ Your profile is pending admin verification. Once approved, you'll be visible in the Network Directory and can receive likes.
+        </div>
+
+        <div class="profile-grid-layout">
+            <div class="profile-photo-card">
+                <div class="cohort-badge" id="cohortBadge">★ 2026</div>
+                <div class="verified-badge pending" id="verifiedBadge">⏳ PENDING</div>
+                <div id="profilePhotoWrap">
+                    <div class="profile-photo-placeholder">👤</div>
+                </div>
+            </div>
+            <div class="profile-details-card">
+                <h2 id="profileName">Loading...</h2>
+                <span class="meta" id="profileMeta">...</span>
+                <p class="bio" id="profileBio">Your eternal statement will appear here.</p>
+                <div class="stats-grid">
+                    <div class="stat-box"><h5>DEPARTMENT</h5><p id="statDept">—</p></div>
+                    <div class="stat-box"><h5>LIKES</h5><p id="statLikes">—</p></div>
+                    <div class="stat-box"><h5>COHORT</h5><p id="statCohort">2026</p></div>
+                </div>
+                <div class="like-section">
+                    <button class="like-btn" id="selfLikeBtn" onclick="copyShareLink()">
+                        🔗 Share My Profile
+                    </button>
+                    <span class="like-count-label" id="likeCountLabel"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW 2: NETWORK DIRECTORY -->
+    <section class="view-container" id="view-network">
+        <div class="view-header">
+            <h1>Network Directory</h1>
+            <p>DISCOVER VERIFIED STUDENTS IN YOUR COHORT</p>
+        </div>
+        <div class="stars-banner">
+            <h3>★ Department Stars</h3>
+            <div class="stars-row" id="starsRow">
+                <div class="star-chip loading-shimmer" style="width:200px;height:40px;"></div>
+                <div class="star-chip loading-shimmer" style="width:200px;height:40px;"></div>
+                <div class="star-chip loading-shimmer" style="width:200px;height:40px;"></div>
+            </div>
+        </div>
+        <div class="network-grid-mesh" id="networkGridTarget">
+            <!-- Loaded from Supabase -->
+        </div>
+    </section>
+
+    <!-- VIEW 3: CONFIG -->
+    <section class="view-container" id="view-config">
+        <div class="view-header">
+            <h1>System Config</h1>
+            <p>YOUR ACCOUNT AND PLATFORM PARAMETERS</p>
+        </div>
+        <div class="config-grid-layout">
+            <div class="config-card">
+                <h3>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    Z-Node Passport
+                </h3>
+                <p id="configPassport" style="font-family:'Space Mono',monospace;font-size:13px;color:var(--accent);">Loading...</p>
+                <div class="config-toggle">
+                    <span id="configInstitution">Institution: —</span>
+                    <div class="status-dot"></div>
+                </div>
+            </div>
+            <div class="config-card">
+                <h3>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    Social Links
+                </h3>
+                <div id="configSocials" style="font-size:13px;color:var(--text-muted);line-height:2;"></div>
+                <div class="config-toggle">
+                    <span>Profile visibility: Public</span>
+                    <div class="status-dot"></div>
+                </div>
+            </div>
+            <div class="config-card">
+                <h3>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Identity Checklist
+                </h3>
+                <div id="configChecklist" style="font-size:13px;line-height:2.2;"></div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<script>
+// ════════════════════════════════════════
+// SUPABASE CONFIG
+// ════════════════════════════════════════
+const SUPABASE_URL  = "https://yohndnmwvgcwadkytmix.supabase.co";
+const SUPABASE_ANON = "YOUR_SUPABASE_ANON_KEY_HERE"; // replace with eyJ... key
+
+const { createClient } = supabase;
+const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let currentStudent = null;
+
+// ════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════
+function showToast(msg, type = 'success') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div'); t.className = `toast toast-${type}`; t.textContent = msg;
+    c.appendChild(t); setTimeout(() => t.remove(), 3800);
+}
+
+// ════════════════════════════════════════
+// SIGN OUT
+// ════════════════════════════════════════
+function signOut() {
+    if (!confirm('Sign out of Z-Node?')) return;
+    localStorage.removeItem('znodeStudentProfile');
+    window.location.href = 'onboarding.html';
+}
+
+// ════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+        const targetId = item.getAttribute('data-target');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
+        document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
+        item.classList.add('active-nav');
+        document.getElementById(targetId).classList.add('active-view');
+        if (targetId === 'view-network') loadNetwork();
+    });
+});
+
+// ════════════════════════════════════════
+// POPULATE PROFILE VIEW
+// ════════════════════════════════════════
+function populateProfile(s) {
+    const isVerified = s.is_verified === true;
+    const instName   = s.institutions?.name || s.institutions?.short_name || s.faculty || 'Institution Pending';
+
+    // Sidebar
+    document.getElementById('sidebarName').textContent    = s.full_name || s.username;
+    document.getElementById('sidebarStatus').textContent  = isVerified ? 'VERIFIED ✓' : 'PENDING ⏳';
+    const avatarEl = document.getElementById('sidebarAvatar');
+    if (s.avatar_url) {
+        avatarEl.innerHTML = `<img src="${s.avatar_url}" alt="avatar">`;
+    } else {
+        avatarEl.textContent = (s.full_name || s.username || '?')[0].toUpperCase();
+    }
+
+    // Pending notice
+    document.getElementById('pendingNotice').style.display = isVerified ? 'none' : 'block';
+
+    // Verified badge
+    const badge = document.getElementById('verifiedBadge');
+    if (isVerified) { badge.textContent = '✓ VERIFIED'; badge.className = 'verified-badge ok'; }
+    else { badge.textContent = '⏳ PENDING'; badge.className = 'verified-badge pending'; }
+
+    // Photo
+    const photoWrap = document.getElementById('profilePhotoWrap');
+    if (s.avatar_url) {
+        photoWrap.innerHTML = `<img src="${s.avatar_url}" alt="${s.full_name}" style="width:100%;height:400px;object-fit:cover;border-radius:16px;">`;
+    } else {
+        photoWrap.innerHTML = `<div class="profile-photo-placeholder">👤</div>`;
+    }
+
+    // Profile details
+    document.getElementById('profileName').textContent  = s.full_name || s.username;
+    document.getElementById('profileMeta').textContent  = `@${s.username} // ${s.department || s.faculty || '—'} // ${instName}`;
+    document.getElementById('profileBio').textContent   = s.eternal_statement || 'No eternal statement set.';
+    document.getElementById('profileSubtitle').textContent = `${instName.toUpperCase()} // ${s.department || '—'} // ${isVerified ? 'ACTIVE' : 'PENDING VERIFICATION'}`;
+    document.getElementById('statDept').textContent     = (s.department || '—').split(' ')[0];
+    document.getElementById('statLikes').textContent    = s.likes_count || 0;
+    document.getElementById('cohortBadge').textContent  = `★ ${new Date().getFullYear()}`;
+
+    // Config tab
+    document.getElementById('configPassport').textContent   = s.znode_passport_id || 'Not yet assigned';
+    document.getElementById('configInstitution').textContent = 'Institution: ' + instName;
+    const socials = s.socials || {};
+    document.getElementById('configSocials').innerHTML = Object.entries(socials)
+        .filter(([,v]) => v).map(([k,v]) => `<div style="color:var(--accent);">${k.toUpperCase()}: <span style="color:var(--text-muted);">${v}</span></div>`).join('') || '<span>No social links added.</span>';
+    document.getElementById('configChecklist').innerHTML = [
+        [isVerified, 'Admin verification'],
+        [!!s.avatar_url, 'Profile photo'],
+        [!!s.department, 'Department linked'],
+        [!!s.eternal_statement, 'Eternal statement'],
+        [!!(socials.x || socials.instagram || socials.linkedin), 'Social handles'],
+    ].map(([ok, label]) => `<div>${ok ? '✅' : '⬜'} ${label}</div>`).join('');
+
+    // Like count label
+    document.getElementById('likeCountLabel').textContent = `${s.likes_count || 0} likes — share your profile to get more!`;
+}
+
+// ════════════════════════════════════════
+// COPY SHARE LINK
+// ════════════════════════════════════════
+function copyShareLink() {
+    const url = `${window.location.origin}${window.location.pathname}?like=${currentStudent?.username}`;
+    navigator.clipboard.writeText(url).then(() => showToast('Profile link copied! Share it to get likes. 🔥', 'success')).catch(() => showToast(url, 'success'));
+}
+
+// ════════════════════════════════════════
+// LIKE A PROFILE (from network directory)
+// ════════════════════════════════════════
+async function likeStudent(studentId, btn) {
+    const storageKey = `znode_liked_${studentId}`;
+    const alreadyLiked = localStorage.getItem(storageKey);
+    if (alreadyLiked) { showToast('You already liked this profile!', 'error'); return; }
+
+    btn.disabled = true;
+    const { error } = await _db.rpc('increment_likes', { student_id: studentId });
+    if (error) {
+        // Fallback: direct update if RPC not set up
+        const { data: st } = await _db.from('students').select('likes_count').eq('id', studentId).maybeSingle();
+        await _db.from('students').update({ likes_count: (st?.likes_count || 0) + 1 }).eq('id', studentId);
+    }
+    localStorage.setItem(storageKey, '1');
+    btn.textContent = '❤️ Liked!';
+    btn.classList.add('liked');
+    showToast('Like sent! 🔥', 'success');
+
+    // Update display
+    const countEl = btn.closest('.magazine-overlay')?.querySelector('.card-like-count');
+    if (countEl) countEl.textContent = parseInt(countEl.textContent || 0) + 1;
+}
+
+// ════════════════════════════════════════
+// LOAD NETWORK DIRECTORY FROM SUPABASE
+// ════════════════════════════════════════
+async function loadNetwork() {
+    const grid = document.getElementById('networkGridTarget');
+    grid.innerHTML = '';
+
+    // Loading skeletons
+    for (let i = 0; i < 6; i++) {
+        const sk = document.createElement('div');
+        sk.className = 'magazine-card loading-shimmer';
+        sk.style.height = '380px';
+        grid.appendChild(sk);
+    }
+
+    const { data: students, error } = await _db
+        .from('students')
+        .select('id, full_name, username, department, faculty, avatar_url, likes_count, is_verified, institutions(name, short_name)')
+        .eq('is_verified', true)
+        .order('likes_count', { ascending: false });
+
+    if (error) { showToast('Could not load network: ' + error.message, 'error'); grid.innerHTML = '<p style="color:var(--text-muted);padding:20px;">Could not load students.</p>'; return; }
+
+    grid.innerHTML = '';
+
+    if (!students || students.length === 0) {
+        grid.innerHTML = '<p style="color:var(--text-muted);padding:20px;font-size:14px;">No verified students yet. Be the first!</p>';
+        return;
+    }
+
+    // Department stars
+    const starMap = {};
+    students.forEach(s => {
+        const dept = s.department || s.faculty || 'General';
+        if (!starMap[dept] || (s.likes_count || 0) > (starMap[dept].likes_count || 0)) starMap[dept] = s;
+    });
+    const starsRow = document.getElementById('starsRow');
+    starsRow.innerHTML = '';
+    Object.entries(starMap).slice(0, 5).forEach(([dept, s]) => {
+        const chip = document.createElement('div'); chip.className = 'star-chip';
+        chip.innerHTML = `<span>★ ${dept.split(' ')[0]}</span><strong>${s.full_name || s.username}</strong><span style="color:var(--accent);">❤️ ${s.likes_count || 0}</span>`;
+        starsRow.appendChild(chip);
+    });
+
+    // Cards
+    students.forEach(s => {
+        const card = document.createElement('div'); card.className = 'magazine-card';
+        const alreadyLiked = localStorage.getItem(`znode_liked_${s.id}`);
+        const instName = s.institutions?.short_name || s.faculty || '—';
+
+        card.innerHTML = `
+            ${s.avatar_url
+                ? `<img src="${s.avatar_url}" alt="${s.full_name}" loading="lazy">`
+                : `<div class="card-placeholder">👤</div>`}
+            <div class="card-like-badge">❤️ <span class="card-like-count">${s.likes_count || 0}</span></div>
+            <div class="magazine-overlay">
+                <h3>${s.full_name || s.username}</h3>
+                <p>${s.department || s.faculty || '—'} · ${instName}</p>
+                <button class="like-btn ${alreadyLiked ? 'liked' : ''}" style="margin-top:10px;flex:none;font-size:11px;padding:8px 16px;" 
+                    onclick="likeStudent('${s.id}', this)">
+                    ${alreadyLiked ? '❤️ Liked' : '🤍 Like'}
+                </button>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+// ════════════════════════════════════════
+// HANDLE SHARE LINK — auto-like from URL
+// ════════════════════════════════════════
+async function handleShareLike() {
+    const params = new URLSearchParams(window.location.search);
+    const likeUsername = params.get('like');
+    if (!likeUsername) return;
+
+    const { data: target } = await _db.from('students').select('id, full_name, likes_count').eq('username', likeUsername).maybeSingle();
+    if (!target) return;
+
+    const storageKey = `znode_liked_${target.id}`;
+    if (localStorage.getItem(storageKey)) { showToast(`You already liked ${target.full_name}'s profile!`, 'error'); return; }
+
+    await _db.from('students').update({ likes_count: (target.likes_count || 0) + 1 }).eq('id', target.id);
+    localStorage.setItem(storageKey, '1');
+    showToast(`❤️ You liked ${target.full_name}'s profile!`, 'success');
+
+    // Clean URL
+    window.history.replaceState({}, '', window.location.pathname);
+}
+
+// ════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════
+async function boot() {
+    // Check session
+    const saved = localStorage.getItem('znodeStudentProfile');
+    if (!saved) { window.location.href = 'onboarding.html'; return; }
+
+    try {
+        const parsed = JSON.parse(saved);
+
+        // Refresh from DB
+        const { data: fresh, error } = await _db
+            .from('students')
+            .select('*, institutions(name, short_name, country_code)')
+            .eq('id', parsed.id)
+            .maybeSingle();
+
+        if (error || !fresh) {
+            // Use cached if DB fails
+            currentStudent = parsed;
+        } else {
+            currentStudent = fresh;
+            localStorage.setItem('znodeStudentProfile', JSON.stringify(fresh));
+        }
+
+        populateProfile(currentStudent);
+        handleShareLike();
+
+    } catch (e) {
+        localStorage.removeItem('znodeStudentProfile');
+        window.location.href = 'onboarding.html';
+    }
+}
+
+boot();
+</script>
+</body>
+</html>
