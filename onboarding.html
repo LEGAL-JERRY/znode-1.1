@@ -284,6 +284,11 @@ h1, h2, h3 { font-weight:900; letter-spacing:-0.03em; line-height:1.1; }
                 <input type="text" class="input-field" id="cyPosition" placeholder="Director of Social, President, etc.">
             </div>
             <div class="input-group">
+                <label class="eyebrow">Matriculation Number</label>
+                <input type="text" class="input-field" id="cyMatric" placeholder="e.g. FUL/22/0001">
+                <p style="font-size:12px; color:var(--text-muted); margin-top:8px; font-weight:500;">Used to generate your Z-Node Passport ID</p>
+            </div>
+            <div class="input-group">
                 <label class="eyebrow">Email Address</label>
                 <input type="email" class="input-field" id="cyEmail" placeholder="your@email.com">
             </div>
@@ -321,6 +326,15 @@ h1, h2, h3 { font-weight:900; letter-spacing:-0.03em; line-height:1.1; }
             <div class="input-group">
                 <label class="eyebrow">Class Of (Graduating Year)</label>
                 <input type="number" class="input-field" id="cyYear" placeholder="2026" min="2024" max="2035">
+            </div>
+            <div class="input-group" style="margin-top:32px; padding-top:24px; border-top:1px solid var(--border-light);">
+                <label class="eyebrow" style="color:var(--text-main);">🔐 Department Join Password</label>
+                <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px; font-weight:500; margin-top:6px;">Create a secret password. Students will need this to join your yearbook.</p>
+                <input type="password" class="input-field" id="cyDeptPass" placeholder="Choose a department password">
+            </div>
+            <div class="input-group">
+                <label class="eyebrow">Confirm Department Password</label>
+                <input type="password" class="input-field" id="cyDeptPassConfirm" placeholder="Repeat the password">
             </div>
         </div>
 
@@ -402,6 +416,11 @@ h1, h2, h3 { font-weight:900; letter-spacing:-0.03em; line-height:1.1; }
             <div class="input-group">
                 <label class="eyebrow">Matriculation Number</label>
                 <input type="text" class="input-field" id="jyMatric" placeholder="Required for verified status">
+            </div>
+            <div class="input-group" style="margin-top:32px; padding-top:24px; border-top:1px solid var(--border-light);">
+                <label class="eyebrow" style="color:var(--text-main);">🔐 Department Join Password</label>
+                <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px; font-weight:500; margin-top:6px;">Enter the password your DOS shared with the department.</p>
+                <input type="password" class="input-field" id="jyDeptPass" placeholder="Department password">
             </div>
         </div>
 
@@ -673,14 +692,19 @@ function cyUpdateView() {
 
 function cyValidateStep() {
     if (cyStep === 0) {
-        if (!document.getElementById('cyFullName').value || !document.getElementById('cyUsername').value || !document.getElementById('cyPosition').value || !document.getElementById('cyEmail').value || !document.getElementById('cyPass').value) {
-            showToast('Please fill all fields.', 'error'); return false;
+        if (!document.getElementById('cyFullName').value || !document.getElementById('cyUsername').value || !document.getElementById('cyPosition').value || !document.getElementById('cyMatric').value || !document.getElementById('cyEmail').value || !document.getElementById('cyPass').value) {
+            showToast('Please fill all fields including Matric Number.', 'error'); return false;
         }
     }
     if (cyStep === 1) {
         if (!document.getElementById('cyUni').value || !document.getElementById('cyDept').value || !document.getElementById('cyYear').value) {
             showToast('University, Department and Year are required.', 'error'); return false;
         }
+        const dp = document.getElementById('cyDeptPass').value;
+        const dc = document.getElementById('cyDeptPassConfirm').value;
+        if (!dp) { showToast('Please set a Department Join Password.', 'error'); return false; }
+        if (dp.length < 6) { showToast('Department password must be at least 6 characters.', 'error'); return false; }
+        if (dp !== dc) { showToast('Department passwords do not match.', 'error'); return false; }
     }
     return true;
 }
@@ -708,16 +732,26 @@ async function submitCreateYearbook() {
         const pwdHash = await hashPassword(document.getElementById('cyPass').value);
 
         msg.textContent = 'Creating yearbook...';
+        const deptPwdHash = await hashPassword(document.getElementById('cyDeptPass').value);
+        const cyMatricVal = document.getElementById('cyMatric').value.trim();
+        const cyUniVal = document.getElementById('cyUni').value.trim();
+        const cyYearVal = document.getElementById('cyYear').value;
+        const cyMatricSuffix = cyMatricVal.replace(/[^a-zA-Z0-9]/g,'').slice(-6).toUpperCase();
+        const cyPassportId = `ZNP-${cyUniVal.toUpperCase().replace(/\s/g,'').slice(0,8)}-${cyYearVal}-${cyMatricSuffix}`;
+
         const payload = {
             username,
             full_name: document.getElementById('cyFullName').value.trim(),
             email: document.getElementById('cyEmail').value.trim(),
             password_hash: pwdHash,
+            matric_number: cyMatricVal,
+            znode_passport_id: cyPassportId,
             department: document.getElementById('cyDept').value.trim().toLowerCase(),
             faculty: document.getElementById('cyFaculty').value.trim().toLowerCase(),
-            institution: document.getElementById('cyUni').value.trim().toLowerCase(),
-            graduation_year: parseInt(document.getElementById('cyYear').value),
+            institution: cyUniVal.toLowerCase(),
+            graduation_year: parseInt(cyYearVal),
             role: document.getElementById('cyPosition').value.trim(),
+            dept_password_hash: deptPwdHash,
             is_dos: true,
             theme: document.body.getAttribute('data-theme') || 'dark',
             is_verified: false
@@ -765,6 +799,12 @@ function jyValidateStep() {
         if (!document.getElementById('jyUni').value || !document.getElementById('jyDept').value || !document.getElementById('jyYear').value) {
             showToast('University, Department and Year are required.', 'error'); return false;
         }
+        if (!document.getElementById('jyMatric').value.trim()) {
+            showToast('Matriculation number is required.', 'error'); return false;
+        }
+        if (!document.getElementById('jyDeptPass').value) {
+            showToast('Department Join Password is required.', 'error'); return false;
+        }
     }
     return true;
 }
@@ -779,7 +819,7 @@ async function jyNextStep() {
         const uni  = document.getElementById('jyUni').value.trim().toLowerCase();
         if (dept && year && uni) {
             const { data: yb } = await _db.from('students')
-                .select('id')
+                .select('id, dept_password_hash')
                 .eq('is_dos', true)
                 .ilike('department', dept)
                 .ilike('institution', uni)
@@ -787,6 +827,13 @@ async function jyNextStep() {
                 .maybeSingle();
             if (!yb) {
                 showToast('No yearbook found for this department & year. Ask your DOS to create one first, or create it yourself!', 'error');
+                return;
+            }
+            // Verify dept join password
+            const enteredPwd = document.getElementById('jyDeptPass').value;
+            const enteredHash = await hashPassword(enteredPwd);
+            if (yb.dept_password_hash && enteredHash !== yb.dept_password_hash) {
+                showToast('Incorrect Department Join Password. Ask your DOS for the correct password.', 'error');
                 return;
             }
         }
