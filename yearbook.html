@@ -42,7 +42,6 @@
         h1, h2, h3 { font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; }
         .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 800; color: var(--text-muted); }
 
-        /* Grid Background */
         .stealth-grid {
             position: fixed; inset: 0;
             background-image: linear-gradient(var(--border-strong) 1px, transparent 1px),
@@ -53,7 +52,6 @@
             pointer-events: none; z-index: 0; opacity: 0.15;
         }
 
-        /* Top Navigation Bar */
         .top-bar {
             position: sticky; top: 0;
             display: flex; align-items: center; justify-content: space-between;
@@ -88,14 +86,12 @@
         }
         .user-avatar img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); }
 
-        /* Page Content */
         .page-content {
             position: relative; z-index: 5;
             max-width: 1200px; margin: 0 auto;
             padding: 56px 48px;
         }
 
-        /* Page Header */
         .page-header { margin-bottom: 48px; border-bottom: 1px solid var(--text-main); padding-bottom: 24px; }
         .page-header h1 { font-size: 40px; margin-top: 8px; }
         .header-meta { display: flex; gap: 24px; margin-top: 12px; }
@@ -104,7 +100,6 @@
             border: 1px solid var(--border-strong); padding: 6px 12px; color: var(--text-muted);
         }
 
-        /* Loading State */
         .state-panel {
             border: 1px solid var(--border-strong); background: var(--bg-surface);
             padding: 64px; text-align: center;
@@ -113,7 +108,6 @@
         .state-panel h3 { font-size: 24px; margin-bottom: 8px; }
         .state-panel p { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
 
-        /* Student Grid */
         .student-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -122,7 +116,6 @@
             background: var(--border-strong);
         }
 
-        /* Student Card */
         .student-card {
             background: var(--bg-base);
             padding: 0;
@@ -173,6 +166,15 @@
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
+        /* DOS badge — distinct from verified */
+        .dos-badge {
+            position: absolute; top: 10px; left: 10px;
+            background: var(--text-main); color: var(--bg-base);
+            padding: 3px 7px;
+            font-size: 9px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.1em;
+        }
+
         .verified-badge {
             position: absolute; top: 10px; right: 10px;
             background: var(--bg-base); border: 1px solid var(--text-main);
@@ -181,14 +183,12 @@
             text-transform: uppercase; letter-spacing: 0.1em;
         }
 
-        /* Count bar */
         .count-bar {
             display: flex; align-items: center; justify-content: space-between;
             padding: 16px 0; margin-bottom: 24px;
         }
         .count-bar .eyebrow { color: var(--text-muted); }
 
-        /* Mobile */
         @media (max-width: 640px) {
             .top-bar { padding: 0 20px; }
             .page-content { padding: 32px 20px; }
@@ -201,7 +201,6 @@
 
 <div class="stealth-grid"></div>
 
-<!-- Top Bar -->
 <header class="top-bar">
     <button class="back-btn" onclick="window.location.href='app.html'">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
@@ -214,7 +213,6 @@
     </div>
 </header>
 
-<!-- Main Content -->
 <main class="page-content">
 
     <div class="page-header">
@@ -226,55 +224,41 @@
         </div>
     </div>
 
-    <!-- Loading State -->
     <div class="state-panel" id="loadingState">
         <div class="eyebrow" style="margin-bottom: 12px;">Z-NODE // QUERYING</div>
         <h3>Accessing Network.</h3>
         <p>Fetching student records from the database...</p>
     </div>
 
-    <!-- Count Bar (visible after load) -->
     <div class="count-bar" id="countBar" style="display:none;">
         <span class="eyebrow" id="studentCount">0 nodes found</span>
         <span class="eyebrow" style="color: var(--text-main);">ACTIVE DIRECTORY</span>
     </div>
 
-    <!-- Student Grid -->
     <div class="student-grid" id="studentGrid" style="display:none;"></div>
 
-    <!-- Empty State -->
     <div class="state-panel" id="emptyState" style="display:none;">
         <div class="eyebrow" style="margin-bottom: 12px;">Z-NODE // NULL RESPONSE</div>
         <h3>No Nodes Found.</h3>
-        <p>No students match this department and class year in the network.<br>
+        <p>No students match this department and graduation year in the network.<br>
            They may not have registered yet or the query parameters don't match.</p>
     </div>
 
 </main>
 
 <script>
-// ════════════════════════════════════════
-// SUPABASE CLIENT
-// ════════════════════════════════════════
 const SUPABASE_URL  = "https://yohndnmwvgcwadkytmix.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvaG5kbm13dmdjd2Fka3l0bWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDEyODgsImV4cCI6MjA5NDYxNzI4OH0.hkUexJ-AS1GpLJL78F7iXDv5PkwuPbShj2fsGVXuEsg";
 const { createClient } = supabase;
 const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ════════════════════════════════════════
-// RESTORE SESSION & APPLY THEME
-// ════════════════════════════════════════
 function initSession() {
     const authRaw = localStorage.getItem('znodeStudentProfile');
-    if (!authRaw) {
-        window.location.href = 'onboarding.html';
-        return null;
-    }
+    if (!authRaw) { window.location.href = 'onboarding.html'; return null; }
     try {
         const student = JSON.parse(authRaw);
         if (student.theme) document.body.setAttribute('data-theme', student.theme);
 
-        // Populate nav chip
         const avatar = document.getElementById('navAvatar');
         if (student.avatar_url) {
             avatar.innerHTML = `<img src="${student.avatar_url}" alt="avatar">`;
@@ -282,7 +266,6 @@ function initSession() {
             avatar.textContent = (student.username || '?').charAt(0).toUpperCase();
         }
         document.getElementById('navUsername').textContent = `@${student.username || '—'}`;
-
         return student;
     } catch(e) {
         window.location.href = 'onboarding.html';
@@ -290,20 +273,11 @@ function initSession() {
     }
 }
 
-// ════════════════════════════════════════
-// URL PARAM READER
-// ════════════════════════════════════════
 function getParams() {
     const p = new URLSearchParams(window.location.search);
-    return {
-        dept: p.get('dept') || '',
-        year: p.get('year') || ''
-    };
+    return { dept: p.get('dept') || '', year: p.get('year') || '' };
 }
 
-// ════════════════════════════════════════
-// RENDER STUDENT CARD
-// ════════════════════════════════════════
 function renderCard(student) {
     const card = document.createElement('div');
     card.className = 'student-card';
@@ -312,40 +286,43 @@ function renderCard(student) {
         ? `<img class="student-photo" src="${student.avatar_url}" alt="${student.full_name || ''}" loading="lazy">`
         : `<div class="student-photo-fallback">👤</div>`;
 
+    // is_dos is stored as text "true"/"false" in your schema
+    const isDOS = student.is_dos === true || student.is_dos === 'true';
+    const dosBadge   = isDOS ? `<span class="dos-badge">DOS</span>` : '';
     const verifiedBadge = student.is_verified
-        ? `<span class="verified-badge">✓ VERIFIED</span>`
-        : '';
+        ? `<span class="verified-badge">✓ VERIFIED</span>` : '';
 
     card.innerHTML = `
         ${photoHTML}
+        ${dosBadge}
         ${verifiedBadge}
         <div class="student-info">
             <div class="student-name">${student.full_name || 'Anonymous'}</div>
             <div class="student-handle">@${student.username || '—'}</div>
-            <div class="student-passport">${student.znode_passport_id || '—'}</div>
+            <div class="student-passport">${student.znode_passport_id || student.matric_number || '—'}</div>
         </div>
     `;
     return card;
 }
 
 // ════════════════════════════════════════
-// MAIN QUERY FUNCTION
+// FIXED QUERY — uses graduation_year column
+// not created_at date range (which was the bug)
 // ════════════════════════════════════════
 async function loadYearbook(dept, year) {
     try {
         let query = _db.from('students').select('*');
 
-        if (dept) query = query.ilike('department', `%${dept}%`);
-
-        // Filter by class year using created_at if available (approximate)
-        // Students from "Class of YEAR" registered in that calendar year
-        if (year) {
-            const start = `${year}-01-01`;
-            const end   = `${year}-12-31`;
-            query = query.gte('created_at', start).lte('created_at', end);
+        if (dept) {
+            query = query.ilike('department', `%${dept}%`);
         }
 
-        const { data: students, error } = await query.order('full_name', { ascending: true });
+        // KEY FIX: filter by graduation_year column, not created_at
+        if (year) {
+            query = query.eq('graduation_year', parseInt(year));
+        }
+
+        const { data: students, error } = await query.order('is_dos', { ascending: false }).order('full_name', { ascending: true });
 
         if (error) throw error;
         return students || [];
@@ -356,29 +333,20 @@ async function loadYearbook(dept, year) {
     }
 }
 
-// ════════════════════════════════════════
-// BOOTSTRAP
-// ════════════════════════════════════════
 async function bootstrap() {
     const session = initSession();
     if (!session) return;
 
     const { dept, year } = getParams();
 
-    // Update page labels
     document.getElementById('pageTitle').textContent =
         dept ? `${dept} — Class of ${year}.` : 'Yearbook Directory.';
-    document.getElementById('queryLabel').textContent =
-        'YEARBOOK // STUDENT DIRECTORY';
-    document.getElementById('deptTag').textContent =
-        `DEPT: ${dept || 'ALL'}`;
-    document.getElementById('yearTag').textContent =
-        `CLASS OF ${year || 'ALL'}`;
+    document.getElementById('queryLabel').textContent = 'YEARBOOK // STUDENT DIRECTORY';
+    document.getElementById('deptTag').textContent  = `DEPT: ${dept || 'ALL'}`;
+    document.getElementById('yearTag').textContent  = `CLASS OF ${year || 'ALL'}`;
 
-    // Fetch students
     const students = await loadYearbook(dept, year);
 
-    // Hide loader
     document.getElementById('loadingState').style.display = 'none';
 
     if (students.length === 0) {
@@ -386,14 +354,10 @@ async function bootstrap() {
         return;
     }
 
-    // Show count bar
-    const countBar = document.getElementById('countBar');
-    const count    = students.length;
     document.getElementById('studentCount').textContent =
-        `${count} node${count !== 1 ? 's' : ''} found`;
-    countBar.style.display = 'flex';
+        `${students.length} node${students.length !== 1 ? 's' : ''} found`;
+    document.getElementById('countBar').style.display = 'flex';
 
-    // Render grid
     const grid = document.getElementById('studentGrid');
     students.forEach(s => grid.appendChild(renderCard(s)));
     grid.style.display = 'grid';
