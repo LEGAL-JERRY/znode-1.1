@@ -9,7 +9,6 @@
 
 <style>
 :root {
-    /* PREMIUM DARK MODE */
     --bg-base: #000000;
     --bg-surface: #111111;
     --border-light: #222222;
@@ -23,9 +22,7 @@
     --radius-input: 16px;
     --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
-
 [data-theme="light"] {
-    /* PREMIUM LIGHT MODE */
     --bg-base: #ffffff;
     --bg-surface: #f9fafb;
     --border-light: #f3f4f6;
@@ -39,43 +36,78 @@
 * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; }
 body { background-color:var(--bg-base); color:var(--text-main); min-height:100vh; overflow-x:hidden; transition:background-color 0.4s var(--ease), color 0.4s var(--ease); }
 
-/* Minimalist Background Grid */
-.stealth-grid { position:fixed; inset:0; background-image:linear-gradient(var(--border-strong) 1px,transparent 1px),linear-gradient(90deg,var(--border-strong) 1px,transparent 1px); background-size:60px 60px; mask-image:radial-gradient(circle at 50% 50%, black 20%, transparent 80%); -webkit-mask-image:radial-gradient(circle at 50% 50%, black 20%, transparent 80%); pointer-events:none; z-index:1; opacity: 0.3; }
+.stealth-grid { position:fixed; inset:0; background-image:linear-gradient(var(--border-strong) 1px,transparent 1px),linear-gradient(90deg,var(--border-strong) 1px,transparent 1px); background-size:60px 60px; mask-image:radial-gradient(circle at 50% 50%, black 20%, transparent 80%); -webkit-mask-image:radial-gradient(circle at 50% 50%, black 20%, transparent 80%); pointer-events:none; z-index:1; opacity:0.3; }
 
-/* Brutalist Typography */
-h1, h2, h3 { font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; }
-.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.3em; font-weight: 800; color: var(--text-muted); }
+h1, h2, h3 { font-weight:900; letter-spacing:-0.03em; line-height:1.1; }
+.eyebrow { font-size:11px; text-transform:uppercase; letter-spacing:0.3em; font-weight:800; color:var(--text-muted); }
 
-/* Overlays */
+/* ── OVERLAYS ── */
 .fullscreen-overlay { position:fixed; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:40px; z-index:100; background:var(--bg-base); opacity:0; visibility:hidden; transform:scale(0.98); transition:all 0.5s var(--ease); }
 .fullscreen-overlay.active { opacity:1; visibility:visible; transform:scale(1); }
 .fullscreen-overlay h1 { font-size:clamp(40px, 8vw, 72px); margin-bottom:16px; }
-.fullscreen-overlay p { font-size:18px; color:var(--text-muted); max-width:500px; margin-bottom:40px; line-height:1.5; font-weight: 500; }
+.fullscreen-overlay p { font-size:18px; color:var(--text-muted); max-width:500px; margin-bottom:40px; line-height:1.5; font-weight:500; }
 
-/* Buttons */
+/* ── THEME PICKER ── */
+.theme-pick-wrap {
+    display:flex; gap:20px; width:100%; max-width:500px;
+}
+.theme-box {
+    flex:1; aspect-ratio:3/4; max-height:220px;
+    border-radius:24px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:12px; font-size:14px; font-weight:700; letter-spacing:0.05em;
+    transition:all 0.25s var(--ease); border:2px solid transparent;
+}
+.theme-box.dark-box {
+    background:#000; color:#fff;
+    border-color:#333;
+}
+.theme-box.light-box {
+    background:#fff; color:#000;
+    border-color:#e5e7eb;
+}
+.theme-box:hover { transform:translateY(-4px); }
+.theme-box.dark-box:hover { border-color:#fff; box-shadow:0 16px 48px rgba(255,255,255,0.1); }
+.theme-box.light-box:hover { border-color:#000; box-shadow:0 16px 48px rgba(0,0,0,0.1); }
+.theme-box svg { opacity:0.7; }
+
+/* ── AUTH CHOICE OVERLAY (3 options) ── */
+.auth-options {
+    display:flex; flex-direction:column; gap:14px; width:100%; max-width:400px;
+}
+.auth-btn {
+    width:100%; padding:18px 32px; border-radius:var(--radius-btn);
+    font-size:15px; font-weight:700; cursor:pointer;
+    transition:all 0.2s var(--ease); border:none; text-align:center;
+}
+.auth-btn-primary { background:var(--accent); color:var(--accent-text); }
+.auth-btn-primary:hover { transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,0.15); }
+.auth-btn-secondary { background:transparent; border:1px solid var(--border-strong); color:var(--text-main); }
+.auth-btn-secondary:hover { border-color:var(--accent); background:var(--bg-surface); }
+.auth-divider { display:flex; align-items:center; gap:12px; color:var(--text-muted); font-size:12px; font-weight:600; letter-spacing:0.1em; }
+.auth-divider::before,.auth-divider::after { content:''; flex:1; height:1px; background:var(--border-strong); }
+
+/* ── BUTTONS ── */
 .btn-wrap { display:flex; gap:16px; justify-content:center; width:100%; max-width:440px; }
-.btn { padding:18px 32px; border:none; border-radius:var(--radius-btn); font-size:15px; font-weight: 700; cursor:pointer; flex:1; transition:all 0.2s var(--ease); text-align:center; }
+.btn { padding:18px 32px; border:none; border-radius:var(--radius-btn); font-size:15px; font-weight:700; cursor:pointer; flex:1; transition:all 0.2s var(--ease); text-align:center; }
 .btn-primary { background:var(--accent); color:var(--accent-text); }
-.btn-primary:hover { transform:translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-.btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; box-shadow: none; }
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 10px 20px rgba(0,0,0,0.1); }
+.btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; box-shadow:none; }
 .btn-secondary { background:transparent; border:1px solid var(--border-strong); color:var(--text-main); }
-.btn-secondary:hover { border-color:var(--accent); background: var(--bg-surface); }
+.btn-secondary:hover { border-color:var(--accent); background:var(--bg-surface); }
 
-/* Onboarding Form Container */
+/* ── ONBOARDING FORM ── */
 .onboarding-container { position:relative; max-width:640px; margin:60px auto; padding:0 20px; z-index:10; display:none; animation:fadeUp 0.6s var(--ease) forwards; }
 @keyframes fadeUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
 
-/* Progress Bar */
 .progress-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:40px; }
 .progress-bar { flex-grow:1; height:2px; background:var(--border-strong); margin:0 24px; position:relative; }
 .progress-fill { position:absolute; top:0; left:0; height:100%; background:var(--accent); transition:width 0.4s var(--ease); }
 
-/* Solid Panel */
 .brutalist-panel { background:var(--bg-base); border:1px solid var(--border-strong); border-radius:var(--radius-panel); padding:48px; box-shadow:0 20px 60px rgba(0,0,0,0.05); }
 .brutalist-panel h2 { font-size:40px; margin-bottom:12px; }
-.brutalist-panel p.sub { color:var(--text-muted); font-size:16px; font-weight: 500; margin-bottom:40px; }
+.brutalist-panel p.sub { color:var(--text-muted); font-size:16px; font-weight:500; margin-bottom:40px; }
 
-/* Form Fields */
 .step-view { display:none; }
 .step-view.active { display:block; animation:fadeIn 0.4s var(--ease); }
 @keyframes fadeIn { from {opacity:0; transform:translateX(10px);} to {opacity:1; transform:translateX(0);} }
@@ -84,25 +116,62 @@ h1, h2, h3 { font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; }
 .input-group label { display:block; margin-bottom:10px; }
 .input-field { width:100%; padding:18px 24px; border-radius:var(--radius-input); background:var(--bg-surface); border:1px solid var(--border-strong); color:var(--text-main); font-size:16px; font-weight:500; outline:none; transition:border-color 0.2s; }
 .input-field:focus { border-color:var(--text-main); }
-.input-field::placeholder { color: var(--text-muted); opacity: 0.5; }
+.input-field::placeholder { color:var(--text-muted); opacity:0.5; }
 
-/* Image Dropzone */
-.image-dropzone { border:2px dashed var(--border-strong); background:var(--bg-surface); border-radius:var(--radius-input); padding:40px; text-align:center; cursor:pointer; transition:all 0.2s var(--ease); margin-bottom:24px; display: block; }
+/* Search dropdown */
+.search-wrap { position:relative; }
+.search-dropdown { position:absolute; top:calc(100% + 6px); left:0; right:0; background:var(--bg-surface); border:1px solid var(--border-strong); border-radius:16px; z-index:999; overflow:hidden; display:none; }
+.search-dropdown.open { display:block; }
+.search-option { padding:14px 20px; font-size:15px; font-weight:500; cursor:pointer; transition:background 0.15s; color:var(--text-main); }
+.search-option:hover { background:var(--border-strong); }
+.search-loading { padding:14px 20px; font-size:13px; color:var(--text-muted); }
+
+/* Section header inside form */
+.form-section-header { margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--border-light); }
+.form-section-header h3 { font-size:18px; font-weight:700; }
+.form-section-header p { font-size:14px; color:var(--text-muted); margin-top:4px; font-weight:500; }
+
+/* Socials */
+.socials-grid { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px; }
+.social-trigger {
+    display:flex; align-items:center; gap:8px;
+    padding:10px 16px; border-radius:40px;
+    border:1px solid var(--border-strong); background:var(--bg-surface);
+    cursor:pointer; font-size:13px; font-weight:700; color:var(--text-muted);
+    transition:all 0.2s var(--ease);
+}
+.social-trigger:hover,.social-trigger.active { border-color:var(--accent); color:var(--text-main); background:var(--bg-base); }
+.social-trigger svg { width:18px; height:18px; flex-shrink:0; }
+.social-input-row { display:none; align-items:center; gap:10px; margin-bottom:12px; animation:fadeIn 0.3s var(--ease); }
+.social-input-row.visible { display:flex; }
+.social-input-row .social-icon { width:36px; height:36px; display:flex; align-items:center; justify-content:center; flex-shrink:0; opacity:0.7; }
+.social-input-row input { flex:1; padding:14px 18px; border-radius:12px; background:var(--bg-surface); border:1px solid var(--border-strong); color:var(--text-main); font-size:15px; font-weight:500; outline:none; transition:border-color 0.2s; }
+.social-input-row input:focus { border-color:var(--text-main); }
+.social-input-row input::placeholder { color:var(--text-muted); opacity:0.5; }
+
+/* Image dropzone */
+.image-dropzone { border:2px dashed var(--border-strong); background:var(--bg-surface); border-radius:var(--radius-input); padding:40px; text-align:center; cursor:pointer; transition:all 0.2s var(--ease); margin-bottom:24px; display:block; }
 .image-dropzone:hover { border-color:var(--text-main); }
-.avatar-preview { width:96px; height:96px; border-radius:50%; object-fit:cover; border:2px solid var(--text-main); display:none; margin:0 auto 16px; filter: grayscale(100%); }
+.avatar-preview { width:96px; height:96px; border-radius:50%; object-fit:cover; border:2px solid var(--text-main); display:none; margin:0 auto 16px; filter:grayscale(100%); }
 
 /* Toast */
 .toast-container { position:fixed; bottom:32px; right:32px; z-index:9999; display:flex; flex-direction:column; gap:12px; }
-.toast { padding:16px 24px; border-radius:var(--radius-input); font-size:14px; font-weight:700; background: var(--bg-surface); border: 1px solid var(--border-strong); color: var(--text-main); box-shadow: 0 10px 30px rgba(0,0,0,0.1); animation:toastIn 0.3s var(--ease); }
+.toast { padding:16px 24px; border-radius:var(--radius-input); font-size:14px; font-weight:700; background:var(--bg-surface); border:1px solid var(--border-strong); color:var(--text-main); box-shadow:0 10px 30px rgba(0,0,0,0.1); animation:toastIn 0.3s var(--ease); }
 @keyframes toastIn { from{opacity:0; transform:translateX(20px)} to{opacity:1; transform:translateX(0)} }
 
-/* Nav Buttons */
 .form-nav { display:flex; justify-content:space-between; margin-top:48px; gap:16px; }
 
+.back-link { font-size:13px; color:var(--text-muted); cursor:pointer; font-weight:600; background:none; border:none; padding:0; margin-bottom:24px; display:block; }
+.back-link:hover { color:var(--text-main); }
+
 @media (max-width: 640px) {
-    .brutalist-panel { padding: 32px 24px; border-radius: 30px; }
-    .brutalist-panel h2 { font-size: 32px; }
+    .brutalist-panel { padding:32px 24px; border-radius:30px; }
+    .brutalist-panel h2 { font-size:32px; }
+    .theme-pick-wrap { gap:12px; }
 }
+
+/* Login panel */
+.login-panel { width:100%; max-width:480px; text-align:left; }
 </style>
 </head>
 <body data-theme="dark">
@@ -110,30 +179,75 @@ h1, h2, h3 { font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; }
 <div class="stealth-grid"></div>
 <div class="toast-container" id="toastContainer"></div>
 
-<div class="fullscreen-overlay active" id="themeOverlay">
-    <div class="eyebrow" style="margin-bottom: 24px;">Z-NODE // INIT</div>
-    <h1>Select<br>Environment.</h1>
-    <p>Choose your interface styling before connecting to the grid.</p>
-    <div class="btn-wrap">
-        <button class="btn btn-secondary" onclick="setTheme('dark')">Dark Mode</button>
-        <button class="btn btn-secondary" onclick="setTheme('light')">Light Mode</button>
+<!-- ════ STEP 1: THEME PICKER (split screen) ════ -->
+<div class="fullscreen-overlay active" id="themeOverlay" style="padding:0; overflow:hidden;">
+    <div style="display:flex; width:100%; height:100vh;">
+        <!-- LIGHT HALF -->
+        <div onclick="setTheme('light')" style="
+            flex:1; display:flex; flex-direction:column; justify-content:flex-end;
+            padding:48px; cursor:pointer;
+            background:#ffffff; border-right:1px solid #e5e7eb;
+            transition:background 0.2s; position:relative;
+        " onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#ffffff'">
+            <div style="position:absolute; top:40px; left:48px;">
+                <div style="width:36px; height:36px; border-radius:50%; background:#000;"></div>
+            </div>
+            <div>
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.3em; font-weight:800; color:#9ca3af; margin-bottom:10px; font-family:'Inter',sans-serif;">Light</div>
+                <div style="font-size:clamp(36px,5vw,60px); font-weight:900; color:#000; letter-spacing:-0.03em; line-height:1.05; font-family:'Inter',sans-serif;">Clean.<br>White.</div>
+                <div style="margin-top:24px; font-size:13px; color:#9ca3af; font-weight:600; font-family:'Inter',sans-serif;">Tap to select →</div>
+            </div>
+        </div>
+        <!-- DARK HALF -->
+        <div onclick="setTheme('dark')" style="
+            flex:1; display:flex; flex-direction:column; justify-content:flex-end;
+            padding:48px; cursor:pointer;
+            background:#000000;
+            transition:background 0.2s; position:relative;
+        " onmouseover="this.style.background='#111111'" onmouseout="this.style.background='#000000'">
+            <div style="position:absolute; top:40px; right:48px;">
+                <div style="width:36px; height:36px; border-radius:50%; border:2px solid #ffffff;"></div>
+            </div>
+            <div>
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.3em; font-weight:800; color:#444444; margin-bottom:10px; font-family:'Inter',sans-serif;">Dark</div>
+                <div style="font-size:clamp(36px,5vw,60px); font-weight:900; color:#ffffff; letter-spacing:-0.03em; line-height:1.05; font-family:'Inter',sans-serif;">Bold.<br>Black.</div>
+                <div style="margin-top:24px; font-size:13px; color:#444444; font-weight:600; font-family:'Inter',sans-serif;">Tap to select →</div>
+            </div>
+        </div>
+    </div>
+</div>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Light
+        </div>
     </div>
 </div>
 
+<!-- ════ STEP 2: AUTH CHOICE (3 options) ════ -->
 <div class="fullscreen-overlay" id="authChoiceOverlay">
+    <div class="eyebrow" style="margin-bottom:24px;">Z-NODE // ACCESS</div>
     <h1>Enter the<br>Network.</h1>
-    <p>Create your digital identity or access your existing node.</p>
-    <div class="btn-wrap">
-        <button class="btn btn-primary" onclick="startOnboarding()">Create Profile</button>
-        <button class="btn btn-secondary" onclick="showLogin()">Login</button>
+    <p>What would you like to do?</p>
+    <div class="auth-options">
+        <button class="auth-btn auth-btn-primary" onclick="showFlow('create-yearbook')">
+            📖 Create Department Yearbook
+        </button>
+        <div class="auth-divider">or</div>
+        <button class="auth-btn auth-btn-secondary" onclick="showFlow('join-yearbook')">
+            🎓 Join Department Yearbook
+        </button>
+        <button class="auth-btn auth-btn-secondary" onclick="showFlow('login')">
+            🔑 Login
+        </button>
     </div>
 </div>
 
+<!-- ════ LOGIN OVERLAY ════ -->
 <div class="fullscreen-overlay" id="loginOverlay">
-    <div class="brutalist-panel" style="width:100%; max-width:480px; text-align:left;">
+    <div class="brutalist-panel login-panel">
+        <button class="back-link" onclick="backToAuth()">← Back</button>
         <span class="eyebrow">Z-NODE ACCESS</span>
-        <h2 style="margin-bottom:8px; margin-top: 16px;">Welcome Back.</h2>
-        <p class="sub" style="margin-bottom: 32px;">Enter your credentials to reconnect.</p>
+        <h2 style="margin-bottom:8px; margin-top:16px;">Welcome Back.</h2>
+        <p class="sub" style="margin-bottom:32px;">Enter your credentials to reconnect.</p>
         <div class="input-group">
             <input type="text" class="input-field" id="loginId" placeholder="Username or Email">
         </div>
@@ -144,74 +258,240 @@ h1, h2, h3 { font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; }
     </div>
 </div>
 
-<div class="onboarding-container" id="onboardingPortal">
+<!-- ════ CREATE YEARBOOK ONBOARDING ════ -->
+<div class="onboarding-container" id="createYearbookPortal">
     <div class="progress-header">
-        <span class="eyebrow" id="stepCounter">STAGE 1/3</span>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:33.3%;"></div></div>
-        <span class="eyebrow" id="stepName">IDENTITY</span>
+        <span class="eyebrow" id="cyStepCounter">STAGE 1/2</span>
+        <div class="progress-bar"><div class="progress-fill" id="cyProgressFill" style="width:50%;"></div></div>
+        <span class="eyebrow" id="cyStepName">DOS IDENTITY</span>
     </div>
-
     <div class="brutalist-panel">
-        
-        <div class="step-view active" id="step0">
-            <h2>Core Identity.</h2>
-            <p class="sub">Define your digital presence on the network.</p>
+
+        <!-- CY Step 0: DOS Info -->
+        <div class="step-view active" id="cyStep0">
+            <h2>DOS Profile.</h2>
+            <p class="sub">Tell us about yourself as Director of Social.</p>
             <div class="input-group">
                 <label class="eyebrow">Full Name</label>
-                <input type="text" class="input-field" id="regFullName" placeholder="David Olayinka">
+                <input type="text" class="input-field" id="cyFullName" placeholder="Your full name">
             </div>
             <div class="input-group">
-                <label class="eyebrow">Network Handle (Username)</label>
-                <input type="text" class="input-field" id="regUsername" placeholder="david_o">
+                <label class="eyebrow">Username</label>
+                <input type="text" class="input-field" id="cyUsername" placeholder="dos_fulafia">
             </div>
             <div class="input-group">
-                <label class="eyebrow">Eternal Statement</label>
-                <input type="text" class="input-field" id="regBio" placeholder="Code is temporary, infrastructure is forever.">
-            </div>
-        </div>
-
-        <div class="step-view" id="step1">
-            <h2>Academic Link.</h2>
-            <p class="sub">Connect to your institution.</p>
-            <div class="input-group">
-                <label class="eyebrow">Institution (Short Name)</label>
-                <input type="text" class="input-field" id="regUni" placeholder="UNILAG, OAU, ABU">
+                <label class="eyebrow">Position / Role in Department</label>
+                <input type="text" class="input-field" id="cyPosition" placeholder="Director of Social, President, etc.">
             </div>
             <div class="input-group">
-                <label class="eyebrow">Department</label>
-                <input type="text" class="input-field" id="regDept" placeholder="Software Engineering">
-            </div>
-            <div class="input-group">
-                <label class="eyebrow">Matriculation Number</label>
-                <input type="text" class="input-field" id="regMatric" placeholder="Required for verified status">
+                <label class="eyebrow">Email Address</label>
+                <input type="email" class="input-field" id="cyEmail" placeholder="your@email.com">
             </div>
             <div class="input-group">
                 <label class="eyebrow">Secure Password</label>
-                <input type="password" class="input-field" id="regPass" placeholder="••••••••">
+                <input type="password" class="input-field" id="cyPass" placeholder="••••••••">
             </div>
         </div>
 
-        <div class="step-view" id="step2">
-            <h2>Verification.</h2>
-            <p class="sub">Finalize your profile to enter the grid.</p>
+        <!-- CY Step 1: Dept Info -->
+        <div class="step-view" id="cyStep1">
+            <h2>Department Setup.</h2>
+            <p class="sub">Link this yearbook to your department.</p>
+            <div class="input-group">
+                <label class="eyebrow">University</label>
+                <div class="search-wrap">
+                    <input type="text" class="input-field" id="cyUni" placeholder="Search your university..." autocomplete="off" oninput="searchField('cyUni','cyUniDrop','institutions','name')">
+                    <div class="search-dropdown" id="cyUniDrop"></div>
+                </div>
+            </div>
+            <div class="input-group">
+                <label class="eyebrow">Faculty</label>
+                <div class="search-wrap">
+                    <input type="text" class="input-field" id="cyFaculty" placeholder="Search faculty..." autocomplete="off" oninput="searchField('cyFaculty','cyFacultyDrop','faculties','name')">
+                    <div class="search-dropdown" id="cyFacultyDrop"></div>
+                </div>
+            </div>
+            <div class="input-group">
+                <label class="eyebrow">Department</label>
+                <div class="search-wrap">
+                    <input type="text" class="input-field" id="cyDept" placeholder="Search department..." autocomplete="off" oninput="searchField('cyDept','cyDeptDrop','departments','name')">
+                    <div class="search-dropdown" id="cyDeptDrop"></div>
+                </div>
+            </div>
+            <div class="input-group">
+                <label class="eyebrow">Class Of (Graduating Year)</label>
+                <input type="number" class="input-field" id="cyYear" placeholder="2026" min="2024" max="2035">
+            </div>
+        </div>
+
+        <div class="form-nav">
+            <button class="btn btn-secondary" id="cyBtnBack" onclick="cyPrevStep()" style="visibility:hidden;">Back</button>
+            <button class="btn btn-primary" id="cyBtnNext" onclick="cyNextStep()">Proceed</button>
+        </div>
+    </div>
+</div>
+
+<!-- ════ JOIN YEARBOOK ONBOARDING ════ -->
+<div class="onboarding-container" id="joinYearbookPortal">
+    <div class="progress-header">
+        <span class="eyebrow" id="jyStepCounter">STAGE 1/3</span>
+        <div class="progress-bar"><div class="progress-fill" id="jyProgressFill" style="width:33%;"></div></div>
+        <span class="eyebrow" id="jyStepName">YOUR IDENTITY</span>
+    </div>
+    <div class="brutalist-panel">
+
+        <!-- JY Step 0: Identity -->
+        <div class="step-view active" id="jyStep0">
+            <div class="form-section-header">
+                <h3>Your Identity</h3>
+                <p>Tell us about yourself</p>
+            </div>
+            <div class="input-group">
+                <label class="eyebrow">Your Full Name</label>
+                <input type="text" class="input-field" id="jyFullName" placeholder="David Olayinka">
+            </div>
+            <div class="input-group">
+                <label class="eyebrow">Your Username</label>
+                <input type="text" class="input-field" id="jyUsername" placeholder="david_o">
+            </div>
+            <div class="input-group">
+                <label class="eyebrow">Famous / Favourite Quote</label>
+                <input type="text" class="input-field" id="jyQuote" placeholder="Code is temporary, infrastructure is forever.">
+            </div>
             <div class="input-group">
                 <label class="eyebrow">Email Address</label>
-                <input type="email" class="input-field" id="regEmail" placeholder="your@email.com">
+                <input type="email" class="input-field" id="jyEmail" placeholder="your@email.com">
             </div>
             <div class="input-group">
-                <label class="eyebrow">X (Twitter) Handle</label>
-                <input type="text" class="input-field" id="regSocial" placeholder="@yourhandle">
+                <label class="eyebrow">Secure Password</label>
+                <input type="password" class="input-field" id="jyPass" placeholder="••••••••">
             </div>
+        </div>
+
+        <!-- JY Step 1: Institution -->
+        <div class="step-view" id="jyStep1">
+            <div class="form-section-header">
+                <h3>Your Institution</h3>
+                <p>Tell us about your school</p>
+            </div>
+            <div class="input-group">
+                <label class="eyebrow">Your University</label>
+                <div class="search-wrap">
+                    <input type="text" class="input-field" id="jyUni" placeholder="Search your university..." autocomplete="off" oninput="searchField('jyUni','jyUniDrop','institutions','name')">
+                    <div class="search-dropdown" id="jyUniDrop"></div>
+                </div>
+            </div>
+            <div class="input-group">
+                <label class="eyebrow">Faculty</label>
+                <div class="search-wrap">
+                    <input type="text" class="input-field" id="jyFaculty" placeholder="Search faculty..." autocomplete="off" oninput="searchField('jyFaculty','jyFacultyDrop','faculties','name')">
+                    <div class="search-dropdown" id="jyFacultyDrop"></div>
+                </div>
+            </div>
+            <div class="input-group">
+                <label class="eyebrow">Department</label>
+                <div class="search-wrap">
+                    <input type="text" class="input-field" id="jyDept" placeholder="Search department..." autocomplete="off" oninput="searchField('jyDept','jyDeptDrop','departments','name')">
+                    <div class="search-dropdown" id="jyDeptDrop"></div>
+                </div>
+            </div>
+            <div class="input-group">
+                <label class="eyebrow">Class Of (Graduating Year)</label>
+                <input type="number" class="input-field" id="jyYear" placeholder="2026" min="2024" max="2035">
+            </div>
+            <div class="input-group">
+                <label class="eyebrow">Matriculation Number</label>
+                <input type="text" class="input-field" id="jyMatric" placeholder="Required for verified status">
+            </div>
+        </div>
+
+        <!-- JY Step 2: Socials + Photo -->
+        <div class="step-view" id="jyStep2">
+            <div class="form-section-header">
+                <h3>Your Presence</h3>
+                <p>Add your socials and photo</p>
+            </div>
+
+            <div class="input-group">
+                <label class="eyebrow" style="margin-bottom:14px;">Social Media Handles</label>
+                <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px; font-weight:500;">Click a platform to add your handle</p>
+                <div class="socials-grid">
+                    <div class="social-trigger" id="trigX" onclick="toggleSocial('x')">
+                        <!-- X / Twitter -->
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.75l7.73-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        X
+                    </div>
+                    <div class="social-trigger" id="trigIg" onclick="toggleSocial('instagram')">
+                        <!-- Instagram -->
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                        Instagram
+                    </div>
+                    <div class="social-trigger" id="trigFb" onclick="toggleSocial('facebook')">
+                        <!-- Facebook -->
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                        Facebook
+                    </div>
+                    <div class="social-trigger" id="trigWa" onclick="toggleSocial('whatsapp')">
+                        <!-- WhatsApp -->
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                        WhatsApp
+                    </div>
+                    <div class="social-trigger" id="trigLi" onclick="toggleSocial('linkedin')">
+                        <!-- LinkedIn -->
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+                        LinkedIn
+                    </div>
+                    <div class="social-trigger" id="trigGh" onclick="toggleSocial('github')">
+                        <!-- GitHub -->
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                        GitHub
+                    </div>
+                    <div class="social-trigger" id="trigTt" onclick="toggleSocial('tiktok')">
+                        <!-- TikTok -->
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>
+                        TikTok
+                    </div>
+                </div>
+
+                <!-- Social input rows (shown when toggled) -->
+                <div id="social-x" class="social-input-row">
+                    <div class="social-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.75l7.73-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
+                    <input type="text" placeholder="@yourhandle" id="social-x-val">
+                </div>
+                <div id="social-instagram" class="social-input-row">
+                    <div class="social-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div>
+                    <input type="text" placeholder="@yourhandle" id="social-instagram-val">
+                </div>
+                <div id="social-facebook" class="social-input-row">
+                    <div class="social-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></div>
+                    <input type="text" placeholder="your.name or profile link" id="social-facebook-val">
+                </div>
+                <div id="social-whatsapp" class="social-input-row">
+                    <div class="social-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></div>
+                    <input type="text" placeholder="+234 801 234 5678" id="social-whatsapp-val">
+                </div>
+                <div id="social-linkedin" class="social-input-row">
+                    <div class="social-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg></div>
+                    <input type="text" placeholder="linkedin.com/in/yourname" id="social-linkedin-val">
+                </div>
+                <div id="social-github" class="social-input-row">
+                    <div class="social-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></div>
+                    <input type="text" placeholder="github.com/yourname" id="social-github-val">
+                </div>
+                <div id="social-tiktok" class="social-input-row">
+                    <div class="social-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg></div>
+                    <input type="text" placeholder="@yourtiktok" id="social-tiktok-val">
+                </div>
+            </div>
+
             <div class="input-group">
                 <label class="eyebrow">Profile Photo</label>
                 <label class="image-dropzone">
                     <img id="avatarPreview" class="avatar-preview" src="" alt="Preview">
                     <div id="dropText">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 12px; color: var(--text-muted);">
-                            <path d="M12 4v16m8-8H4"/>
-                        </svg>
-                        <span style="font-size:14px; font-weight: 500; color:var(--text-main); display:block;">Click to upload photo</span>
-                        <span style="font-size:13px; color:var(--text-muted); display:block; margin-top:4px;">JPG, PNG (Auto-compressed)</span>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 12px; color:var(--text-muted);"><path d="M12 4v16m8-8H4"/></svg>
+                        <span style="font-size:14px; font-weight:500; color:var(--text-main); display:block;">Click to upload photo</span>
+                        <span style="font-size:13px; color:var(--text-muted); display:block; margin-top:4px;">JPG, PNG — stored at full quality</span>
                     </div>
                     <input type="file" id="regPhoto" accept="image/*" style="display:none;">
                 </label>
@@ -219,264 +499,392 @@ h1, h2, h3 { font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; }
         </div>
 
         <div class="form-nav">
-            <button class="btn btn-secondary" id="btnBack" onclick="prevStep()" style="visibility:hidden;">Back</button>
-            <button class="btn btn-primary" id="btnNext" onclick="nextStep()">Proceed</button>
+            <button class="btn btn-secondary" id="jyBtnBack" onclick="jyPrevStep()" style="visibility:hidden;">Back</button>
+            <button class="btn btn-primary" id="jyBtnNext" onclick="jyNextStep()">Proceed</button>
         </div>
     </div>
 </div>
 
+<!-- ════ SUBMITTING OVERLAY ════ -->
 <div class="fullscreen-overlay" id="submittingOverlay">
-    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom: 32px; animation: pulse 2s infinite;">
-        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-    </svg>
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom:32px; animation:pulse 2s infinite;"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
     <h2>Deploying Node.</h2>
     <p id="submitMsg">Writing to the network.</p>
 </div>
 
 <script>
-// ════════════════════════════════════════════════════
-// SUPABASE CONFIG
-// ════════════════════════════════════════════════════
+// ════ SUPABASE ════
 const SUPABASE_URL  = "https://yohndnmwvgcwadkytmix.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvaG5kbm13dmdjd2Fka3l0bWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDEyODgsImV4cCI6MjA5NDYxNzI4OH0.hkUexJ-AS1GpLJL78F7iXDv5PkwuPbShj2fsGVXuEsg";
 const { createClient } = supabase;
 const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// State
-let currentStep = 0;
-const totalSteps = 3;
-const stepNames = ["IDENTITY", "ACADEMIC", "VERIFICATION"];
+// ════ OVERLAY REFS ════
+const themeOverlay       = document.getElementById('themeOverlay');
+const authOverlay        = document.getElementById('authChoiceOverlay');
+const loginOverlay       = document.getElementById('loginOverlay');
+const createYearbookPortal = document.getElementById('createYearbookPortal');
+const joinYearbookPortal   = document.getElementById('joinYearbookPortal');
+const submittingOverlay  = document.getElementById('submittingOverlay');
+
 let studentImageBlob = null;
 
-// UI Elements
-const themeOverlay = document.getElementById('themeOverlay');
-const authOverlay = document.getElementById('authChoiceOverlay');
-const loginOverlay = document.getElementById('loginOverlay');
-const onboardingPortal = document.getElementById('onboardingPortal');
-const submittingOverlay = document.getElementById('submittingOverlay');
-const btnBack = document.getElementById('btnBack');
-const btnNext = document.getElementById('btnNext');
-
-// Toast
+// ════ TOAST ════
 function showToast(msg, type = 'success') {
     const c = document.getElementById('toastContainer');
-    const t = document.createElement('div'); 
-    t.className = `toast`; 
+    const t = document.createElement('div');
+    t.className = 'toast';
     t.innerHTML = type === 'error' ? `⚠ ${msg}` : `✓ ${msg}`;
-    c.appendChild(t); 
+    c.appendChild(t);
     setTimeout(() => t.remove(), 3800);
 }
 
-// ════════════════════════════════════════════════════
-// FLOW LOGIC
-// ════════════════════════════════════════════════════
+// ════ THEME ════
 function setTheme(theme) {
     document.body.setAttribute('data-theme', theme);
     themeOverlay.classList.remove('active');
     setTimeout(() => authOverlay.classList.add('active'), 400);
 }
 
-function showLogin() {
+// ════ AUTH CHOICE ════
+function showFlow(flow) {
     authOverlay.classList.remove('active');
-    setTimeout(() => loginOverlay.classList.add('active'), 400);
+    setTimeout(() => {
+        if (flow === 'login') {
+            loginOverlay.classList.add('active');
+        } else if (flow === 'create-yearbook') {
+            createYearbookPortal.style.display = 'block';
+        } else if (flow === 'join-yearbook') {
+            joinYearbookPortal.style.display = 'block';
+        }
+    }, 400);
 }
 
-function startOnboarding() {
-    authOverlay.classList.remove('active');
-    setTimeout(() => { onboardingPortal.style.display = 'block'; }, 400);
+function backToAuth() {
+    loginOverlay.classList.remove('active');
+    setTimeout(() => authOverlay.classList.add('active'), 400);
 }
 
-function updateView() {
-    document.querySelectorAll('.step-view').forEach((el, idx) => {
-        el.classList.toggle('active', idx === currentStep);
+// ════ SEARCH FIELD (live Supabase search) ════
+let searchTimers = {};
+async function searchField(inputId, dropId, table, column) {
+    const input = document.getElementById(inputId);
+    const drop  = document.getElementById(dropId);
+    const q = input.value.trim();
+
+    if (q.length < 2) { drop.innerHTML = ''; drop.classList.remove('open'); return; }
+
+    clearTimeout(searchTimers[inputId]);
+    drop.innerHTML = '<div class="search-loading">Searching...</div>';
+    drop.classList.add('open');
+
+    searchTimers[inputId] = setTimeout(async () => {
+        try {
+            const { data, error } = await _db.from(table).select(column).ilike(column, `%${q}%`).limit(8);
+            if (error || !data || data.length === 0) {
+                drop.innerHTML = '<div class="search-loading">No results found.</div>';
+                return;
+            }
+            drop.innerHTML = data.map(row =>
+                `<div class="search-option" onclick="selectOption('${inputId}','${dropId}','${row[column].replace(/'/g,"\\'")}')">
+                    ${row[column]}
+                </div>`
+            ).join('');
+        } catch(e) {
+            drop.innerHTML = '<div class="search-loading">Search unavailable.</div>';
+        }
+    }, 350);
+}
+
+function selectOption(inputId, dropId, value) {
+    document.getElementById(inputId).value = value;
+    document.getElementById(dropId).classList.remove('open');
+    document.getElementById(dropId).innerHTML = '';
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', e => {
+    if (!e.target.closest('.search-wrap')) {
+        document.querySelectorAll('.search-dropdown').forEach(d => {
+            d.classList.remove('open'); d.innerHTML = '';
+        });
+    }
+});
+
+// ════ SOCIALS TOGGLE ════
+const socialMap = { x:'trigX', instagram:'trigIg', facebook:'trigFb', whatsapp:'trigWa', linkedin:'trigLi', github:'trigGh', tiktok:'trigTt' };
+function toggleSocial(key) {
+    const row = document.getElementById(`social-${key}`);
+    const trig = document.getElementById(socialMap[key]);
+    const isVisible = row.classList.contains('visible');
+    row.classList.toggle('visible', !isVisible);
+    trig.classList.toggle('active', !isVisible);
+    if (!isVisible) document.getElementById(`social-${key}-val`).focus();
+}
+
+function getSocials() {
+    const obj = {};
+    Object.keys(socialMap).forEach(key => {
+        const val = (document.getElementById(`social-${key}-val`)?.value || '').trim();
+        if (val) obj[key] = val;
     });
-    document.getElementById('stepCounter').textContent = `STAGE ${currentStep + 1}/${totalSteps}`;
-    document.getElementById('stepName').textContent = stepNames[currentStep];
-    document.getElementById('progressFill').style.width = `${((currentStep + 1) / totalSteps) * 100}%`;
-    
-    btnBack.style.visibility = currentStep === 0 ? 'hidden' : 'visible';
-    btnNext.textContent = currentStep === totalSteps - 1 ? 'Deploy Profile' : 'Proceed';
+    return obj;
 }
 
-function validateStep() {
-    if (currentStep === 0) {
-        if(!document.getElementById('regFullName').value || !document.getElementById('regUsername').value) {
-            showToast('Name and Username are required.', 'error'); return false;
-        }
-    }
-    if (currentStep === 1) {
-        if(!document.getElementById('regUni').value || !document.getElementById('regPass').value) {
-            showToast('Institution and Password are required.', 'error'); return false;
-        }
-    }
-    if (currentStep === 2) {
-        if(!document.getElementById('regEmail').value) {
-            showToast('Email is required.', 'error'); return false;
-        }
-    }
-    return true;
-}
-
-async function nextStep() {
-    if (!validateStep()) return;
-    if (currentStep < totalSteps - 1) {
-        currentStep++;
-        updateView();
-    } else {
-        await submitProfile();
-    }
-}
-
-function prevStep() {
-    if (currentStep > 0) {
-        currentStep--;
-        updateView();
-    }
-}
-
-// ════════════════════════════════════════════════════
-// IMAGE HANDLING
-// ════════════════════════════════════════════════════
+// ════ IMAGE HANDLING (high quality — no downsizing) ════
 document.getElementById('regPhoto').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
+    studentImageBlob = file;
     const reader = new FileReader();
-    reader.onload = (ev) => {
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const max = 400;
-            let w = img.width, h = img.height;
-            if (w > max || h > max) { if (w > h) { h = Math.round(h * max / w); w = max; } else { w = Math.round(w * max / h); h = max; } }
-            canvas.width = w; canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
-            canvas.toBlob((blob) => {
-                studentImageBlob = blob;
-                document.getElementById('avatarPreview').src = canvas.toDataURL('image/jpeg', 0.82);
-                document.getElementById('avatarPreview').style.display = 'block';
-                document.getElementById('dropText').innerHTML = `<span style="font-size:14px; font-weight:600; color:var(--text-main);">✓ Processed</span>`;
-            }, 'image/jpeg', 0.82);
-        };
-        img.src = ev.target.result;
+    reader.onload = ev => {
+        const preview = document.getElementById('avatarPreview');
+        preview.src = ev.target.result;
+        preview.style.display = 'block';
+        document.getElementById('dropText').innerHTML = `<span style="font-size:14px; font-weight:600; color:var(--text-main);">✓ Photo selected</span>`;
     };
     reader.readAsDataURL(file);
 });
 
-// ════════════════════════════════════════════════════
-// DATABASE OPERATIONS
-// ════════════════════════════════════════════════════
+// ════ PASSWORD HASH ════
 async function hashPassword(pw) {
     const enc = new TextEncoder();
     const buf = await crypto.subtle.digest('SHA-256', enc.encode(pw + 'znode_salt_2026'));
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-async function submitProfile() {
-    onboardingPortal.style.display = 'none';
+// ════════════════════════════════
+// CREATE YEARBOOK FLOW
+// ════════════════════════════════
+let cyStep = 0;
+const cyTotalSteps = 2;
+const cyStepNames = ['DOS IDENTITY', 'DEPARTMENT'];
+
+function cyUpdateView() {
+    document.querySelectorAll('#createYearbookPortal .step-view').forEach((el, i) => {
+        el.classList.toggle('active', i === cyStep);
+    });
+    document.getElementById('cyStepCounter').textContent = `STAGE ${cyStep+1}/${cyTotalSteps}`;
+    document.getElementById('cyStepName').textContent = cyStepNames[cyStep];
+    document.getElementById('cyProgressFill').style.width = `${((cyStep+1)/cyTotalSteps)*100}%`;
+    document.getElementById('cyBtnBack').style.visibility = cyStep === 0 ? 'hidden' : 'visible';
+    document.getElementById('cyBtnNext').textContent = cyStep === cyTotalSteps - 1 ? 'Create Yearbook' : 'Proceed';
+}
+
+function cyValidateStep() {
+    if (cyStep === 0) {
+        if (!document.getElementById('cyFullName').value || !document.getElementById('cyUsername').value || !document.getElementById('cyPosition').value || !document.getElementById('cyEmail').value || !document.getElementById('cyPass').value) {
+            showToast('Please fill all fields.', 'error'); return false;
+        }
+    }
+    if (cyStep === 1) {
+        if (!document.getElementById('cyUni').value || !document.getElementById('cyDept').value || !document.getElementById('cyYear').value) {
+            showToast('University, Department and Year are required.', 'error'); return false;
+        }
+    }
+    return true;
+}
+
+function cyNextStep() {
+    if (!cyValidateStep()) return;
+    if (cyStep < cyTotalSteps - 1) { cyStep++; cyUpdateView(); }
+    else submitCreateYearbook();
+}
+function cyPrevStep() {
+    if (cyStep > 0) { cyStep--; cyUpdateView(); }
+}
+
+async function submitCreateYearbook() {
+    createYearbookPortal.style.display = 'none';
     submittingOverlay.classList.add('active');
     const msg = document.getElementById('submitMsg');
-
     try {
-        const username = document.getElementById('regUsername').value.trim();
-        const email = document.getElementById('regEmail').value.trim();
-        const rawPass = document.getElementById('regPass').value;
-        const uniStr = document.getElementById('regUni').value.trim();
-
-        // 1. Check Username
-        msg.textContent = "Verifying network handle...";
+        msg.textContent = 'Verifying handle...';
+        const username = document.getElementById('cyUsername').value.trim();
         const { data: existing } = await _db.from('students').select('id').eq('username', username).maybeSingle();
         if (existing) throw new Error(`@${username} is already taken.`);
 
-        // 2. Hash & Upload
-        msg.textContent = "Securing credentials...";
-        const pwdHash = await hashPassword(rawPass);
-        
+        msg.textContent = 'Securing credentials...';
+        const pwdHash = await hashPassword(document.getElementById('cyPass').value);
+
+        msg.textContent = 'Creating yearbook...';
+        const payload = {
+            username,
+            full_name: document.getElementById('cyFullName').value.trim(),
+            email: document.getElementById('cyEmail').value.trim(),
+            password_hash: pwdHash,
+            department: document.getElementById('cyDept').value.trim().toLowerCase(),
+            faculty: document.getElementById('cyFaculty').value.trim().toLowerCase(),
+            institution: document.getElementById('cyUni').value.trim().toLowerCase(),
+            graduation_year: parseInt(document.getElementById('cyYear').value),
+            role: document.getElementById('cyPosition').value.trim(),
+            is_dos: true,
+            theme: document.body.getAttribute('data-theme') || 'dark',
+            is_verified: false
+        };
+
+        const { data: dos, error } = await _db.from('students').insert(payload).select().maybeSingle();
+        if (error) throw new Error(error.message);
+
+        localStorage.setItem('znodeStudentProfile', JSON.stringify(dos));
+        document.querySelector('#submittingOverlay h2').textContent = 'Yearbook Created ✓';
+        msg.textContent = 'Redirecting to your dashboard...';
+        setTimeout(() => { window.location.href = 'app.html'; }, 1500);
+    } catch(err) {
+        submittingOverlay.classList.remove('active');
+        createYearbookPortal.style.display = 'block';
+        showToast(err.message, 'error');
+    }
+}
+
+// ════════════════════════════════
+// JOIN YEARBOOK FLOW
+// ════════════════════════════════
+let jyStep = 0;
+const jyTotalSteps = 3;
+const jyStepNames = ['YOUR IDENTITY', 'YOUR INSTITUTION', 'YOUR PRESENCE'];
+
+function jyUpdateView() {
+    document.querySelectorAll('#joinYearbookPortal .step-view').forEach((el, i) => {
+        el.classList.toggle('active', i === jyStep);
+    });
+    document.getElementById('jyStepCounter').textContent = `STAGE ${jyStep+1}/${jyTotalSteps}`;
+    document.getElementById('jyStepName').textContent = jyStepNames[jyStep];
+    document.getElementById('jyProgressFill').style.width = `${((jyStep+1)/jyTotalSteps)*100}%`;
+    document.getElementById('jyBtnBack').style.visibility = jyStep === 0 ? 'hidden' : 'visible';
+    document.getElementById('jyBtnNext').textContent = jyStep === jyTotalSteps - 1 ? 'Deploy Profile' : 'Proceed';
+}
+
+function jyValidateStep() {
+    if (jyStep === 0) {
+        if (!document.getElementById('jyFullName').value || !document.getElementById('jyUsername').value || !document.getElementById('jyEmail').value || !document.getElementById('jyPass').value) {
+            showToast('Name, Username, Email and Password are required.', 'error'); return false;
+        }
+    }
+    if (jyStep === 1) {
+        if (!document.getElementById('jyUni').value || !document.getElementById('jyDept').value || !document.getElementById('jyYear').value) {
+            showToast('University, Department and Year are required.', 'error'); return false;
+        }
+    }
+    return true;
+}
+
+async function jyNextStep() {
+    if (!jyValidateStep()) return;
+
+    // Check if yearbook exists for this dept + year on step 1
+    if (jyStep === 1) {
+        const dept = document.getElementById('jyDept').value.trim().toLowerCase();
+        const year = parseInt(document.getElementById('jyYear').value);
+        const uni  = document.getElementById('jyUni').value.trim().toLowerCase();
+        if (dept && year && uni) {
+            const { data: yb } = await _db.from('students')
+                .select('id')
+                .eq('is_dos', true)
+                .ilike('department', dept)
+                .ilike('institution', uni)
+                .eq('graduation_year', year)
+                .maybeSingle();
+            if (!yb) {
+                showToast('No yearbook found for this department & year. Ask your DOS to create one first, or create it yourself!', 'error');
+                return;
+            }
+        }
+    }
+
+    if (jyStep < jyTotalSteps - 1) { jyStep++; jyUpdateView(); }
+    else submitJoinYearbook();
+}
+
+function jyPrevStep() {
+    if (jyStep > 0) { jyStep--; jyUpdateView(); }
+}
+
+async function submitJoinYearbook() {
+    joinYearbookPortal.style.display = 'none';
+    submittingOverlay.classList.add('active');
+    const msg = document.getElementById('submitMsg');
+    try {
+        const username = document.getElementById('jyUsername').value.trim();
+        msg.textContent = 'Verifying handle...';
+        const { data: existing } = await _db.from('students').select('id').eq('username', username).maybeSingle();
+        if (existing) throw new Error(`@${username} is already taken.`);
+
+        msg.textContent = 'Securing credentials...';
+        const pwdHash = await hashPassword(document.getElementById('jyPass').value);
+
         let avatarUrl = null;
         if (studentImageBlob) {
-            msg.textContent = "Uploading avatar...";
+            msg.textContent = 'Uploading photo...';
             const fileName = `${username}_${Date.now()}.jpg`;
-            await _db.storage.from('avatars').upload(fileName, studentImageBlob, { contentType: 'image/jpeg', upsert: true });
+            await _db.storage.from('avatars').upload(fileName, studentImageBlob, { contentType: studentImageBlob.type || 'image/jpeg', upsert: true });
             avatarUrl = _db.storage.from('avatars').getPublicUrl(fileName).data.publicUrl;
         }
 
-        // 3. Resolve Institution
-        msg.textContent = "Linking institution data...";
-        let instId = null;
-        const { data: instRow } = await _db.from('institutions').select('id').ilike('short_name', uniStr).maybeSingle();
-        if (instRow) instId = instRow.id;
+        const suffix = (document.getElementById('jyMatric').value || username).replace(/[^a-zA-Z0-9]/g,'').slice(-6).toUpperCase();
+        const uni = document.getElementById('jyUni').value.trim();
+        const passportId = `ZNP-${uni.toUpperCase().replace(/\s/g,'').slice(0,8)}-${document.getElementById('jyYear').value}-${suffix}`;
 
-        // 4. Generate Passport
-        const suffix = (document.getElementById('regMatric').value || username).replace(/[^a-zA-Z0-9]/g,'').slice(-6).toUpperCase();
-        const passportId = `ZNP-${uniStr.toUpperCase() || 'ZND'}-2026-${suffix}`;
-
-        // 5. Insert
-        msg.textContent = "Writing to grid...";
+        msg.textContent = 'Writing to the grid...';
         const payload = {
-            username: username,
-            full_name: document.getElementById('regFullName').value.trim(),
-            email: email,
+            username,
+            full_name: document.getElementById('jyFullName').value.trim(),
+            email: document.getElementById('jyEmail').value.trim(),
             password_hash: pwdHash,
             avatar_url: avatarUrl,
-            institution_id: instId,
-            faculty: uniStr,
-            department: document.getElementById('regDept').value.trim(),
-            matric_number: document.getElementById('regMatric').value.trim(),
-            eternal_statement: document.getElementById('regBio').value.trim(),
+            institution: uni.toLowerCase(),
+            faculty: document.getElementById('jyFaculty').value.trim().toLowerCase(),
+            department: document.getElementById('jyDept').value.trim().toLowerCase(),
+            graduation_year: parseInt(document.getElementById('jyYear').value),
+            matric_number: document.getElementById('jyMatric').value.trim(),
+            eternal_statement: document.getElementById('jyQuote').value.trim(),
             znode_passport_id: passportId,
             theme: document.body.getAttribute('data-theme') || 'dark',
-            socials: { x: document.getElementById('regSocial').value.trim() },
+            socials: getSocials(),
+            is_dos: false,
             is_verified: false
         };
 
         const { data: student, error } = await _db.from('students').insert(payload).select().maybeSingle();
         if (error) throw new Error(error.message);
 
-        // Success
         localStorage.setItem('znodeStudentProfile', JSON.stringify(student));
         document.querySelector('#submittingOverlay h2').textContent = 'Node Deployed ✓';
-        msg.textContent = 'Redirecting to Dashboard...';
+        msg.textContent = 'Redirecting to dashboard...';
         setTimeout(() => { window.location.href = 'app.html'; }, 1500);
-
-    } catch (err) {
+    } catch(err) {
         submittingOverlay.classList.remove('active');
-        onboardingPortal.style.display = 'block';
+        joinYearbookPortal.style.display = 'block';
         showToast(err.message, 'error');
     }
 }
 
+// ════ LOGIN ════
 async function processLogin() {
     const id = document.getElementById('loginId').value.trim();
     const pw = document.getElementById('loginPass').value;
     const btn = document.getElementById('loginBtn');
-    
     if (!id || !pw) return showToast('Enter credentials.', 'error');
     btn.textContent = 'Authenticating...'; btn.disabled = true;
-
     try {
         const pwdHash = await hashPassword(pw);
         let student = null;
-        
         const { data: byUser } = await _db.from('students').select('*').eq('username', id).eq('password_hash', pwdHash).maybeSingle();
         student = byUser;
         if (!student) {
             const { data: byEmail } = await _db.from('students').select('*').eq('email', id).eq('password_hash', pwdHash).maybeSingle();
             student = byEmail;
         }
-
         if (!student) throw new Error('Invalid credentials.');
-
         localStorage.setItem('znodeStudentProfile', JSON.stringify(student));
         btn.textContent = 'Success ✓';
         setTimeout(() => { window.location.href = 'app.html'; }, 1000);
-
-    } catch (err) {
+    } catch(err) {
         showToast(err.message, 'error');
         btn.textContent = 'Authenticate'; btn.disabled = false;
     }
 }
 
-// Redirect if logged in
 if (localStorage.getItem('znodeStudentProfile')) {
     window.location.href = 'app.html';
 }
