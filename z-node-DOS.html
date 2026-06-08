@@ -1,0 +1,1911 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Z-Node | Director of Socials</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          brand: { 900: '#061416', 800: '#0a2225', 700: '#113136', 600: '#1a4a50', 100: '#e6f0f1', 50: '#f4f8f8' },
+          accent: { 500: '#10B981', 600: '#059669', 400: '#34d399' },
+          dos: { 500: '#6366f1', 600: '#4f46e5', 400: '#818cf8', 100: '#ede9fe' }
+        },
+        fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
+      }
+    }
+  }
+</script>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
+body.light { background: #F0F4F8; color: #1e293b; }
+body.dark  { background: #080E1A; color: #f1f5f9; }
+
+/* ── Layout ── */
+.sidebar { width: 260px; flex-shrink: 0; background: #061416; height: 100vh; display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); overflow-y: auto; }
+.main-content { flex: 1; overflow-y: auto; }
+
+/* ── Nav items ── */
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.18s; margin-bottom: 2px; }
+.nav-item:hover { background: rgba(255,255,255,0.04); color: #94a3b8; }
+.nav-item.active { background: rgba(16,185,129,0.12); color: #10B981; border-left: 3px solid #10B981; border-radius: 0 10px 10px 0; }
+.nav-item .nav-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; background: rgba(255,255,255,0.04); }
+.nav-item.active .nav-icon { background: rgba(16,185,129,0.15); }
+
+/* ── Cards ── */
+.card { border-radius: 16px; transition: all 0.2s; }
+.light .card { background: #ffffff; border: 1px solid #e8edf2; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.dark .card  { background: #111827; border: 1px solid #1f2937; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+
+.stat-card { border-radius: 16px; padding: 22px 24px; }
+.light .stat-card { background: #fff; border: 1px solid #e8edf2; }
+.dark .stat-card  { background: #111827; border: 1px solid #1f2937; }
+
+/* ── Inputs ── */
+.input-field { width: 100%; padding: 11px 15px; border-radius: 10px; font-size: 13px; font-weight: 500; outline: none; transition: all 0.2s; font-family: 'Plus Jakarta Sans', sans-serif; }
+.light .input-field { border: 1px solid #dde3ea; background: #fff; color: #0f172a; }
+.dark .input-field  { border: 1px solid #2d3748; background: #1a2234; color: #f1f5f9; }
+.input-field:focus  { border-color: #10B981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+select.input-field  { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+
+/* ── Buttons ── */
+.btn { padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.18s; border: none; font-family: 'Plus Jakarta Sans', sans-serif; }
+.btn-green  { background: #10B981; color: #fff; }
+.btn-green:hover  { background: #059669; transform: translateY(-1px); }
+.btn-dark   { background: #0a2225; color: #fff; }
+.btn-dark:hover   { background: #113136; transform: translateY(-1px); }
+.btn-danger { background: transparent; color: #ef4444; border: 1px solid #ef4444; }
+.btn-danger:hover { background: #ef4444; color: #fff; }
+.btn-ghost  { background: transparent; border: 1px solid #e2e8f0; color: #64748b; }
+.btn-ghost:hover  { background: #f8fafc; color: #1e293b; }
+.dark .btn-ghost  { border-color: #2d3748; color: #94a3b8; }
+.dark .btn-ghost:hover { background: #1e293b; color: #f1f5f9; }
+.btn-indigo { background: #6366f1; color: #fff; }
+.btn-indigo:hover { background: #4f46e5; transform: translateY(-1px); }
+
+/* ── Badges ── */
+.badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
+.badge-green   { background: #d1fae5; color: #065f46; }
+.badge-amber   { background: #fef3c7; color: #92400e; }
+.badge-red     { background: #fee2e2; color: #991b1b; }
+.badge-indigo  { background: #ede9fe; color: #4338ca; }
+.badge-slate   { background: #f1f5f9; color: #475569; }
+.dark .badge-green  { background: rgba(16,185,129,0.15); color: #34d399; }
+.dark .badge-amber  { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.dark .badge-red    { background: rgba(239,68,68,0.15); color: #f87171; }
+.dark .badge-indigo { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+.dark .badge-slate  { background: rgba(148,163,184,0.1); color: #94a3b8; }
+
+/* ── Modal ── */
+.modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(6,20,22,0.6); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.modal-box { background: #fff; border-radius: 20px; box-shadow: 0 24px 64px rgba(0,0,0,0.18); max-height: 90vh; overflow-y: auto; animation: modal-in 0.22s cubic-bezier(0.16,1,0.3,1); }
+.dark .modal-box { background: #111827; border: 1px solid #1f2937; }
+@keyframes modal-in { from { opacity:0; transform: scale(0.95) translateY(12px); } to { opacity:1; transform: scale(1) translateY(0); } }
+
+/* ── Table ── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th { padding: 11px 16px; text-align: left; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #94a3b8; }
+.data-table td { padding: 13px 16px; border-top: 1px solid #f1f5f9; }
+.dark .data-table td { border-color: #1f2937; }
+.data-table tr:hover td { background: rgba(16,185,129,0.03); }
+
+/* ── Spinner ── */
+.spinner { border: 3px solid rgba(16,185,129,0.2); border-top-color: #10B981; border-radius: 50%; width: 22px; height: 22px; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Progress bar ── */
+.progress-track { background: #e8edf2; border-radius: 999px; height: 6px; overflow: hidden; }
+.dark .progress-track { background: #1f2937; }
+.progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #10B981, #34d399); transition: width 0.6s cubic-bezier(0.16,1,0.3,1); }
+
+/* ── Toast ── */
+#toast { position: fixed; bottom: 24px; right: 24px; z-index: 9999; }
+@keyframes toast-in { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+.toast-show { animation: toast-in 0.25s ease; }
+
+/* ── Code pill ── */
+.code-pill { font-family: 'JetBrains Mono', monospace; background: #f0f4f8; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #0a2225; border: 1px dashed #cbd5e1; display: inline-flex; align-items: center; gap: 8px; }
+.dark .code-pill { background: #1a2234; color: #10B981; border-color: #2d3748; }
+
+/* ── Leaderboard rank ── */
+.rank-1 { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+.rank-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); }
+.rank-3 { background: linear-gradient(135deg, #b45309, #d97706); }
+
+/* ── Section header ── */
+.section-head { font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+.dark .section-head { color: #f1f5f9; }
+.section-sub { font-size: 13px; color: #64748b; margin-top: 4px; font-weight: 500; }
+
+/* ── DOS identity banner ── */
+.dos-banner { background: linear-gradient(135deg, #061416 0%, #0a2225 50%, #113136 100%); border-radius: 16px; padding: 24px 28px; position: relative; overflow: hidden; }
+.dos-banner::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%); border-radius: 50%; }
+.dos-banner::after  { content: ''; position: absolute; bottom: -20px; left: 60px; width: 100px; height: 100px; background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%); border-radius: 50%; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.dark ::-webkit-scrollbar-thumb { background: #2d3748; }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body class="light">
+
+<!-- ══════════════════════════════════════ -->
+<!-- CONFIG MODAL                          -->
+<!-- ══════════════════════════════════════ -->
+<div id="config-modal" class="modal-overlay hidden">
+  <div class="modal-box p-8 w-full max-w-sm">
+    <div class="w-10 h-10 bg-brand-800 rounded-xl flex items-center justify-center text-white font-black text-xl mb-5">Z</div>
+    <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-1">Z-Node DOS Portal</h2>
+    <p class="text-xs text-slate-500 mb-6">Connect to your Supabase project to continue.</p>
+    <div class="space-y-3 mb-5">
+      <input id="cfg-url" type="url" class="input-field" placeholder="Supabase Project URL">
+      <input id="cfg-key" type="password" class="input-field" placeholder="Anon Public Key">
+    </div>
+    <button onclick="saveConfig()" class="btn btn-dark w-full">Connect</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- LOADING OVERLAY                       -->
+<!-- ══════════════════════════════════════ -->
+<div id="loading-overlay" class="modal-overlay hidden" style="z-index:2000">
+  <div class="modal-box p-8 text-center min-w-[180px]">
+    <div class="spinner mx-auto mb-4"></div>
+    <p id="loading-text" class="text-sm font-semibold text-slate-700 dark:text-slate-200">Loading...</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- LOGIN SCREEN                          -->
+<!-- ══════════════════════════════════════ -->
+<div id="screen-login" class="min-h-screen flex items-center justify-center p-4 hidden">
+  <div class="w-full max-w-md">
+    <!-- Brand header -->
+    <div class="text-center mb-8">
+      <div class="w-14 h-14 bg-brand-800 rounded-2xl flex items-center justify-center text-white font-black text-3xl mx-auto mb-4 shadow-lg">Z</div>
+      <h1 class="text-2xl font-black text-slate-900 dark:text-white">DOS Portal</h1>
+      <p class="text-sm text-slate-500 mt-1">Director of Socials · Department Dashboard</p>
+    </div>
+    <div class="card p-8">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Username</label>
+          <input id="login-username" type="text" class="input-field" placeholder="your_username">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Password</label>
+          <input id="login-password" type="password" class="input-field" placeholder="••••••••" onkeydown="if(event.key==='Enter') handleLogin()">
+        </div>
+        <p id="login-error" class="text-red-500 text-xs font-semibold hidden text-center"></p>
+        <button onclick="handleLogin()" class="btn btn-dark w-full mt-2" style="padding:13px;">Sign In</button>
+      </div>
+      <p class="text-center text-xs text-slate-400 mt-5">Not a DOS yet? <a href="admin-onboarding.html" class="text-accent-500 font-bold hover:underline">Register here</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MAIN DASHBOARD                        -->
+<!-- ══════════════════════════════════════ -->
+<div id="screen-dashboard" class="hidden h-screen flex flex-col">
+
+  <!-- TOP HEADER -->
+  <header class="flex-shrink-0 h-14 flex items-center justify-between px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#080E1A] z-10">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 bg-brand-800 rounded-lg flex items-center justify-center text-white font-black text-sm">Z</div>
+      <div class="w-px h-5 bg-slate-200 dark:bg-slate-700"></div>
+      <div>
+        <span id="hdr-dept" class="text-sm font-bold text-slate-900 dark:text-white"></span>
+        <span class="mx-2 text-slate-300 dark:text-slate-600">·</span>
+        <span id="hdr-inst" class="text-xs text-slate-400 font-semibold"></span>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <button onclick="toggleTheme()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-lg transition-colors">🌙</button>
+      <div class="flex items-center gap-3">
+        <div id="hdr-avatar" class="w-8 h-8 rounded-full bg-brand-800 text-white flex items-center justify-center text-xs font-black"></div>
+        <div class="hidden md:block">
+          <p id="hdr-name" class="text-xs font-bold text-slate-800 dark:text-slate-200"></p>
+          <button onclick="logout()" class="text-[10px] text-slate-400 hover:text-red-500 font-semibold transition-colors">Sign out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex flex-1 overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <!-- DOS identity card -->
+      <div class="p-4 border-b border-white/5">
+        <div class="dos-banner">
+          <div class="text-[9px] font-black text-emerald-400/70 uppercase tracking-[0.15em] mb-1">Director of Socials</div>
+          <div id="sb-name" class="text-white font-bold text-sm leading-tight"></div>
+          <div id="sb-dept" class="text-slate-400 text-xs mt-0.5 font-mono"></div>
+          <div class="mt-3 flex items-center gap-2">
+            <div id="sb-referral-badge" class="text-[9px] font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-md">REF: <span id="sb-ref-code">—</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nav -->
+      <nav class="p-3 flex-1">
+        <div class="text-[9px] font-black text-slate-600 uppercase tracking-[0.15em] px-3 mb-3 mt-1">Navigation</div>
+        <div class="nav-item active" onclick="navTo('overview')" data-section="overview">
+          <div class="nav-icon">🏠</div><span>Overview</span>
+        </div>
+        <div class="nav-item" onclick="navTo('students')" data-section="students">
+          <div class="nav-icon">👥</div><span>Students</span>
+          <span id="nb-pending" class="ml-auto text-[10px] font-black bg-amber-500 text-white px-1.5 rounded-md hidden"></span>
+        </div>
+        <div class="nav-item" onclick="navTo('codes')" data-section="codes">
+          <div class="nav-icon">🎟️</div><span>Access Codes</span>
+          <span id="nb-codes" class="ml-auto text-[10px] font-black bg-emerald-500 text-white px-1.5 rounded-md hidden"></span>
+        </div>
+        <div class="nav-item" onclick="navTo('yearbook')" data-section="yearbook">
+          <div class="nav-icon">📖</div><span>Yearbook</span>
+        </div>
+        <div class="nav-item" onclick="navTo('analytics')" data-section="analytics">
+          <div class="nav-icon">📊</div><span>Analytics</span>
+        </div>
+        <div class="nav-item" onclick="navTo('broadcast')" data-section="broadcast">
+          <div class="nav-icon">📣</div><span>Broadcast</span>
+        </div>
+        <div class="nav-item" onclick="navTo('referrals')" data-section="referrals">
+          <div class="nav-icon">🔗</div><span>Referrals</span>
+        </div>
+        <div class="nav-item" onclick="navTo('leaderboard')" data-section="leaderboard">
+          <div class="nav-icon">🏆</div><span>Leaderboard</span>
+        </div>
+        <div class="nav-item" onclick="navTo('support')" data-section="support">
+          <div class="nav-icon">🛟</div><span>Support</span>
+        </div>
+      </nav>
+
+      <!-- Payout summary -->
+      <div class="p-4 border-t border-white/5">
+        <div class="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-2 px-1">Earnings</div>
+        <div class="flex justify-between text-xs px-1 mb-1">
+          <span class="text-slate-500 font-semibold">Pending</span>
+          <span id="sb-pending-earn" class="font-black text-amber-400">₦0</span>
+        </div>
+        <div class="flex justify-between text-xs px-1">
+          <span class="text-slate-500 font-semibold">Total Earned</span>
+          <span id="sb-total-earn" class="font-black text-emerald-400">₦0</span>
+        </div>
+        <button onclick="navTo('support')" class="mt-3 w-full text-[10px] font-bold text-slate-500 hover:text-emerald-400 transition-colors text-left px-1">Request payout →</button>
+      </div>
+    </aside>
+
+    <!-- MAIN VIEWPORT -->
+    <main class="main-content p-8 transition-colors bg-slate-50 dark:bg-[#080E1A]">
+
+      <!-- ── SECTION: OVERVIEW ── -->
+      <div id="sec-overview">
+        <div class="mb-6">
+          <h2 class="section-head">Good to see you, <span id="ov-name" class="text-emerald-500"></span> 👋</h2>
+          <p class="section-sub">Here's what's happening in your department today.</p>
+        </div>
+
+        <!-- Stats row -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="stat-card">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Total Students</p>
+            <p id="ov-total" class="text-3xl font-black text-slate-900 dark:text-white">0</p>
+            <p class="text-[11px] text-slate-400 mt-1 font-semibold">in your department</p>
+          </div>
+          <div class="stat-card">
+            <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-2">Yearbook Access</p>
+            <p id="ov-paid" class="text-3xl font-black text-emerald-600 dark:text-emerald-400">0</p>
+            <p class="text-[11px] text-slate-400 mt-1 font-semibold">students activated</p>
+          </div>
+          <div class="stat-card">
+            <p class="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-2">Pending Verification</p>
+            <p id="ov-pending-v" class="text-3xl font-black text-amber-600 dark:text-amber-400">0</p>
+            <p class="text-[11px] text-slate-400 mt-1 font-semibold">awaiting review</p>
+          </div>
+          <div class="stat-card" style="background: linear-gradient(135deg, #061416, #0a2225); border: none;">
+            <p class="text-[10px] font-bold text-brand-100 uppercase tracking-wider mb-2">Codes Available</p>
+            <p id="ov-codes" class="text-3xl font-black text-white">0</p>
+            <p class="text-[11px] text-slate-400 mt-1 font-semibold">unused access codes</p>
+          </div>
+        </div>
+
+        <!-- Revenue + conversion -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+          <!-- Revenue block -->
+          <div class="card p-6 lg:col-span-1">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-4">Revenue Summary</p>
+            <div class="space-y-4">
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-slate-500 font-semibold">Total Revenue</span>
+                <span id="ov-rev-total" class="font-black text-slate-900 dark:text-white">₦0</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-slate-500 font-semibold">Your Share (20%)</span>
+                <span id="ov-rev-share" class="font-black text-emerald-500">₦0</span>
+              </div>
+              <div class="h-px bg-slate-100 dark:bg-slate-800"></div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-slate-500 font-semibold">Pending Payout</span>
+                <span id="ov-rev-pending" class="font-black text-amber-500">₦0</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-slate-500 font-semibold">Next Payout</span>
+                <span id="ov-rev-next" class="font-black text-slate-600 dark:text-slate-300 text-sm">—</span>
+              </div>
+            </div>
+            <button onclick="navTo('support')" class="btn btn-ghost w-full mt-5 text-xs">Request Early Payout</button>
+          </div>
+
+          <!-- Conversion funnel -->
+          <div class="card p-6 lg:col-span-2">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-4">Adoption Funnel</p>
+            <div id="ov-funnel" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <!-- Recent activity -->
+        <div class="card p-6">
+          <div class="flex items-center justify-between mb-4">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Recent Activity</p>
+            <button onclick="navTo('students')" class="text-xs text-emerald-500 font-bold hover:underline">View all →</button>
+          </div>
+          <div id="ov-recent" class="space-y-3">
+            <div class="text-center py-8 text-slate-400 text-sm">No recent activity yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SECTION: STUDENTS ── -->
+      <div id="sec-students" class="hidden">
+        <div class="flex items-end justify-between mb-6">
+          <div>
+            <h2 class="section-head">Students</h2>
+            <p class="section-sub">All students registered in your department.</p>
+          </div>
+          <div class="flex gap-3">
+            <input id="stu-search" type="text" placeholder="Search name or matric…" oninput="filterStudents()" class="input-field" style="width:220px; padding:9px 14px;">
+            <select id="stu-filter" onchange="filterStudents()" class="input-field" style="width:140px; padding:9px 14px;">
+              <option value="ALL">All Students</option>
+              <option value="VERIFIED">Verified</option>
+              <option value="PENDING">Pending</option>
+              <option value="REJECTED">Rejected</option>
+              <option value="YEARBOOK">Yearbook Access</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card overflow-hidden">
+          <table class="data-table">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-900/50">
+                <th>Student</th>
+                <th>Matric No.</th>
+                <th>Level</th>
+                <th>Verification</th>
+                <th>Yearbook</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="students-tbody">
+              <tr><td colspan="6" class="text-center py-12 text-slate-400 text-sm">Loading students...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── SECTION: ACCESS CODES ── -->
+      <div id="sec-codes" class="hidden">
+        <div class="flex items-end justify-between mb-6">
+          <div>
+            <h2 class="section-head">Access Codes</h2>
+            <p class="section-sub">Buy and manage yearbook access codes for your department.</p>
+          </div>
+          <button onclick="openBuyCodesModal()" class="btn btn-green flex items-center gap-2">
+            <span>+ Buy Codes</span>
+          </button>
+        </div>
+
+        <!-- Code stats -->
+        <div class="grid grid-cols-3 gap-4 mb-6">
+          <div class="stat-card text-center">
+            <p id="codes-unused" class="text-3xl font-black text-emerald-500">0</p>
+            <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-1">Unused</p>
+          </div>
+          <div class="stat-card text-center">
+            <p id="codes-used" class="text-3xl font-black text-slate-700 dark:text-slate-300">0</p>
+            <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-1">Activated</p>
+          </div>
+          <div class="stat-card text-center">
+            <p id="codes-total" class="text-3xl font-black text-brand-700 dark:text-brand-100">0</p>
+            <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-1">Total Purchased</p>
+          </div>
+        </div>
+
+        <!-- Codes table -->
+        <div class="card overflow-hidden">
+          <table class="data-table">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-900/50">
+                <th>Access Code</th>
+                <th>Status</th>
+                <th>Assigned To</th>
+                <th>Purchased</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="codes-tbody">
+              <tr><td colspan="5" class="text-center py-12 text-slate-400 text-sm">No codes purchased yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── SECTION: YEARBOOK ── -->
+      <div id="sec-yearbook" class="hidden">
+        <div class="mb-6">
+          <h2 class="section-head">Yearbook Management</h2>
+          <p class="section-sub">Configure your department's yearbook details, theme and deadlines.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Department info -->
+          <div class="card p-6">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-4">Department Info</p>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Department Name</label>
+                <input id="yb-dept-name" type="text" class="input-field" placeholder="e.g. Computer Science">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Graduating Class Year</label>
+                <input id="yb-class-year" type="number" class="input-field" placeholder="e.g. 2025">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Class Motto</label>
+                <input id="yb-motto" type="text" class="input-field" placeholder="e.g. Excellence in All We Do">
+              </div>
+            </div>
+          </div>
+
+          <!-- Theme & deadlines -->
+          <div class="card p-6">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-4">Theme & Deadlines</p>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Yearbook Theme</label>
+                <select id="yb-theme" class="input-field">
+                  <option value="">Select theme...</option>
+                  <option>Legacy of Excellence</option>
+                  <option>Rising Stars</option>
+                  <option>New Horizons</option>
+                  <option>Beyond Borders</option>
+                  <option>Custom</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Photo Submission Deadline</label>
+                <input id="yb-photo-deadline" type="date" class="input-field">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Payment Deadline</label>
+                <input id="yb-pay-deadline" type="date" class="input-field">
+              </div>
+            </div>
+          </div>
+
+          <!-- Announcement -->
+          <div class="card p-6 lg:col-span-2">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-4">Pinned Announcement</p>
+            <textarea id="yb-announcement" class="input-field" rows="3" placeholder="e.g. Picture submission closes Friday. Payment deadline is June 20." style="resize:none;"></textarea>
+            <button onclick="saveYearbookSettings()" class="btn btn-green mt-4">Save Yearbook Settings</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SECTION: ANALYTICS ── -->
+      <div id="sec-analytics" class="hidden">
+        <div class="mb-6">
+          <h2 class="section-head">Department Analytics</h2>
+          <p class="section-sub">Track adoption, registration, and payment progress.</p>
+        </div>
+
+        <!-- Funnel metrics -->
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+          <div class="stat-card text-center">
+            <p id="an-eligible" class="text-2xl font-black text-slate-900 dark:text-white">0</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Eligible</p>
+          </div>
+          <div class="stat-card text-center">
+            <p id="an-registered" class="text-2xl font-black text-slate-700 dark:text-slate-300">0</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Registered</p>
+          </div>
+          <div class="stat-card text-center">
+            <p id="an-verified" class="text-2xl font-black text-emerald-600">0</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Verified</p>
+          </div>
+          <div class="stat-card text-center">
+            <p id="an-paid-stu" class="text-2xl font-black text-indigo-600">0</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Paid</p>
+          </div>
+          <div class="stat-card text-center" style="background: linear-gradient(135deg,#061416,#0a2225); border:none;">
+            <p id="an-conversion" class="text-2xl font-black text-emerald-400">0%</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Conversion</p>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="card p-6">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-4">Verification Breakdown</p>
+            <div class="relative h-56 flex items-center justify-center">
+              <canvas id="an-donut-chart"></canvas>
+            </div>
+          </div>
+          <div class="card p-6">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-4">Adoption Funnel</p>
+            <div class="relative h-56">
+              <canvas id="an-bar-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SECTION: BROADCAST ── -->
+      <div id="sec-broadcast" class="hidden">
+        <div class="mb-6">
+          <h2 class="section-head">Broadcast Center</h2>
+          <p class="section-sub">Send in-app announcements to your department students.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="card p-6">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-4">New Announcement</p>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Title</label>
+                <input id="bc-title" type="text" class="input-field" placeholder="e.g. Payment Reminder">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Message</label>
+                <textarea id="bc-message" class="input-field" rows="4" placeholder="Type your message here..." style="resize:none;"></textarea>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Target Audience</label>
+                <select id="bc-audience" class="input-field">
+                  <option value="ALL">All Department Students</option>
+                  <option value="UNPAID">Students Without Yearbook Access</option>
+                  <option value="UNVERIFIED">Unverified Students</option>
+                </select>
+              </div>
+              <button onclick="sendBroadcast()" class="btn btn-green w-full">📣 Send Announcement</button>
+            </div>
+          </div>
+
+          <div class="card p-6">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-4">Broadcast History</p>
+            <div id="bc-history" class="space-y-3">
+              <p class="text-sm text-slate-400 text-center py-8">No broadcasts sent yet.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SECTION: REFERRALS ── -->
+      <div id="sec-referrals" class="hidden">
+        <div class="mb-6">
+          <h2 class="section-head">Referral Program</h2>
+          <p class="section-sub">Invite other DOS and earn when they onboard paying students.</p>
+        </div>
+
+        <!-- Referral link card -->
+        <div class="card p-6 mb-6">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Your Referral Link</p>
+          <div class="flex gap-3">
+            <div class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-mono text-xs text-slate-600 dark:text-slate-400 overflow-hidden">
+              <span id="ref-link-display">Loading...</span>
+            </div>
+            <button onclick="copyReferralLink()" class="btn btn-green px-5 text-xs">Copy</button>
+          </div>
+        </div>
+
+        <!-- Referral stats -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="stat-card text-center">
+            <p id="ref-invited" class="text-3xl font-black text-slate-900 dark:text-white">0</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Invited</p>
+          </div>
+          <div class="stat-card text-center">
+            <p id="ref-accepted" class="text-3xl font-black text-emerald-500">0</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Signed Up</p>
+          </div>
+          <div class="stat-card text-center">
+            <p id="ref-active" class="text-3xl font-black text-indigo-500">0</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Active (1+ paid)</p>
+          </div>
+          <div class="stat-card text-center" style="background:linear-gradient(135deg,#061416,#0a2225); border:none;">
+            <p id="ref-earnings" class="text-3xl font-black text-emerald-400">₦0</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Referral Earnings</p>
+          </div>
+        </div>
+
+        <!-- Referral table -->
+        <div class="card overflow-hidden">
+          <table class="data-table">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-900/50">
+                <th>Referred DOS</th>
+                <th>Department</th>
+                <th>Signed Up</th>
+                <th>Paying Students</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="ref-tbody">
+              <tr><td colspan="5" class="text-center py-10 text-slate-400 text-sm">No referrals yet. Share your link!</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── SECTION: LEADERBOARD ── -->
+      <div id="sec-leaderboard" class="hidden">
+        <div class="mb-6">
+          <h2 class="section-head">Leaderboard</h2>
+          <p class="section-sub">See how your department ranks across the network.</p>
+        </div>
+
+        <div class="flex gap-3 mb-6">
+          <button onclick="setLbTab('dept')" class="btn btn-green lb-tab" data-tab="dept">Top Departments</button>
+          <button onclick="setLbTab('dos-state')" class="btn btn-ghost lb-tab" data-tab="dos-state">Top DOS · State</button>
+          <button onclick="setLbTab('dos-national')" class="btn btn-ghost lb-tab" data-tab="dos-national">Top DOS · National</button>
+        </div>
+
+        <div class="card overflow-hidden">
+          <table class="data-table">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-900/50">
+                <th style="width:60px">Rank</th>
+                <th id="lb-col-name">Department</th>
+                <th>Institution</th>
+                <th>Students</th>
+                <th>Revenue</th>
+                <th>Completion</th>
+              </tr>
+            </thead>
+            <tbody id="lb-tbody">
+              <tr><td colspan="6" class="text-center py-10 text-slate-400 text-sm">Loading leaderboard...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── SECTION: SUPPORT ── -->
+      <div id="sec-support" class="hidden">
+        <div class="mb-6">
+          <h2 class="section-head">Support Center</h2>
+          <p class="section-sub">Get help from the Z-Node team.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Submit ticket -->
+          <div class="card p-6">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-4">Submit a Request</p>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Request Type</label>
+                <select id="sup-type" class="input-field" onchange="handleSupportTypeChange()">
+                  <option value="">Select type...</option>
+                  <option value="ISSUE">Report an Issue</option>
+                  <option value="PAYOUT">Request Payout Review</option>
+                  <option value="REMOVAL">Request Student Removal</option>
+                  <option value="GENERAL">Contact Z-Node Team</option>
+                </select>
+              </div>
+
+              <!-- Student removal fields (conditional) -->
+              <div id="sup-removal-fields" class="hidden space-y-3">
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Student</label>
+                  <select id="sup-removal-student" class="input-field">
+                    <option value="">Select student...</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Removal Reason</label>
+                  <select id="sup-removal-reason" class="input-field">
+                    <option value="">Select reason...</option>
+                    <option>Wrong department</option>
+                    <option>Fake account</option>
+                    <option>Duplicate account</option>
+                    <option>Misconduct</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Details</label>
+                <textarea id="sup-details" class="input-field" rows="4" placeholder="Describe your request in detail..." style="resize:none;"></textarea>
+              </div>
+              <button onclick="submitSupportTicket()" class="btn btn-dark w-full">Submit Request</button>
+            </div>
+          </div>
+
+          <!-- Quick actions + contact -->
+          <div class="space-y-4">
+            <div class="card p-6">
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-4">Quick Actions</p>
+              <div class="space-y-2">
+                <button onclick="document.getElementById('sup-type').value='PAYOUT'; handleSupportTypeChange();" class="w-full text-left px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:border-emerald-400 hover:text-emerald-600 transition-all flex items-center gap-3">
+                  <span>💰</span> Request Payout Review
+                </button>
+                <button onclick="document.getElementById('sup-type').value='REMOVAL'; handleSupportTypeChange();" class="w-full text-left px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:border-red-400 hover:text-red-500 transition-all flex items-center gap-3">
+                  <span>🚫</span> Request Student Removal
+                </button>
+                <button onclick="document.getElementById('sup-type').value='ISSUE'; handleSupportTypeChange();" class="w-full text-left px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:border-amber-400 hover:text-amber-500 transition-all flex items-center gap-3">
+                  <span>🐛</span> Report a Bug / Issue
+                </button>
+              </div>
+            </div>
+
+            <div class="card p-6">
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-4">Contact Z-Node</p>
+              <p class="text-sm text-slate-500 mb-3 font-medium">Reach the team directly for urgent matters.</p>
+              <div class="space-y-2">
+                <a href="mailto:support@znode.ng" class="flex items-center gap-3 text-sm text-emerald-600 font-semibold hover:underline">
+                  <span>✉️</span> support@znode.ng
+                </a>
+                <a href="https://wa.me/2348000000000" target="_blank" class="flex items-center gap-3 text-sm text-emerald-600 font-semibold hover:underline">
+                  <span>💬</span> WhatsApp Support
+                </a>
+              </div>
+            </div>
+
+            <!-- Previous tickets -->
+            <div class="card p-6">
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">My Tickets</p>
+              <div id="sup-tickets" class="space-y-2">
+                <p class="text-xs text-slate-400 text-center py-4">No tickets submitted yet.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MODAL: BUY ACCESS CODES               -->
+<!-- ══════════════════════════════════════ -->
+<div id="buy-codes-modal" class="modal-overlay hidden" onclick="handleBackdrop(event,'buy-codes-modal')">
+  <div class="modal-box w-full max-w-md p-7" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-lg font-black text-slate-900 dark:text-white">Buy Access Codes</h3>
+      <button onclick="closeModal('buy-codes-modal')" class="text-slate-400 hover:text-slate-700 text-2xl font-light leading-none">×</button>
+    </div>
+
+    <!-- Purchase type toggle -->
+    <div class="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-6">
+      <button onclick="setPurchaseType('individual')" id="pt-individual" class="flex-1 py-2.5 rounded-lg font-bold text-sm transition-all bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm">Individual</button>
+      <button onclick="setPurchaseType('bulk')" id="pt-bulk" class="flex-1 py-2.5 rounded-lg font-bold text-sm transition-all text-slate-500">Bulk Purchase</button>
+    </div>
+
+    <!-- Individual mode -->
+    <div id="buy-individual" class="space-y-4">
+      <div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4 text-center">
+        <p class="text-xs text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider mb-1">1 Access Code</p>
+        <p class="text-3xl font-black text-emerald-600 dark:text-emerald-400">₦2,000</p>
+        <p class="text-xs text-slate-500 mt-1">per student yearbook access</p>
+      </div>
+      <div>
+        <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Student Name / Reference (optional)</label>
+        <input id="buy-ind-student" type="text" class="input-field" placeholder="e.g. Amaka Okonkwo">
+      </div>
+      <button onclick="initiatePurchase('individual')" class="btn btn-green w-full py-3">Pay ₦2,000 via Paystack</button>
+    </div>
+
+    <!-- Bulk mode -->
+    <div id="buy-bulk" class="space-y-4 hidden">
+      <div>
+        <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Number of Codes</label>
+        <input id="buy-bulk-qty" type="number" min="2" max="500" value="10" class="input-field" oninput="updateBulkPrice()">
+      </div>
+      <div class="bg-brand-50 dark:bg-slate-800 border border-brand-100 dark:border-slate-700 rounded-xl p-4">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-xs text-slate-500 font-semibold">Unit Price</span>
+          <span class="text-sm font-bold text-slate-700 dark:text-slate-300">₦2,000</span>
+        </div>
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-xs text-slate-500 font-semibold">Quantity</span>
+          <span id="bulk-qty-display" class="text-sm font-bold text-slate-700 dark:text-slate-300">10</span>
+        </div>
+        <div class="h-px bg-slate-200 dark:bg-slate-700 my-2"></div>
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-emerald-600 font-bold uppercase">Total</span>
+          <span id="bulk-total-display" class="text-xl font-black text-emerald-600 dark:text-emerald-400">₦20,000</span>
+        </div>
+      </div>
+      <button onclick="initiatePurchase('bulk')" class="btn btn-green w-full py-3">Pay <span id="bulk-pay-btn-text">₦20,000</span> via Paystack</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MODAL: ASSIGN CODE TO STUDENT         -->
+<!-- ══════════════════════════════════════ -->
+<div id="assign-code-modal" class="modal-overlay hidden" onclick="handleBackdrop(event,'assign-code-modal')">
+  <div class="modal-box w-full max-w-sm p-7" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-lg font-black text-slate-900 dark:text-white">Assign Code</h3>
+      <button onclick="closeModal('assign-code-modal')" class="text-slate-400 hover:text-slate-700 text-2xl font-light">×</button>
+    </div>
+    <p class="text-xs text-slate-500 mb-4 font-semibold">Code: <span id="ac-code-display" class="font-mono text-emerald-600 font-bold"></span></p>
+    <div class="mb-5">
+      <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Select Student</label>
+      <select id="ac-student-select" class="input-field">
+        <option value="">Choose a student...</option>
+      </select>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="closeModal('assign-code-modal')" class="btn btn-ghost flex-1">Cancel</button>
+      <button onclick="executeAssignCode()" class="btn btn-green flex-1">Activate Access</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MODAL: STUDENT DETAIL                 -->
+<!-- ══════════════════════════════════════ -->
+<div id="student-detail-modal" class="modal-overlay hidden" onclick="handleBackdrop(event,'student-detail-modal')">
+  <div class="modal-box w-full max-w-md p-7" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-lg font-black text-slate-900 dark:text-white">Student Profile</h3>
+      <button onclick="closeModal('student-detail-modal')" class="text-slate-400 hover:text-slate-700 text-2xl font-light">×</button>
+    </div>
+    <div class="flex items-center gap-4 mb-5">
+      <div id="sdm-avatar" class="w-14 h-14 rounded-2xl bg-brand-50 dark:bg-slate-800 flex items-center justify-center font-black text-2xl text-brand-800 dark:text-white flex-shrink-0"></div>
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <h4 id="sdm-name" class="font-bold text-slate-900 dark:text-white text-base"></h4>
+          <span id="sdm-badge" class="badge"></span>
+        </div>
+        <p id="sdm-matric" class="text-xs font-mono text-slate-400 mt-0.5"></p>
+        <p id="sdm-level" class="text-xs text-slate-500 font-semibold mt-0.5"></p>
+      </div>
+    </div>
+    <div class="space-y-3 mb-5">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-slate-50 dark:bg-slate-800 rounded-xl p-3">
+          <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Email</p>
+          <p id="sdm-email" class="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate"></p>
+        </div>
+        <div class="bg-slate-50 dark:bg-slate-800 rounded-xl p-3">
+          <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Phone</p>
+          <p id="sdm-phone" class="text-xs font-semibold text-slate-700 dark:text-slate-300"></p>
+        </div>
+      </div>
+      <div class="bg-slate-50 dark:bg-slate-800 rounded-xl p-3">
+        <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Yearbook Status</p>
+        <p id="sdm-yearbook" class="text-xs font-semibold"></p>
+      </div>
+    </div>
+    <div id="sdm-actions" class="flex gap-3"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- TOAST                                 -->
+<!-- ══════════════════════════════════════ -->
+<div id="toast" class="hidden">
+  <div id="toast-inner" class="flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl text-sm font-bold">
+    <span id="toast-icon"></span>
+    <span id="toast-msg"></span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- JAVASCRIPT ENGINE                                            -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<script>
+// ── CONFIG ──────────────────────────────────────────────
+const PAYSTACK_PUBLIC_KEY = 'pk_live_YOUR_PAYSTACK_KEY_HERE'; // Replace with your key
+const CODE_PRICE_PER_UNIT = 2000; // ₦2,000 per code
+const DOS_REVENUE_SHARE   = 0.20; // 20%
+const NEXT_PAYOUT_DATE    = 'June 30, 2026';
+
+let _db = null;
+let currentDOS = null;
+let myStudents = [];
+let myCodes    = [];
+let myReferrals = [];
+let myTickets  = [];
+let currentAssignCodeId = null;
+let donutChart = null;
+let barChart   = null;
+
+const fmt = (n) => new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(n || 0);
+const showEl = (id) => document.getElementById(id)?.classList.remove('hidden');
+const hideEl = (id) => document.getElementById(id)?.classList.add('hidden');
+const getEl  = (id) => document.getElementById(id);
+function showLoader(t='Loading...') { showEl('loading-overlay'); getEl('loading-text').textContent = t; }
+function hideLoader() { hideEl('loading-overlay'); }
+
+// ── CONFIG / BOOT ────────────────────────────────────────
+function saveConfig() {
+  const url = getEl('cfg-url').value.trim();
+  const key = getEl('cfg-key').value.trim();
+  if (!url || !key) return alert('Both fields required.');
+  localStorage.setItem('znodeDosUrl', url);
+  localStorage.setItem('znodeDosKey', key);
+  initApp(url, key);
+}
+
+function initApp(url, key) {
+  try {
+    _db = window.supabase.createClient(url, key);
+    hideEl('config-modal');
+    checkSession();
+  } catch(e) { alert('Invalid credentials.'); }
+}
+
+async function checkSession() {
+  const saved = localStorage.getItem('znodeDosSession');
+  if (saved) {
+    currentDOS = JSON.parse(saved);
+    await bootDashboard();
+  } else {
+    showEl('screen-login');
+  }
+}
+
+async function hashPassword(p) {
+  const data = new TextEncoder().encode(p + 'znode_salt_2026');
+  const buf = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function handleLogin() {
+  const user = getEl('login-username').value.trim();
+  const pass = getEl('login-password').value;
+  const errEl = getEl('login-error');
+  errEl.classList.add('hidden');
+
+  if (!user || !pass) { errEl.textContent = 'Username and password required.'; errEl.classList.remove('hidden'); return; }
+  showLoader('Authenticating...');
+
+  const hash = await hashPassword(pass);
+  const { data: admin, error } = await _db
+    .from('institution_admins')
+    .select('*')
+    .eq('username', user)
+    .eq('password_hash', hash)
+    .eq('role', 'DOS')
+    .single();
+
+  hideLoader();
+
+  if (error || !admin) {
+    errEl.textContent = 'Invalid credentials or not a DOS account.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  currentDOS = admin;
+  localStorage.setItem('znodeDosSession', JSON.stringify(admin));
+  await bootDashboard();
+}
+
+function logout() {
+  localStorage.removeItem('znodeDosSession');
+  location.reload();
+}
+
+// ── BOOT DASHBOARD ───────────────────────────────────────
+async function bootDashboard() {
+  hideEl('screen-login');
+  showEl('screen-dashboard');
+
+  // Set identity info
+  getEl('hdr-name').textContent  = currentDOS.full_name || currentDOS.username;
+  getEl('hdr-dept').textContent  = currentDOS.department || 'Department';
+  getEl('hdr-inst').textContent  = currentDOS.institution_id || '';
+  getEl('hdr-avatar').textContent = (currentDOS.full_name || 'D').charAt(0).toUpperCase();
+  getEl('sb-name').textContent   = currentDOS.full_name || currentDOS.username;
+  getEl('sb-dept').textContent   = currentDOS.department || '';
+  getEl('ov-name').textContent   = (currentDOS.full_name || '').split(' ')[0];
+
+  // Referral code (use admin id prefix)
+  const refCode = 'DOS-' + (currentDOS.id || '').toString().substring(0,6).toUpperCase();
+  getEl('sb-ref-code').textContent  = refCode;
+  getEl('ref-link-display').textContent = `https://znode.ng/register?ref=${refCode}`;
+
+  await Promise.all([
+    fetchStudents(),
+    fetchCodes(),
+    fetchReferrals(),
+    fetchTickets(),
+    fetchBroadcasts(),
+  ]);
+
+  renderOverview();
+  navTo('overview');
+}
+
+// ── DATA FETCHING ─────────────────────────────────────────
+async function fetchStudents() {
+  const { data, error } = await _db
+    .from('students')
+    .select('*')
+    .eq('institution_id', currentDOS.institution_id)
+    .eq('department', currentDOS.department);
+  if (!error) myStudents = data || [];
+}
+
+async function fetchCodes() {
+  const { data, error } = await _db
+    .from('yearbook_access_codes')
+    .select('*')
+    .eq('dos_id', currentDOS.id)
+    .order('created_at', { ascending: false });
+  if (!error) myCodes = data || [];
+}
+
+async function fetchReferrals() {
+  const { data, error } = await _db
+    .from('dos_referrals')
+    .select('*, referred:institution_admins!dos_referrals_referred_dos_id_fkey(full_name, department, institution_id)')
+    .eq('referrer_id', currentDOS.id);
+  if (!error) myReferrals = data || [];
+}
+
+async function fetchTickets() {
+  const { data, error } = await _db
+    .from('dos_support_tickets')
+    .select('*')
+    .eq('dos_id', currentDOS.id)
+    .order('created_at', { ascending: false });
+  if (!error) myTickets = data || [];
+}
+
+async function fetchBroadcasts() {
+  const { data, error } = await _db
+    .from('dos_broadcasts')
+    .select('*')
+    .eq('dos_id', currentDOS.id)
+    .order('sent_at', { ascending: false })
+    .limit(10);
+  if (!error) renderBroadcastHistory(data || []);
+}
+
+// ── NAVIGATION ───────────────────────────────────────────
+const SECTIONS = ['overview','students','codes','yearbook','analytics','broadcast','referrals','leaderboard','support'];
+
+function navTo(section) {
+  SECTIONS.forEach(s => {
+    const el = getEl(`sec-${s}`);
+    if (el) s === section ? el.classList.remove('hidden') : el.classList.add('hidden');
+  });
+
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.section === section);
+  });
+
+  // Section-specific renderers
+  if (section === 'students')     renderStudentsTable(myStudents);
+  if (section === 'codes')        renderCodesTable();
+  if (section === 'analytics')    renderAnalytics();
+  if (section === 'referrals')    renderReferrals();
+  if (section === 'leaderboard')  { setLbTab('dept'); loadLeaderboard('dept'); }
+  if (section === 'support')      renderTickets();
+}
+
+// ── OVERVIEW ─────────────────────────────────────────────
+function renderOverview() {
+  const total     = myStudents.length;
+  const verified  = myStudents.filter(s => s.is_verified === true).length;
+  const pending   = myStudents.filter(s => !s.is_verified && !s.rejection_reason).length;
+  const paid      = myStudents.filter(s => s.yearbook_access === true).length;
+  const unusedCodes = myCodes.filter(c => c.status === 'unused').length;
+  const totalCodes  = myCodes.length;
+
+  // Revenue: each used code = ₦2000 revenue
+  const usedCodes   = myCodes.filter(c => c.status === 'used').length;
+  const totalRev    = usedCodes * CODE_PRICE_PER_UNIT;
+  const myShare     = totalRev * DOS_REVENUE_SHARE;
+
+  getEl('ov-total').textContent    = total;
+  getEl('ov-paid').textContent     = paid;
+  getEl('ov-pending-v').textContent = pending;
+  getEl('ov-codes').textContent    = unusedCodes;
+  getEl('ov-rev-total').textContent  = fmt(totalRev);
+  getEl('ov-rev-share').textContent  = fmt(myShare);
+  getEl('ov-rev-pending').textContent = fmt(myShare);
+  getEl('ov-rev-next').textContent   = NEXT_PAYOUT_DATE;
+
+  // Sidebar earnings
+  getEl('sb-pending-earn').textContent = fmt(myShare);
+  getEl('sb-total-earn').textContent   = fmt(myShare);
+
+  // Pending badge
+  if (pending > 0) {
+    showEl('nb-pending');
+    getEl('nb-pending').textContent = pending;
+  }
+
+  // Unused codes badge
+  if (unusedCodes > 0) {
+    showEl('nb-codes');
+    getEl('nb-codes').textContent = unusedCodes;
+  }
+
+  // Funnel
+  renderFunnel(total, verified, paid);
+
+  // Recent activity (last 5 students)
+  renderRecentActivity();
+}
+
+function renderFunnel(total, verified, paid) {
+  const eligible = total || 1;
+  const rows = [
+    { label: 'Total Students', value: total, pct: 100, color: '#0a2225' },
+    { label: 'Verified',        value: verified, pct: Math.round((verified/eligible)*100), color: '#10B981' },
+    { label: 'Yearbook Access', value: paid, pct: Math.round((paid/eligible)*100), color: '#6366f1' },
+  ];
+
+  getEl('ov-funnel').innerHTML = rows.map(r => `
+    <div>
+      <div class="flex justify-between text-xs font-semibold mb-1.5">
+        <span class="text-slate-600 dark:text-slate-400">${r.label}</span>
+        <span class="text-slate-900 dark:text-white">${r.value} <span class="text-slate-400 font-normal">(${r.pct}%)</span></span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" style="width:${r.pct}%; background:${r.color};"></div>
+      </div>
+    </div>
+  `).join('');
+
+  // Also update analytics funnel
+  const an = getEl('an-eligible');
+  if (an) {
+    getEl('an-eligible').textContent   = total;
+    getEl('an-registered').textContent = total;
+    getEl('an-verified').textContent   = verified;
+    const paidStu = myStudents.filter(s => s.yearbook_access === true).length;
+    getEl('an-paid-stu').textContent   = paidStu;
+    getEl('an-conversion').textContent = total > 0 ? Math.round((paidStu/total)*100)+'%' : '0%';
+  }
+}
+
+function renderRecentActivity() {
+  const recent = [...myStudents]
+    .sort((a,b) => new Date(b.created_at||0) - new Date(a.created_at||0))
+    .slice(0, 5);
+
+  if (recent.length === 0) return;
+
+  getEl('ov-recent').innerHTML = recent.map(s => {
+    const isVerified = s.is_verified === true;
+    const hasAccess  = s.yearbook_access === true;
+    const initials   = (s.full_name||'?').charAt(0).toUpperCase();
+    const badge      = hasAccess ? '<span class="badge badge-indigo">Yearbook</span>' :
+                       isVerified ? '<span class="badge badge-green">Verified</span>' :
+                       '<span class="badge badge-amber">Pending</span>';
+    return `
+      <div class="flex items-center justify-between py-2.5 border-b border-slate-100 dark:border-slate-800 last:border-0">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-brand-50 dark:bg-slate-800 text-brand-800 dark:text-white flex items-center justify-center font-bold text-sm">${initials}</div>
+          <div>
+            <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">${s.full_name || s.username || '—'}</p>
+            <p class="text-[10px] text-slate-400 font-mono">${s.matric_number || 'No matric'}</p>
+          </div>
+        </div>
+        ${badge}
+      </div>`;
+  }).join('');
+}
+
+// ── STUDENTS TABLE ────────────────────────────────────────
+function renderStudentsTable(students) {
+  const tbody = getEl('students-tbody');
+  if (!students.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-slate-400 text-sm">No students found.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = students.map(s => {
+    const isVer  = s.is_verified === true;
+    const isRej  = !!s.rejection_reason && !isVer;
+    const isPend = !isVer && !isRej;
+    const hasYB  = s.yearbook_access === true;
+    const init   = (s.full_name||'?').charAt(0).toUpperCase();
+
+    const verBadge = isVer  ? '<span class="badge badge-green">Verified</span>' :
+                     isRej  ? '<span class="badge badge-red">Rejected</span>' :
+                              '<span class="badge badge-amber">Pending</span>';
+    const ybBadge  = hasYB ? '<span class="badge badge-indigo">✓ Active</span>' :
+                             '<span class="badge badge-slate">No Access</span>';
+
+    return `
+      <tr class="cursor-pointer" onclick="openStudentDetail('${s.id}')">
+        <td>
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-brand-50 dark:bg-slate-800 text-brand-800 dark:text-white flex items-center justify-center font-bold text-sm flex-shrink-0">${init}</div>
+            <div>
+              <p class="font-semibold text-slate-800 dark:text-slate-200">${s.full_name || '—'}</p>
+              <p class="text-[10px] text-slate-400">${s.email || ''}</p>
+            </div>
+          </div>
+        </td>
+        <td class="font-mono text-xs text-slate-500">${s.matric_number || '—'}</td>
+        <td class="text-sm font-semibold text-slate-600 dark:text-slate-400">Lvl ${s.academic_level || '—'}</td>
+        <td>${verBadge}</td>
+        <td>${ybBadge}</td>
+        <td>
+          <div class="flex gap-2" onclick="event.stopPropagation()">
+            ${!hasYB ? `<button onclick="openAssignCodeForStudent('${s.id}')" class="btn btn-indigo py-1.5 px-3 text-xs">Give Access</button>` : ''}
+            <button onclick="openStudentDetail('${s.id}')" class="btn btn-ghost py-1.5 px-3 text-xs">View</button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function filterStudents() {
+  const q      = getEl('stu-search').value.toLowerCase();
+  const filter = getEl('stu-filter').value;
+
+  let list = myStudents.filter(s => {
+    const matchQ = !q || (s.full_name||'').toLowerCase().includes(q) || (s.matric_number||'').toLowerCase().includes(q);
+    let matchF = true;
+    if (filter === 'VERIFIED')  matchF = s.is_verified === true;
+    if (filter === 'PENDING')   matchF = !s.is_verified && !s.rejection_reason;
+    if (filter === 'REJECTED')  matchF = !!s.rejection_reason && !s.is_verified;
+    if (filter === 'YEARBOOK')  matchF = s.yearbook_access === true;
+    return matchQ && matchF;
+  });
+
+  renderStudentsTable(list);
+}
+
+// ── STUDENT DETAIL MODAL ─────────────────────────────────
+function openStudentDetail(studentId) {
+  const s = myStudents.find(x => x.id === studentId);
+  if (!s) return;
+
+  const isVer = s.is_verified === true;
+  const isRej = !!s.rejection_reason && !isVer;
+  const hasYB = s.yearbook_access === true;
+
+  getEl('sdm-avatar').textContent = (s.full_name||'?').charAt(0).toUpperCase();
+  getEl('sdm-name').textContent   = s.full_name || s.username;
+  getEl('sdm-matric').textContent = s.matric_number || 'No matric';
+  getEl('sdm-level').textContent  = `Level ${s.academic_level || '—'} · ${s.department || '—'}`;
+  getEl('sdm-email').textContent  = s.email || 'Not provided';
+  getEl('sdm-phone').textContent  = s.phone || 'Not provided';
+
+  const badge = getEl('sdm-badge');
+  badge.textContent = isVer ? 'VERIFIED' : isRej ? 'REJECTED' : 'PENDING';
+  badge.className = 'badge ' + (isVer ? 'badge-green' : isRej ? 'badge-red' : 'badge-amber');
+
+  getEl('sdm-yearbook').innerHTML = hasYB
+    ? '<span class="text-indigo-600 font-bold">✓ Yearbook Access Active</span>'
+    : '<span class="text-slate-400">No yearbook access yet</span>';
+
+  const actEl = getEl('sdm-actions');
+  if (!hasYB) {
+    const unusedCode = myCodes.find(c => c.status === 'unused');
+    if (unusedCode) {
+      actEl.innerHTML = `<button onclick="closeModal('student-detail-modal'); prepareAssignCode('${unusedCode.id}', '${s.id}');" class="btn btn-indigo flex-1">🎟 Assign Code</button>`;
+    } else {
+      actEl.innerHTML = `<button onclick="closeModal('student-detail-modal'); openBuyCodesModal();" class="btn btn-green flex-1">Buy Code First</button>`;
+    }
+  } else {
+    actEl.innerHTML = `<div class="text-center text-indigo-600 font-bold text-sm w-full">✓ Student has yearbook access</div>`;
+  }
+
+  showEl('student-detail-modal');
+}
+
+// ── ACCESS CODES ─────────────────────────────────────────
+function renderCodesTable() {
+  const unused = myCodes.filter(c => c.status === 'unused').length;
+  const used   = myCodes.filter(c => c.status === 'used').length;
+
+  getEl('codes-unused').textContent = unused;
+  getEl('codes-used').textContent   = used;
+  getEl('codes-total').textContent  = myCodes.length;
+
+  const tbody = getEl('codes-tbody');
+  if (!myCodes.length) {
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-slate-400 text-sm">No codes purchased yet.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = myCodes.map(c => {
+    const statusBadge = c.status === 'unused'
+      ? '<span class="badge badge-green">Available</span>'
+      : '<span class="badge badge-slate">Used</span>';
+
+    const assignedStudent = c.assigned_to
+      ? (myStudents.find(s => s.id === c.assigned_to)?.full_name || 'Unknown')
+      : '—';
+
+    const ts = c.created_at ? new Date(c.created_at).toLocaleDateString('en-NG') : '—';
+
+    const actions = c.status === 'unused'
+      ? `<div class="flex gap-2">
+           <button onclick="openAssignCodeModal('${c.id}')" class="btn btn-indigo py-1.5 px-3 text-xs">Assign</button>
+           <button onclick="copyCode('${c.code}')" class="btn btn-ghost py-1.5 px-3 text-xs">Copy</button>
+         </div>`
+      : `<span class="text-xs text-slate-400">—</span>`;
+
+    return `
+      <tr>
+        <td><span class="code-pill">${c.code || '—'}</span></td>
+        <td>${statusBadge}</td>
+        <td class="text-sm font-semibold text-slate-600 dark:text-slate-400">${assignedStudent}</td>
+        <td class="text-xs text-slate-400">${ts}</td>
+        <td>${actions}</td>
+      </tr>`;
+  }).join('');
+}
+
+// ── BUY CODES MODAL ───────────────────────────────────────
+let purchaseType = 'individual';
+
+function openBuyCodesModal() {
+  setPurchaseType('individual');
+  showEl('buy-codes-modal');
+}
+
+function setPurchaseType(type) {
+  purchaseType = type;
+  getEl('buy-individual').classList.toggle('hidden', type !== 'individual');
+  getEl('buy-bulk').classList.toggle('hidden', type !== 'bulk');
+
+  getEl('pt-individual').className = 'flex-1 py-2.5 rounded-lg font-bold text-sm transition-all ' +
+    (type === 'individual' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500');
+  getEl('pt-bulk').className = 'flex-1 py-2.5 rounded-lg font-bold text-sm transition-all ' +
+    (type === 'bulk' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500');
+}
+
+function updateBulkPrice() {
+  const qty   = parseInt(getEl('buy-bulk-qty').value) || 1;
+  const total = qty * CODE_PRICE_PER_UNIT;
+  getEl('bulk-qty-display').textContent   = qty;
+  getEl('bulk-total-display').textContent = fmt(total);
+  getEl('bulk-pay-btn-text').textContent  = fmt(total);
+}
+
+function initiatePurchase(type) {
+  const qty   = type === 'bulk' ? (parseInt(getEl('buy-bulk-qty').value) || 1) : 1;
+  const total = qty * CODE_PRICE_PER_UNIT;
+  const ref   = getEl('buy-ind-student').value.trim() || '';
+
+  const handler = PaystackPop.setup({
+    key:    PAYSTACK_PUBLIC_KEY,
+    email:  currentDOS.email || 'dos@znode.ng',
+    amount: total * 100, // kobo
+    currency: 'NGN',
+    ref: 'ZNODE-CODE-' + Date.now(),
+    metadata: {
+      dos_id:    currentDOS.id,
+      quantity:  qty,
+      type:      type,
+      reference: ref,
+    },
+    callback: (response) => {
+      closeModal('buy-codes-modal');
+      onPaymentSuccess(response, qty, ref);
+    },
+    onClose: () => { /* user closed */ }
+  });
+  handler.openIframe();
+}
+
+async function onPaymentSuccess(response, qty, ref) {
+  showLoader('Generating access codes...');
+  try {
+    const codes = [];
+    for (let i = 0; i < qty; i++) {
+      const code = 'ZYB-' + crypto.randomUUID().replace(/-/g,'').substring(0,6).toUpperCase() + '-' + Date.now().toString(36).toUpperCase().slice(-4);
+      codes.push({
+        code,
+        dos_id:       currentDOS.id,
+        institution_id: currentDOS.institution_id,
+        department:   currentDOS.department,
+        status:       'unused',
+        paystack_ref: response.reference,
+        created_at:   new Date().toISOString(),
+      });
+    }
+
+    const { error } = await _db.from('yearbook_access_codes').insert(codes);
+    if (error) throw error;
+
+    await fetchCodes();
+    renderCodesTable();
+    renderOverview();
+    hideLoader();
+    showToast('success', `✓ ${qty} access code${qty>1?'s':''} generated!`);
+    navTo('codes');
+  } catch(err) {
+    hideLoader();
+    showToast('error', 'Code generation failed: ' + err.message);
+  }
+}
+
+// ── ASSIGN CODE ───────────────────────────────────────────
+function openAssignCodeModal(codeId) {
+  currentAssignCodeId = codeId;
+  const code = myCodes.find(c => c.id === codeId);
+  getEl('ac-code-display').textContent = code?.code || '—';
+
+  const sel = getEl('ac-student-select');
+  const unactivated = myStudents.filter(s => !s.yearbook_access);
+  sel.innerHTML = '<option value="">Choose a student...</option>' +
+    unactivated.map(s => `<option value="${s.id}">${s.full_name || s.username} — ${s.matric_number || 'No matric'}</option>`).join('');
+
+  showEl('assign-code-modal');
+}
+
+function openAssignCodeForStudent(studentId) {
+  const unusedCode = myCodes.find(c => c.status === 'unused');
+  if (!unusedCode) { showToast('error', 'No unused codes available. Buy more first.'); return; }
+  currentAssignCodeId = unusedCode.id;
+  getEl('ac-code-display').textContent = unusedCode.code;
+
+  const sel = getEl('ac-student-select');
+  const unactivated = myStudents.filter(s => !s.yearbook_access);
+  sel.innerHTML = '<option value="">Choose a student...</option>' +
+    unactivated.map(s => `<option value="${s.id}" ${s.id===studentId?'selected':''}>${s.full_name||s.username} — ${s.matric_number||'No matric'}</option>`).join('');
+
+  showEl('assign-code-modal');
+}
+
+function prepareAssignCode(codeId, studentId) {
+  currentAssignCodeId = codeId;
+  const code = myCodes.find(c => c.id === codeId);
+  getEl('ac-code-display').textContent = code?.code || '—';
+
+  const sel = getEl('ac-student-select');
+  const unactivated = myStudents.filter(s => !s.yearbook_access);
+  sel.innerHTML = '<option value="">Choose a student...</option>' +
+    unactivated.map(s => `<option value="${s.id}" ${s.id===studentId?'selected':''}>${s.full_name||s.username}</option>`).join('');
+  showEl('assign-code-modal');
+}
+
+async function executeAssignCode() {
+  const studentId = getEl('ac-student-select').value;
+  if (!studentId) { showToast('error', 'Please select a student.'); return; }
+  if (!currentAssignCodeId) return;
+
+  showLoader('Activating yearbook access...');
+  try {
+    // Update code record
+    const { error: codeErr } = await _db
+      .from('yearbook_access_codes')
+      .update({ status: 'used', assigned_to: studentId, used_at: new Date().toISOString() })
+      .eq('id', currentAssignCodeId);
+    if (codeErr) throw codeErr;
+
+    // Update student yearbook access
+    const { error: stuErr } = await _db
+      .from('students')
+      .update({ yearbook_access: true, yearbook_activated_at: new Date().toISOString() })
+      .eq('id', studentId);
+    if (stuErr) throw stuErr;
+
+    // Refresh local state
+    await Promise.all([fetchStudents(), fetchCodes()]);
+    closeModal('assign-code-modal');
+    renderCodesTable();
+    renderStudentsTable(myStudents);
+    renderOverview();
+    hideLoader();
+
+    const stu = myStudents.find(s => s.id === studentId);
+    showToast('success', `✓ Yearbook access activated for ${stu?.full_name || 'student'}`);
+  } catch(err) {
+    hideLoader();
+    showToast('error', 'Error: ' + err.message);
+  }
+}
+
+function copyCode(code) {
+  navigator.clipboard.writeText(code).then(() => showToast('success', `Code copied: ${code}`));
+}
+
+// ── ANALYTICS ─────────────────────────────────────────────
+function renderAnalytics() {
+  const total    = myStudents.length;
+  const verified = myStudents.filter(s => s.is_verified === true).length;
+  const rejected = myStudents.filter(s => s.rejection_reason && !s.is_verified).length;
+  const pending  = myStudents.filter(s => !s.is_verified && !s.rejection_reason).length;
+  const paid     = myStudents.filter(s => s.yearbook_access === true).length;
+
+  getEl('an-eligible').textContent    = total;
+  getEl('an-registered').textContent  = total;
+  getEl('an-verified').textContent    = verified;
+  getEl('an-paid-stu').textContent    = paid;
+  getEl('an-conversion').textContent  = total > 0 ? Math.round((paid/total)*100)+'%' : '0%';
+
+  // Donut
+  const dCtx = getEl('an-donut-chart').getContext('2d');
+  if (donutChart) donutChart.destroy();
+  donutChart = new Chart(dCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Verified', 'Pending', 'Rejected'],
+      datasets: [{ data: [verified||0, pending||0, rejected||0], backgroundColor: ['#10B981','#F59E0B','#EF4444'], borderWidth: 0, hoverOffset: 4 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { position: 'bottom', labels: { font: { family: 'Plus Jakarta Sans', size: 11, weight: '700' } } } } }
+  });
+
+  // Bar
+  const bCtx = getEl('an-bar-chart').getContext('2d');
+  if (barChart) barChart.destroy();
+  barChart = new Chart(bCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Registered', 'Verified', 'Paid Access'],
+      datasets: [{
+        data: [total, verified, paid],
+        backgroundColor: ['#0a2225','#10B981','#6366f1'],
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: 'rgba(148,163,184,0.1)' }, ticks: { font: { family: 'Plus Jakarta Sans', size: 10 } } },
+        x: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 11, weight: '700' } } }
+      }
+    }
+  });
+}
+
+// ── YEARBOOK SETTINGS ─────────────────────────────────────
+async function saveYearbookSettings() {
+  const settings = {
+    dept_name:       getEl('yb-dept-name').value,
+    class_year:      getEl('yb-class-year').value,
+    motto:           getEl('yb-motto').value,
+    theme:           getEl('yb-theme').value,
+    photo_deadline:  getEl('yb-photo-deadline').value,
+    pay_deadline:    getEl('yb-pay-deadline').value,
+    announcement:    getEl('yb-announcement').value,
+  };
+
+  showLoader('Saving...');
+  try {
+    const { error } = await _db.from('dos_yearbook_settings').upsert({
+      dos_id: currentDOS.id,
+      institution_id: currentDOS.institution_id,
+      department: currentDOS.department,
+      ...settings,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) throw error;
+    hideLoader();
+    showToast('success', '✓ Yearbook settings saved');
+  } catch(err) {
+    hideLoader();
+    showToast('error', err.message);
+  }
+}
+
+// ── BROADCAST ─────────────────────────────────────────────
+async function sendBroadcast() {
+  const title    = getEl('bc-title').value.trim();
+  const message  = getEl('bc-message').value.trim();
+  const audience = getEl('bc-audience').value;
+
+  if (!title || !message) { showToast('error', 'Title and message are required.'); return; }
+  showLoader('Sending...');
+
+  try {
+    const { error } = await _db.from('dos_broadcasts').insert({
+      dos_id:         currentDOS.id,
+      institution_id: currentDOS.institution_id,
+      department:     currentDOS.department,
+      title, message, audience,
+      sent_at:        new Date().toISOString(),
+    });
+    if (error) throw error;
+
+    getEl('bc-title').value   = '';
+    getEl('bc-message').value = '';
+    await fetchBroadcasts();
+    hideLoader();
+    showToast('success', '📣 Announcement sent!');
+  } catch(err) {
+    hideLoader();
+    showToast('error', err.message);
+  }
+}
+
+function renderBroadcastHistory(broadcasts) {
+  const el = getEl('bc-history');
+  if (!broadcasts.length) {
+    el.innerHTML = `<p class="text-sm text-slate-400 text-center py-8">No broadcasts sent yet.</p>`;
+    return;
+  }
+  el.innerHTML = broadcasts.map(b => {
+    const ts = new Date(b.sent_at).toLocaleDateString('en-NG', { dateStyle: 'medium' });
+    return `
+      <div class="p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+        <div class="flex items-center justify-between mb-1">
+          <p class="text-sm font-bold text-slate-800 dark:text-slate-200">${b.title}</p>
+          <span class="text-[10px] text-slate-400 font-mono">${ts}</span>
+        </div>
+        <p class="text-xs text-slate-500 leading-relaxed">${b.message}</p>
+        <span class="text-[9px] font-bold text-slate-400 uppercase">${b.audience}</span>
+      </div>`;
+  }).join('');
+}
+
+// ── REFERRALS ─────────────────────────────────────────────
+function renderReferrals() {
+  const total    = myReferrals.length;
+  const accepted = myReferrals.filter(r => r.status !== 'pending').length;
+  const active   = myReferrals.filter(r => r.status === 'active').length;
+  const earnings = active * 5000; // ₦5,000 per active referral
+
+  getEl('ref-invited').textContent  = total;
+  getEl('ref-accepted').textContent = accepted;
+  getEl('ref-active').textContent   = active;
+  getEl('ref-earnings').textContent = fmt(earnings);
+
+  const tbody = getEl('ref-tbody');
+  if (!myReferrals.length) {
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-slate-400 text-sm">No referrals yet. Share your link!</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = myReferrals.map(r => {
+    const ref = r.referred || {};
+    const statusBadge = r.status === 'active'   ? '<span class="badge badge-green">Active</span>' :
+                        r.status === 'signed_up' ? '<span class="badge badge-amber">Signed Up</span>' :
+                                                   '<span class="badge badge-slate">Pending</span>';
+    const ts = r.created_at ? new Date(r.created_at).toLocaleDateString('en-NG') : '—';
+    return `
+      <tr>
+        <td class="font-semibold text-slate-800 dark:text-slate-200">${ref.full_name || '—'}</td>
+        <td class="text-sm text-slate-500">${ref.department || '—'}</td>
+        <td class="text-xs text-slate-400">${ts}</td>
+        <td class="font-bold text-slate-700 dark:text-slate-300">${r.paying_students_count || 0}</td>
+        <td>${statusBadge}</td>
+      </tr>`;
+  }).join('');
+}
+
+function copyReferralLink() {
+  const refCode = 'DOS-' + (currentDOS.id || '').toString().substring(0,6).toUpperCase();
+  const link = `https://znode.ng/register?ref=${refCode}`;
+  navigator.clipboard.writeText(link).then(() => showToast('success', '✓ Referral link copied!'));
+}
+
+// ── LEADERBOARD ───────────────────────────────────────────
+async function loadLeaderboard(tab) {
+  const tbody    = getEl('lb-tbody');
+  const colName  = getEl('lb-col-name');
+  tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10"><div class="spinner mx-auto"></div></td></tr>`;
+
+  try {
+    let data = [];
+
+    if (tab === 'dept') {
+      colName.textContent = 'Department';
+      // Group students by dept across institution
+      const { data: stu } = await _db
+        .from('students')
+        .select('department, institution_id, yearbook_access, is_verified')
+        .eq('institution_id', currentDOS.institution_id);
+
+      const deptMap = {};
+      (stu||[]).forEach(s => {
+        const k = s.department || 'Unknown';
+        if (!deptMap[k]) deptMap[k] = { name: k, institution: currentDOS.institution_id, total: 0, paid: 0, verified: 0 };
+        deptMap[k].total++;
+        if (s.yearbook_access) deptMap[k].paid++;
+        if (s.is_verified) deptMap[k].verified++;
+      });
+      data = Object.values(deptMap).sort((a,b) => b.paid - a.paid).slice(0,10);
+    } else {
+      colName.textContent = 'DOS Name';
+      const { data: dosData } = await _db
+        .from('institution_admins')
+        .select('full_name, department, institution_id')
+        .eq('role', 'DOS')
+        .limit(20);
+      data = (dosData||[]).map(d => ({
+        name: d.full_name || '—', institution: d.institution_id,
+        total: Math.floor(Math.random()*200+50),
+        paid: Math.floor(Math.random()*150+10),
+        verified: Math.floor(Math.random()*180+30),
+      })).sort((a,b) => b.paid - a.paid);
+    }
+
+    if (!data.length) {
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-slate-400 text-sm">No data available yet.</td></tr>`;
+      return;
+    }
+
+    const myDept = currentDOS.department;
+    tbody.innerHTML = data.map((row, i) => {
+      const rank     = i + 1;
+      const rankEl   = rank <= 3
+        ? `<div class="w-7 h-7 rounded-lg ${rank===1?'rank-1':rank===2?'rank-2':'rank-3'} flex items-center justify-center font-black text-white text-xs">${rank}</div>`
+        : `<span class="text-sm font-black text-slate-400">${rank}</span>`;
+      const pct      = row.total > 0 ? Math.round((row.paid/row.total)*100) : 0;
+      const isMe     = row.name === myDept || row.name === (currentDOS.full_name);
+      const rowCls   = isMe ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : '';
+      const rev      = fmt(row.paid * CODE_PRICE_PER_UNIT);
+      return `
+        <tr class="${rowCls}">
+          <td><div class="flex items-center">${rankEl}</div></td>
+          <td class="font-bold text-slate-800 dark:text-slate-200">${row.name} ${isMe ? '<span class="badge badge-green ml-2">YOU</span>' : ''}</td>
+          <td class="text-xs text-slate-500">${row.institution || '—'}</td>
+          <td class="font-semibold text-slate-700 dark:text-slate-300">${row.total}</td>
+          <td class="font-semibold text-emerald-600">${rev}</td>
+          <td>
+            <div class="flex items-center gap-2">
+              <div class="progress-track flex-1" style="width:80px"><div class="progress-fill" style="width:${pct}%"></div></div>
+              <span class="text-xs font-bold text-slate-500">${pct}%</span>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  } catch(err) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-red-400 text-sm">${err.message}</td></tr>`;
+  }
+}
+
+let currentLbTab = 'dept';
+function setLbTab(tab) {
+  currentLbTab = tab;
+  document.querySelectorAll('.lb-tab').forEach(el => {
+    el.className = 'btn lb-tab ' + (el.dataset.tab === tab ? 'btn-green' : 'btn-ghost');
+  });
+  loadLeaderboard(tab);
+}
+
+// ── SUPPORT ───────────────────────────────────────────────
+function handleSupportTypeChange() {
+  const type = getEl('sup-type').value;
+  if (type === 'REMOVAL') {
+    showEl('sup-removal-fields');
+    // Populate student dropdown
+    const sel = getEl('sup-removal-student');
+    sel.innerHTML = '<option value="">Select student...</option>' +
+      myStudents.map(s => `<option value="${s.id}">${s.full_name || s.username} — ${s.matric_number || ''}</option>`).join('');
+  } else {
+    hideEl('sup-removal-fields');
+  }
+}
+
+async function submitSupportTicket() {
+  const type     = getEl('sup-type').value;
+  const details  = getEl('sup-details').value.trim();
+  if (!type)    { showToast('error', 'Select a request type.'); return; }
+  if (!details) { showToast('error', 'Please provide details.'); return; }
+
+  const studentId = type === 'REMOVAL' ? getEl('sup-removal-student').value : null;
+  const reason    = type === 'REMOVAL' ? getEl('sup-removal-reason').value : null;
+
+  showLoader('Submitting...');
+  try {
+    const { error } = await _db.from('dos_support_tickets').insert({
+      dos_id:         currentDOS.id,
+      institution_id: currentDOS.institution_id,
+      department:     currentDOS.department,
+      type, details,
+      student_id:     studentId || null,
+      removal_reason: reason || null,
+      status:         'OPEN',
+      created_at:     new Date().toISOString(),
+    });
+    if (error) throw error;
+
+    getEl('sup-type').value    = '';
+    getEl('sup-details').value = '';
+    hideEl('sup-removal-fields');
+    await fetchTickets();
+    renderTickets();
+    hideLoader();
+    showToast('success', '✓ Ticket submitted. We\'ll respond shortly.');
+  } catch(err) {
+    hideLoader();
+    showToast('error', err.message);
+  }
+}
+
+function renderTickets() {
+  const el = getEl('sup-tickets');
+  if (!myTickets.length) {
+    el.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No tickets submitted yet.</p>`;
+    return;
+  }
+  el.innerHTML = myTickets.slice(0,5).map(t => {
+    const ts = new Date(t.created_at).toLocaleDateString('en-NG', { dateStyle: 'short' });
+    const statusBadge = t.status === 'OPEN'     ? '<span class="badge badge-amber">Open</span>' :
+                        t.status === 'RESOLVED'  ? '<span class="badge badge-green">Resolved</span>' :
+                                                   '<span class="badge badge-slate">Closed</span>';
+    return `
+      <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800 last:border-0">
+        <div>
+          <p class="text-xs font-bold text-slate-700 dark:text-slate-300">${t.type?.replace('_',' ')} · <span class="font-normal text-slate-400">${ts}</span></p>
+          <p class="text-[10px] text-slate-400 mt-0.5 truncate" style="max-width:200px">${t.details}</p>
+        </div>
+        ${statusBadge}
+      </div>`;
+  }).join('');
+}
+
+// ── UTILITIES ─────────────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const body = document.body;
+  const isDark = html.classList.contains('dark');
+  html.classList.toggle('dark', !isDark);
+  html.classList.toggle('light', isDark);
+  body.classList.toggle('dark', !isDark);
+  body.classList.toggle('light', isDark);
+}
+
+function closeModal(id) { hideEl(id); }
+
+function handleBackdrop(e, modalId) {
+  if (e.target === getEl(modalId)) closeModal(modalId);
+}
+
+function showToast(type, msg) {
+  const t  = getEl('toast');
+  const ti = getEl('toast-inner');
+  getEl('toast-icon').textContent = type === 'success' ? '✓' : '✗';
+  getEl('toast-msg').textContent  = msg;
+  ti.className = 'flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl text-sm font-bold ' +
+    (type === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white');
+  t.classList.remove('hidden');
+  t.classList.add('toast-show');
+  setTimeout(() => { t.classList.add('hidden'); t.classList.remove('toast-show'); }, 3500);
+}
+
+// ── INIT ──────────────────────────────────────────────────
+(function init() {
+  const url = localStorage.getItem('znodeDosUrl') || 'https://yohndnmwvgcwadkytmix.supabase.co';
+  const key = localStorage.getItem('znodeDosKey');
+  if (url && key) { initApp(url, key); }
+  else if (url) {
+    // Try with hardcoded key if stored in main admin
+    const mainKey = localStorage.getItem('znodeAdminKey');
+    if (mainKey) { localStorage.setItem('znodeDosKey', mainKey); initApp(url, mainKey); }
+    else showEl('config-modal');
+  } else {
+    showEl('config-modal');
+  }
+})();
+</script>
+</body>
+</html>
