@@ -6,6 +6,8 @@
     <title>Z-Node // Core Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- PATCH 1: Paystack inline SDK -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
     <style>
         :root {
             --bg-base: #000000;
@@ -122,6 +124,26 @@
         .yearbook-dept-input::placeholder { color: var(--text-muted); opacity: 0.6; }
         .yearbook-dept-input:focus { border-color: var(--text-main); outline: none; background: var(--bg-base); }
 
+        /* ── PATCH: Yearbook gate status dot ── */
+        .status-dot {
+            width: 8px; height: 8px; flex-shrink: 0;
+            display: inline-block;
+        }
+        .status-dot.red  { background: #ff4444; }
+        .status-dot.green { background: #00ff88; }
+
+        /* ── PATCH: DOS voucher panel transition ── */
+        #dosVoucherPanel { transition: all 0.2s var(--ease); }
+
+        /* ── PATCH: Avatar preview in settings ── */
+        .settings-avatar-preview {
+            width: 80px; height: 80px; border: 1px solid var(--border-strong);
+            overflow: hidden; margin-bottom: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; background: var(--border-light);
+        }
+        .settings-avatar-preview img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); }
+
         /* Toast */
         .toast-container { position:fixed; bottom:32px; right:32px; z-index:9999; display:flex; flex-direction:column; gap:12px; }
         .toast { padding:16px 24px; font-size:13px; font-weight:700; background: var(--bg-surface); border: 1px solid var(--text-main); color: var(--text-main); animation:toastIn 0.3s var(--ease); box-shadow: 8px 8px 0px rgba(255,255,255,0.1); }
@@ -160,6 +182,9 @@
             .mob-nav-btn svg { width:20px; height:20px; }
 
             .field-injection-panel { flex-direction: column; }
+
+            /* Mobile: yearbook gate button stack */
+            #yearbookPayGate .content-card > div[style*="flex"] { flex-direction: column; }
         }
     </style>
 </head>
@@ -271,12 +296,48 @@
         </div>
     </section>
 
-    <!-- ══ VIEW 2: YEARBOOK ══ -->
+    <!-- ══ VIEW 2: YEARBOOK ══ (PATCH 3: Payment gate added) -->
     <section class="view-container" id="view-yearbook">
         <div class="view-header">
             <h1>Yearbook Directory.</h1>
         </div>
 
+        <!-- Gate: shown when NOT verified -->
+        <div id="yearbookPayGate" style="display:none; margin-bottom:32px;">
+            <div class="content-card">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                    <span class="status-dot red"></span>
+                    <h3>You are not in the Yearbook yet</h3>
+                </div>
+                <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px; line-height:1.6;">
+                    You can browse the directory and edit your profile freely. When you are ready to have your entry published, complete verification below.
+                </p>
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <button class="action-btn" onclick="initiatePaystackPayment()">Pay via Paystack</button>
+                    <button class="action-btn secondary" onclick="toggleDOSVoucherPanel()">Pay via DOS Voucher</button>
+                </div>
+
+                <!-- DOS Voucher input — hidden until toggled -->
+                <div id="dosVoucherPanel" style="display:none; margin-top:24px; padding-top:24px; border-top:1px solid var(--border-strong);">
+                    <label class="eyebrow" style="display:block; margin-bottom:10px;">Enter DOS Voucher Code</label>
+                    <div style="display:flex; gap:12px;">
+                        <input type="text" id="voucherCodeInput" placeholder="e.g. DOS-XXXX-XXXX" style="flex:1; text-transform:uppercase;">
+                        <button class="action-btn" onclick="redeemVoucherCode()">Redeem</button>
+                    </div>
+                    <p id="voucherFeedback" style="font-size:12px; margin-top:10px; font-weight:700; min-height:16px;"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Badge: shown when verified -->
+        <div id="yearbookVerifiedBadge" style="display:none; margin-bottom:24px;">
+            <div class="content-card" style="display:flex; align-items:center; gap:12px;">
+                <span class="status-dot green"></span>
+                <span style="font-weight:800; font-size:13px; text-transform:uppercase; letter-spacing:0.05em;">Yearbook Verified — Your entry is live in the directory.</span>
+            </div>
+        </div>
+
+        <!-- Query form — always visible -->
         <div class="content-card" style="max-width: 500px;">
             <h3 style="margin-bottom:8px;">Access Student Database</h3>
             <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px;">Enter department name and graduating year to query the network.</p>
@@ -334,6 +395,17 @@
             </div>
 
             <div style="display:flex; flex-direction:column; gap:16px;">
+
+                <!-- PATCH 4: Avatar upload card -->
+                <div class="content-card">
+                    <h3 style="margin-bottom:12px;">Update Identity Image</h3>
+                    <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Upload a new profile photo. Updates across your entire node.</p>
+                    <div class="settings-avatar-preview" id="settingsAvatarPreview">👤</div>
+                    <input type="file" id="avatarFileInput" accept="image/*" style="margin-bottom:16px; font-size:12px; padding:10px 14px;">
+                    <button class="action-btn" onclick="uploadNewAvatar()">Upload Image</button>
+                    <p id="avatarUploadStatus" style="font-size:12px; margin-top:10px; font-weight:700; min-height:16px;"></p>
+                </div>
+
                 <div class="content-card">
                     <h3 style="margin-bottom:12px;">Visual Interface Config</h3>
                     <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Toggle system lighting state environments instantly.</p>
@@ -356,6 +428,11 @@ const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const { createClient } = supabase;
 const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// PATCH 5a: Paystack config — change YEARBOOK_PRICE_KOBO to set your price (kobo = NGN × 100)
+const PAYSTACK_PUBLIC_KEY  = 'pk_live_ad4252161bf61d466256573cb5b5fd8a4d3bb07a';
+const YEARBOOK_PRICE_KOBO  = 500000; // ← ₦5,000. Change as needed.
+
+// PATCH 2: Added yearbook_verified and email to session object
 let studentSessionData = {
     username: "",
     full_name: "",
@@ -365,6 +442,8 @@ let studentSessionData = {
     department: "",
     faculty: "",
     avatar_url: "",
+    email: "",
+    yearbook_verified: false,
     custom_attributes: []
 };
 
@@ -387,11 +466,14 @@ function syncViewRenderState() {
         avatarContainer.innerHTML = `<img src="${studentSessionData.avatar_url}" alt="${studentSessionData.full_name}">`;
         document.getElementById('sidebarAvatar').innerHTML = `<img src="${studentSessionData.avatar_url}" alt="avatar">`;
         document.getElementById('mobileAvatarNode').innerHTML = `<img src="${studentSessionData.avatar_url}" alt="avatar" style="width:100%;height:100%;object-fit:cover;">`;
+        // PATCH: update settings avatar preview
+        document.getElementById('settingsAvatarPreview').innerHTML = `<img src="${studentSessionData.avatar_url}" alt="avatar">`;
     } else {
         avatarContainer.innerHTML = `<div class="profile-image-fallback">👤</div>`;
         const initial = (studentSessionData.username || '?').charAt(0).toUpperCase();
         document.getElementById('sidebarAvatar').textContent = initial;
         document.getElementById('mobileAvatarNode').textContent = initial;
+        document.getElementById('settingsAvatarPreview').textContent = '👤';
     }
 
     document.getElementById('nodeFullName').textContent   = studentSessionData.full_name  || '—';
@@ -426,6 +508,9 @@ function syncViewRenderState() {
     document.getElementById('editUniversity').value = studentSessionData.university;
     document.getElementById('editDept').value      = studentSessionData.department;
     document.getElementById('editFaculty').value   = studentSessionData.faculty;
+
+    // PATCH: update yearbook gate UI
+    updateYearbookGateUI();
 }
 
 function injectCustomProfileAttribute() {
@@ -470,6 +555,196 @@ function accessYearbook(event) {
     }
 }
 
+// ── PATCH 5b: YEARBOOK GATE UI ──
+function updateYearbookGateUI() {
+    const gate   = document.getElementById('yearbookPayGate');
+    const badge  = document.getElementById('yearbookVerifiedBadge');
+    if (!gate || !badge) return;
+    if (studentSessionData.yearbook_verified) {
+        gate.style.display  = 'none';
+        badge.style.display = 'block';
+    } else {
+        gate.style.display  = 'block';
+        badge.style.display = 'none';
+    }
+}
+
+function toggleDOSVoucherPanel() {
+    const panel = document.getElementById('dosVoucherPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+// ── PATCH 5c: PAYSTACK PAYMENT ──
+function initiatePaystackPayment() {
+    // Use stored email or prompt once
+    const email = studentSessionData.email || prompt('Enter your email address for payment receipt:');
+    if (!email || !email.includes('@')) {
+        showToast('A valid email address is required.'); return;
+    }
+
+    const handler = PaystackPop.setup({
+        key:      PAYSTACK_PUBLIC_KEY,
+        email:    email,
+        amount:   YEARBOOK_PRICE_KOBO,
+        currency: 'NGN',
+        ref:      `ZN-${studentSessionData.passport_id}-${Date.now()}`,
+        metadata: {
+            passport_id: studentSessionData.passport_id,
+            full_name:   studentSessionData.full_name
+        },
+        callback: async function(response) {
+            showToast('Payment confirmed. Updating your node...');
+            await markStudentAsVerified();
+        },
+        onClose: function() {
+            showToast('Payment window closed.');
+        }
+    });
+    handler.openIframe();
+}
+
+// ── PATCH 5d: MARK VERIFIED IN DB + SESSION ──
+async function markStudentAsVerified() {
+    try {
+        const { error } = await _db
+            .from('students')
+            .update({ yearbook_verified: true })
+            .eq('znode_passport_id', studentSessionData.passport_id);
+
+        if (error) throw error;
+
+        studentSessionData.yearbook_verified = true;
+        saveLocalState();
+        updateYearbookGateUI();
+        showToast('Yearbook verification complete. Your entry is now live.');
+    } catch (err) {
+        console.error('Verification write failed:', err);
+        showToast('Verification error — contact support with your payment reference.');
+    }
+}
+
+// ── PATCH 5e: DOS VOUCHER REDEMPTION ──
+async function redeemVoucherCode() {
+    const code     = document.getElementById('voucherCodeInput').value.trim().toUpperCase();
+    const feedback = document.getElementById('voucherFeedback');
+
+    if (!code) { feedback.style.color = '#ff4444'; feedback.textContent = 'Please enter a voucher code.'; return; }
+
+    feedback.style.color = 'var(--text-muted)';
+    feedback.textContent = 'Verifying code...';
+
+    try {
+        const { data, error } = await _db
+            .from('voucher_codes')
+            .select('*')
+            .eq('code', code)
+            .eq('used', false)
+            .single();
+
+        if (error || !data) {
+            feedback.style.color = '#ff4444';
+            feedback.textContent = 'Invalid or already used voucher code.';
+            return;
+        }
+
+        // Mark voucher consumed
+        await _db
+            .from('voucher_codes')
+            .update({ used: true, used_by: studentSessionData.passport_id })
+            .eq('code', code);
+
+        feedback.textContent = '';
+        document.getElementById('voucherCodeInput').value = '';
+        await markStudentAsVerified();
+
+    } catch (err) {
+        console.error('Voucher error:', err);
+        feedback.style.color = '#ff4444';
+        feedback.textContent = 'Error redeeming voucher. Please try again.';
+    }
+}
+
+// ── PATCH 5f: AVATAR UPLOAD ──
+async function uploadNewAvatar() {
+    const fileInput = document.getElementById('avatarFileInput');
+    const status    = document.getElementById('avatarUploadStatus');
+
+    if (!fileInput.files || fileInput.files.length === 0) {
+        status.style.color = '#ff4444';
+        status.textContent = 'Please select an image file first.';
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const ext  = file.name.split('.').pop().toLowerCase();
+    const path = `${studentSessionData.passport_id}/avatar.${ext}`;
+
+    status.style.color = 'var(--text-muted)';
+    status.textContent = 'Uploading...';
+
+    try {
+        const { error: uploadError } = await _db.storage
+            .from('student-avatars')
+            .upload(path, file, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = _db.storage
+            .from('student-avatars')
+            .getPublicUrl(path);
+
+        const publicUrl = urlData.publicUrl;
+
+        // Write back to students table
+        await _db
+            .from('students')
+            .update({ avatar_url: publicUrl })
+            .eq('znode_passport_id', studentSessionData.passport_id);
+
+        // Sync local caches
+        studentSessionData.avatar_url = publicUrl;
+        const authRaw = localStorage.getItem('znodeStudentProfile');
+        if (authRaw) {
+            try {
+                const stored = JSON.parse(authRaw);
+                stored.avatar_url = publicUrl;
+                localStorage.setItem('znodeStudentProfile', JSON.stringify(stored));
+            } catch(e) {}
+        }
+
+        saveLocalState();
+        syncViewRenderState();
+        status.style.color = '#00ff88';
+        status.textContent = 'Image updated successfully.';
+        showToast('Avatar updated.');
+
+    } catch (err) {
+        console.error('Avatar upload failed:', err);
+        status.style.color = '#ff4444';
+        status.textContent = 'Upload failed. Check bucket permissions in Supabase.';
+    }
+}
+
+// ── PATCH 5g: FETCH LIVE YEARBOOK STATUS FROM SUPABASE ──
+async function fetchYearbookStatus() {
+    if (!studentSessionData.passport_id) return;
+    try {
+        const { data, error } = await _db
+            .from('students')
+            .select('yearbook_verified')
+            .eq('znode_passport_id', studentSessionData.passport_id)
+            .single();
+
+        if (!error && data) {
+            studentSessionData.yearbook_verified = data.yearbook_verified || false;
+            saveLocalState();
+            updateYearbookGateUI();
+        }
+    } catch(e) {
+        console.warn('Could not fetch yearbook status:', e);
+    }
+}
+
 // ── HELPERS ──
 function saveLocalState() {
     localStorage.setItem('znode_test_session', JSON.stringify(studentSessionData));
@@ -504,7 +779,7 @@ function signOut() {
     }
 }
 
-// ── BOOTSTRAP ──
+// ── BOOTSTRAP (PATCH 6: reads email, fetches live yearbook status) ──
 function bootstrap() {
     const authRaw  = localStorage.getItem('znodeStudentProfile');
     const cacheRaw = localStorage.getItem('znode_test_session');
@@ -516,20 +791,25 @@ function bootstrap() {
             const db = JSON.parse(authRaw);
             if (db.theme) document.body.setAttribute('data-theme', db.theme);
 
-            studentSessionData.username   = db.username          || '';
-            studentSessionData.full_name  = db.full_name         || '';
-            studentSessionData.matric_no  = db.matric_number     || '';
-            studentSessionData.passport_id = db.znode_passport_id || '';
-            studentSessionData.university = db.institution       || '';
-            studentSessionData.department = db.department        || '';
-            studentSessionData.faculty    = db.faculty           || '';
-            studentSessionData.avatar_url = db.avatar_url        || '';
+            studentSessionData.username    = db.username           || '';
+            studentSessionData.full_name   = db.full_name          || '';
+            studentSessionData.matric_no   = db.matric_number      || '';
+            studentSessionData.passport_id = db.znode_passport_id  || '';
+            studentSessionData.university  = db.institution        || '';
+            studentSessionData.department  = db.department         || '';
+            studentSessionData.faculty     = db.faculty            || '';
+            studentSessionData.avatar_url  = db.avatar_url         || '';
+            studentSessionData.email       = db.email              || ''; // PATCH 6a
 
             if (cacheRaw) {
                 try {
                     const cached = JSON.parse(cacheRaw);
                     if (Array.isArray(cached.custom_attributes)) {
                         studentSessionData.custom_attributes = cached.custom_attributes;
+                    }
+                    // Restore cached verified state as optimistic default
+                    if (typeof cached.yearbook_verified === 'boolean') {
+                        studentSessionData.yearbook_verified = cached.yearbook_verified;
                     }
                 } catch(e) {}
             }
@@ -540,6 +820,9 @@ function bootstrap() {
     }
 
     syncViewRenderState();
+
+    // PATCH 6b: Always fetch authoritative verified status from Supabase
+    fetchYearbookStatus();
 }
 
 bootstrap();
