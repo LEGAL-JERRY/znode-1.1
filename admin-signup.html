@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Z-Node DOS Signup</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Inter',sans-serif;
+}
+
+body{
+    background:#f7f7f7;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+.container{
+    width:100%;
+    max-width:500px;
+}
+
+.card{
+    background:white;
+    border-radius:20px;
+    padding:40px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.08);
+    border:1px solid #e5e5e5;
+}
+
+.logo{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.logo h1{
+    font-size:32px;
+    font-weight:700;
+    color:#111;
+}
+
+.logo p{
+    margin-top:8px;
+    color:#666;
+    font-size:14px;
+}
+
+.form-group{
+    margin-bottom:18px;
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    font-size:14px;
+    font-weight:600;
+    color:#222;
+}
+
+input,select{
+    width:100%;
+    padding:14px 16px;
+    border:1px solid #d9d9d9;
+    border-radius:12px;
+    font-size:15px;
+    outline:none;
+    transition:.2s;
+}
+
+input:focus,
+select:focus{
+    border-color:#000;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    border:none;
+    background:#000;
+    color:white;
+    font-size:15px;
+    font-weight:600;
+    border-radius:12px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+button:disabled{
+    opacity:.6;
+    cursor:not-allowed;
+}
+
+.status{
+    margin-top:15px;
+    text-align:center;
+    font-size:14px;
+}
+
+.success{
+    color:#15803d;
+}
+
+.error{
+    color:#dc2626;
+}
+
+.footer{
+    text-align:center;
+    margin-top:25px;
+    font-size:14px;
+    color:#666;
+}
+
+.footer a{
+    color:#000;
+    font-weight:600;
+    text-decoration:none;
+}
+
+.loading{
+    display:none;
+    text-align:center;
+    margin-bottom:15px;
+    color:#666;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+
+        <div class="logo">
+            <h1>Z-NODE</h1>
+            <p>Department Officer Registration</p>
+        </div>
+
+        <div id="loading" class="loading">
+            Loading institutions...
+        </div>
+
+        <form id="signupForm">
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input
+                    type="text"
+                    id="fullName"
+                    required
+                    placeholder="Enter your full name">
+            </div>
+
+            <div class="form-group">
+                <label>Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    required
+                    placeholder="Choose a username">
+            </div>
+
+            <div class="form-group">
+                <label>Institution</label>
+                <select id="institution" required>
+                    <option value="">Select Institution</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    required
+                    placeholder="Create password">
+            </div>
+
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    required
+                    placeholder="Confirm password">
+            </div>
+
+            <button type="submit" id="signupBtn">
+                Create DOS Account
+            </button>
+
+            <div id="status" class="status"></div>
+
+        </form>
+
+        <div class="footer">
+            Already have an account?
+            <a href="admin-login.html">Sign In</a>
+        </div>
+
+    </div>
+</div>
+
+<script type="module">
+
+/* ===========================================
+   REPLACE WITH YOUR SUPABASE VALUES
+=========================================== */
+
+import { createClient }
+from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+const SUPABASE_URL =
+'YOUR_SUPABASE_URL';
+
+const SUPABASE_ANON_KEY =
+'YOUR_SUPABASE_ANON_KEY';
+
+const supabase =
+createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
+
+/* ===========================================
+   DOM
+=========================================== */
+
+const form =
+document.getElementById('signupForm');
+
+const statusDiv =
+document.getElementById('status');
+
+const institutionSelect =
+document.getElementById('institution');
+
+const signupBtn =
+document.getElementById('signupBtn');
+
+const loadingDiv =
+document.getElementById('loading');
+
+/* ===========================================
+   LOAD INSTITUTIONS
+=========================================== */
+
+async function loadInstitutions(){
+
+    loadingDiv.style.display = 'block';
+
+    try{
+
+        const { data,error } =
+        await supabase
+        .from('institutions')
+        .select('id,name')
+        .order('name');
+
+        if(error) throw error;
+
+        data.forEach(inst => {
+
+            const option =
+            document.createElement('option');
+
+            option.value =
+            inst.id;
+
+            option.textContent =
+            inst.name;
+
+            institutionSelect.appendChild(option);
+
+        });
+
+    }
+    catch(err){
+
+        console.error(err);
+
+        statusDiv.innerHTML =
+        '<span class="error">Failed to load institutions.</span>';
+
+    }
+
+    loadingDiv.style.display = 'none';
+
+}
+
+loadInstitutions();
+
+/* ===========================================
+   PASSWORD HASHING
+=========================================== */
+
+async function hashPassword(password){
+
+    const encoder =
+    new TextEncoder();
+
+    const data =
+    encoder.encode(
+        password + 'znode_salt_2026'
+    );
+
+    const hashBuffer =
+    await crypto.subtle.digest(
+        'SHA-256',
+        data
+    );
+
+    return Array
+    .from(
+        new Uint8Array(hashBuffer)
+    )
+    .map(b =>
+        b.toString(16).padStart(2,'0')
+    )
+    .join('');
+
+}
+
+/* ===========================================
+   REGISTER
+=========================================== */
+
+form.addEventListener(
+'submit',
+async (e)=>{
+
+    e.preventDefault();
+
+    statusDiv.innerHTML = '';
+
+    const fullName =
+    document
+    .getElementById('fullName')
+    .value
+    .trim();
+
+    const username =
+    document
+    .getElementById('username')
+    .value
+    .trim();
+
+    const institutionId =
+    document
+    .getElementById('institution')
+    .value;
+
+    const password =
+    document
+    .getElementById('password')
+    .value;
+
+    const confirmPassword =
+    document
+    .getElementById('confirmPassword')
+    .value;
+
+    if(password !== confirmPassword){
+
+        statusDiv.innerHTML =
+        '<span class="error">Passwords do not match.</span>';
+
+        return;
+    }
+
+    signupBtn.disabled = true;
+    signupBtn.textContent = 'Creating Account...';
+
+    try{
+
+        const { data:existing } =
+        await supabase
+        .from('institution_admins')
+        .select('id')
+        .eq('username',username)
+        .maybeSingle();
+
+        if(existing){
+
+            throw new Error(
+                'Username already exists'
+            );
+
+        }
+
+        const passwordHash =
+        await hashPassword(password);
+
+        const { error } =
+        await supabase
+        .from('institution_admins')
+        .insert({
+
+            username,
+            full_name: fullName,
+            institution_id: institutionId,
+            password_hash: passwordHash,
+            role:'DOS'
+
+        });
+
+        if(error) throw error;
+
+        /* SESSION STORAGE */
+
+        localStorage.setItem(
+            'dos_username',
+            username
+        );
+
+        localStorage.setItem(
+            'dos_name',
+            fullName
+        );
+
+        localStorage.setItem(
+            'dos_institution',
+            institutionId
+        );
+
+        statusDiv.innerHTML =
+        '<span class="success">Account created successfully.</span>';
+
+        setTimeout(()=>{
+
+            window.location.href =
+            'z-node-DOS.html';
+
+        },1200);
+
+    }
+    catch(err){
+
+        console.error(err);
+
+        statusDiv.innerHTML =
+        `<span class="error">${err.message}</span>`;
+
+    }
+
+    signupBtn.disabled = false;
+    signupBtn.textContent =
+    'Create DOS Account';
+
+});
+</script>
+
+</body>
+</html>
