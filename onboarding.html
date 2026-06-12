@@ -47,30 +47,6 @@ h1, h2, h3 { font-weight:900; letter-spacing:-0.03em; line-height:1.1; }
 .fullscreen-overlay h1 { font-size:clamp(40px, 8vw, 72px); margin-bottom:16px; }
 .fullscreen-overlay p { font-size:18px; color:var(--text-muted); max-width:500px; margin-bottom:40px; line-height:1.5; font-weight:500; }
 
-/* ── THEME PICKER ── */
-.theme-pick-wrap {
-    display:flex; gap:20px; width:100%; max-width:500px;
-}
-.theme-box {
-    flex:1; aspect-ratio:3/4; max-height:220px;
-    border-radius:24px; cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:12px; font-size:14px; font-weight:700; letter-spacing:0.05em;
-    transition:all 0.25s var(--ease); border:2px solid transparent;
-}
-.theme-box.dark-box {
-    background:#000; color:#fff;
-    border-color:#333;
-}
-.theme-box.light-box {
-    background:#fff; color:#000;
-    border-color:#e5e7eb;
-}
-.theme-box:hover { transform:translateY(-4px); }
-.theme-box.dark-box:hover { border-color:#fff; box-shadow:0 16px 48px rgba(255,255,255,0.1); }
-.theme-box.light-box:hover { border-color:#000; box-shadow:0 16px 48px rgba(0,0,0,0.1); }
-.theme-box svg { opacity:0.7; }
-
 /* ── AUTH CHOICE OVERLAY (3 options) ── */
 .auth-options {
     display:flex; flex-direction:column; gap:14px; width:100%; max-width:400px;
@@ -106,7 +82,7 @@ h1, h2, h3 { font-weight:900; letter-spacing:-0.03em; line-height:1.1; }
 
 .brutalist-panel { background:var(--bg-base); border:1px solid var(--border-strong); border-radius:var(--radius-panel); padding:48px; box-shadow:0 20px 60px rgba(0,0,0,0.05); }
 .brutalist-panel h2 { font-size:40px; margin-bottom:12px; }
-.brutalist-panel p.sub { color:var(--text-muted); font-size:16px; font-weight:500; margin-bottom:40px; }
+.brutalist-panel p.sub { color:var(--text-muted); font-size:16px; font-weight:500; margin-bottom:40px; line-height:1.5; }
 
 .step-view { display:none; }
 .step-view.active { display:block; animation:fadeIn 0.4s var(--ease); }
@@ -125,6 +101,21 @@ h1, h2, h3 { font-weight:900; letter-spacing:-0.03em; line-height:1.1; }
 .search-option { padding:14px 20px; font-size:15px; font-weight:500; cursor:pointer; transition:background 0.15s; color:var(--text-main); }
 .search-option:hover { background:var(--border-strong); }
 .search-loading { padding:14px 20px; font-size:13px; color:var(--text-muted); }
+
+/* Cascading section reveal */
+.cascade-section { display:none; margin-top:8px; animation:fadeIn 0.35s var(--ease); }
+.cascade-section.visible { display:block; }
+.cascade-divider { height:1px; background:var(--border-light); margin:8px 0 24px; }
+
+/* Selected badge */
+.selected-badge {
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 16px; border-radius:40px;
+    background:var(--bg-surface); border:1px solid var(--border-strong);
+    font-size:13px; font-weight:700; color:var(--text-main);
+    margin-top:8px;
+}
+.selected-badge span { color:var(--text-muted); font-weight:500; }
 
 /* Section header inside form */
 .form-section-header { margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--border-light); }
@@ -167,7 +158,6 @@ h1, h2, h3 { font-weight:900; letter-spacing:-0.03em; line-height:1.1; }
 @media (max-width: 640px) {
     .brutalist-panel { padding:32px 24px; border-radius:30px; }
     .brutalist-panel h2 { font-size:32px; }
-    .theme-pick-wrap { gap:12px; }
 }
 
 /* Login panel */
@@ -216,13 +206,8 @@ h1, h2, h3 { font-weight:900; letter-spacing:-0.03em; line-height:1.1; }
         </div>
     </div>
 </div>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            Light
-        </div>
-    </div>
-</div>
 
-<!-- ════ STEP 2: AUTH CHOICE (3 options) ════ -->
+<!-- ════ STEP 2: AUTH CHOICE ════ -->
 <div class="fullscreen-overlay" id="authChoiceOverlay">
     <div class="eyebrow" style="margin-bottom:24px;">Z-NODE // ACCESS</div>
     <h1>Enter the<br>Network.</h1>
@@ -258,7 +243,7 @@ h1, h2, h3 { font-weight:900; letter-spacing:-0.03em; line-height:1.1; }
     </div>
 </div>
 
-<!-- ════ CREATE YEARBOOK ONBOARDING ════ -->
+<!-- ════ CREATE YEARBOOK (DOS) ONBOARDING ════ -->
 <div class="onboarding-container" id="createYearbookPortal">
     <div class="progress-header">
         <span class="eyebrow" id="cyStepCounter">STAGE 1/2</span>
@@ -267,13 +252,22 @@ h1, h2, h3 { font-weight:900; letter-spacing:-0.03em; line-height:1.1; }
     </div>
     <div class="brutalist-panel">
 
-        <!-- CY Step 0: DOS Info -->
+        <!-- ── CY Step 0: DOS Personal Info ── -->
         <div class="step-view active" id="cyStep0">
             <h2>DOS Profile.</h2>
             <p class="sub">Tell us about yourself as Director of Social.</p>
+
             <div class="input-group">
                 <label class="eyebrow">Full Name</label>
-                <input type="text" class="input-field" id="cyFullName" placeholder="Your full name">
+                <input type="text" class="input-field" id="dosName" placeholder="Your full name">
+            </div>
+            <div class="input-group">
+                <label class="eyebrow">Email Address</label>
+                <input type="email" class="input-field" id="dosEmail" placeholder="your@email.com">
+            </div>
+            <div class="input-group">
+                <label class="eyebrow">Secure Password</label>
+                <input type="password" class="input-field" id="dosPassword" placeholder="••••••••">
             </div>
             <div class="input-group">
                 <label class="eyebrow">Username</label>
@@ -288,53 +282,74 @@ h1, h2, h3 { font-weight:900; letter-spacing:-0.03em; line-height:1.1; }
                 <input type="text" class="input-field" id="cyMatric" placeholder="e.g. FUL/22/0001">
                 <p style="font-size:12px; color:var(--text-muted); margin-top:8px; font-weight:500;">Used to generate your Z-Node Passport ID</p>
             </div>
-            <div class="input-group">
-                <label class="eyebrow">Email Address</label>
-                <input type="email" class="input-field" id="cyEmail" placeholder="your@email.com">
-            </div>
-            <div class="input-group">
-                <label class="eyebrow">Secure Password</label>
-                <input type="password" class="input-field" id="cyPass" placeholder="••••••••">
-            </div>
         </div>
 
-        <!-- CY Step 1: Dept Info -->
+        <!-- ── CY Step 1: Department Setup (cascading search — synced to backend) ── -->
         <div class="step-view" id="cyStep1">
             <h2>Department Setup.</h2>
             <p class="sub">Link this yearbook to your department.</p>
+
+            <!-- University search -->
             <div class="input-group">
                 <label class="eyebrow">University</label>
                 <div class="search-wrap">
-                    <input type="text" class="input-field" id="cyUni" placeholder="Search your university..." autocomplete="off" oninput="searchField('cyUni','cyUniDrop','institutions','name')">
-                    <div class="search-dropdown" id="cyUniDrop"></div>
+                    <input
+                        type="text"
+                        class="input-field"
+                        id="universitySearch"
+                        placeholder="Search your university..."
+                        autocomplete="off"
+                        oninput="searchUniversities()"
+                    >
+                    <div class="search-dropdown" id="universityResults"></div>
+                </div>
+                <!-- Selected institution badge -->
+                <div id="selectedInstitutionBadge" style="display:none;" class="selected-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span id="selectedInstitutionName"></span>
                 </div>
             </div>
-            <div class="input-group">
-                <label class="eyebrow">Faculty</label>
-                <div class="search-wrap">
-                    <input type="text" class="input-field" id="cyFaculty" placeholder="Search faculty..." autocomplete="off" oninput="searchField('cyFaculty','cyFacultyDrop','faculties','name')">
-                    <div class="search-dropdown" id="cyFacultyDrop"></div>
+
+            <!-- Faculty (hidden until institution selected) -->
+            <div class="cascade-section" id="facultyBox">
+                <div class="cascade-divider"></div>
+                <div class="input-group" style="margin-bottom:0;">
+                    <label class="eyebrow">Faculty</label>
+                    <div id="facultyResults" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
+                    <div id="selectedFacultyBadge" style="display:none;" class="selected-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span id="selectedFacultyName"></span>
+                    </div>
                 </div>
             </div>
-            <div class="input-group">
-                <label class="eyebrow">Department</label>
-                <div class="search-wrap">
-                    <input type="text" class="input-field" id="cyDept" placeholder="Search department..." autocomplete="off" oninput="searchField('cyDept','cyDeptDrop','departments','name')">
-                    <div class="search-dropdown" id="cyDeptDrop"></div>
+
+            <!-- Department (hidden until faculty selected) -->
+            <div class="cascade-section" id="departmentBox">
+                <div class="cascade-divider"></div>
+                <div class="input-group" style="margin-bottom:0;">
+                    <label class="eyebrow">Department</label>
+                    <div id="departmentResults" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
+                    <div id="selectedDepartmentBadge" style="display:none;" class="selected-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span id="selectedDepartmentName"></span>
+                    </div>
                 </div>
             </div>
-            <div class="input-group">
-                <label class="eyebrow">Class Of (Graduating Year)</label>
-                <input type="number" class="input-field" id="cyYear" placeholder="2026" min="2024" max="2035">
-            </div>
-            <div class="input-group" style="margin-top:32px; padding-top:24px; border-top:1px solid var(--border-light);">
-                <label class="eyebrow" style="color:var(--text-main);">🔐 Department Join Password</label>
-                <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px; font-weight:500; margin-top:6px;">Create a secret password. Students will need this to join your yearbook.</p>
-                <input type="password" class="input-field" id="cyDeptPass" placeholder="Choose a department password">
-            </div>
-            <div class="input-group">
-                <label class="eyebrow">Confirm Department Password</label>
-                <input type="password" class="input-field" id="cyDeptPassConfirm" placeholder="Repeat the password">
+
+            <div style="margin-top:32px; padding-top:24px; border-top:1px solid var(--border-light);">
+                <div class="input-group">
+                    <label class="eyebrow">Class Of (Graduating Year)</label>
+                    <input type="number" class="input-field" id="cyYear" placeholder="2026" min="2024" max="2035">
+                </div>
+                <div class="input-group">
+                    <label class="eyebrow" style="color:var(--text-main);">🔐 Department Join Password</label>
+                    <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px; font-weight:500; margin-top:6px;">Create a secret password. Students will need this to join your yearbook.</p>
+                    <input type="password" class="input-field" id="cyDeptPass" placeholder="Choose a department password">
+                </div>
+                <div class="input-group">
+                    <label class="eyebrow">Confirm Department Password</label>
+                    <input type="password" class="input-field" id="cyDeptPassConfirm" placeholder="Repeat the password">
+                </div>
             </div>
         </div>
 
@@ -436,43 +451,35 @@ h1, h2, h3 { font-weight:900; letter-spacing:-0.03em; line-height:1.1; }
                 <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px; font-weight:500;">Click a platform to add your handle</p>
                 <div class="socials-grid">
                     <div class="social-trigger" id="trigX" onclick="toggleSocial('x')">
-                        <!-- X / Twitter -->
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.75l7.73-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                         X
                     </div>
                     <div class="social-trigger" id="trigIg" onclick="toggleSocial('instagram')">
-                        <!-- Instagram -->
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
                         Instagram
                     </div>
                     <div class="social-trigger" id="trigFb" onclick="toggleSocial('facebook')">
-                        <!-- Facebook -->
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
                         Facebook
                     </div>
                     <div class="social-trigger" id="trigWa" onclick="toggleSocial('whatsapp')">
-                        <!-- WhatsApp -->
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
                         WhatsApp
                     </div>
                     <div class="social-trigger" id="trigLi" onclick="toggleSocial('linkedin')">
-                        <!-- LinkedIn -->
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
                         LinkedIn
                     </div>
                     <div class="social-trigger" id="trigGh" onclick="toggleSocial('github')">
-                        <!-- GitHub -->
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
                         GitHub
                     </div>
                     <div class="social-trigger" id="trigTt" onclick="toggleSocial('tiktok')">
-                        <!-- TikTok -->
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>
                         TikTok
                     </div>
                 </div>
 
-                <!-- Social input rows (shown when toggled) -->
                 <div id="social-x" class="social-input-row">
                     <div class="social-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.75l7.73-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
                     <input type="text" placeholder="@yourhandle" id="social-x-val">
@@ -539,12 +546,12 @@ const { createClient } = supabase;
 const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
 // ════ OVERLAY REFS ════
-const themeOverlay       = document.getElementById('themeOverlay');
-const authOverlay        = document.getElementById('authChoiceOverlay');
-const loginOverlay       = document.getElementById('loginOverlay');
+const themeOverlay         = document.getElementById('themeOverlay');
+const authOverlay          = document.getElementById('authChoiceOverlay');
+const loginOverlay         = document.getElementById('loginOverlay');
 const createYearbookPortal = document.getElementById('createYearbookPortal');
 const joinYearbookPortal   = document.getElementById('joinYearbookPortal');
-const submittingOverlay  = document.getElementById('submittingOverlay');
+const submittingOverlay    = document.getElementById('submittingOverlay');
 
 let studentImageBlob = null;
 
@@ -584,186 +591,252 @@ function backToAuth() {
     setTimeout(() => authOverlay.classList.add('active'), 400);
 }
 
-// ════ SEARCH FIELD (live Supabase search) ════
-let searchTimers = {};
-async function searchField(inputId, dropId, table, column) {
-    const input = document.getElementById(inputId);
-    const drop  = document.getElementById(dropId);
-    const q = input.value.trim();
+// ════════════════════════════════════════════════════════
+// DOS CASCADING INSTITUTION SEARCH (Change 1 — synced to backend)
+// Uses institution_id / faculty_id / department_id as UUID foreign keys
+// Writes to institution_admins + profiles via supabase.auth.signUp
+// ════════════════════════════════════════════════════════
 
-    if (q.length < 2) { drop.innerHTML = ''; drop.classList.remove('open'); return; }
+let selectedInstitution = null;
+let selectedFaculty     = null;
+let selectedDepartment  = null;
 
-    clearTimeout(searchTimers[inputId]);
+let uniSearchTimer = null;
+
+async function searchUniversities() {
+    const value = document.getElementById('universitySearch').value;
+    const drop  = document.getElementById('universityResults');
+
+    // Reset downstream selections whenever user retypes
+    selectedInstitution = null;
+    selectedFaculty     = null;
+    selectedDepartment  = null;
+    document.getElementById('selectedInstitutionBadge').style.display = 'none';
+    document.getElementById('facultyBox').classList.remove('visible');
+    document.getElementById('departmentBox').classList.remove('visible');
+
+    if (value.length < 2) { drop.innerHTML = ''; drop.classList.remove('open'); return; }
+
+    clearTimeout(uniSearchTimer);
     drop.innerHTML = '<div class="search-loading">Searching...</div>';
     drop.classList.add('open');
 
-    searchTimers[inputId] = setTimeout(async () => {
+    uniSearchTimer = setTimeout(async () => {
         try {
-            const { data, error } = await _db.from(table).select(column).ilike(column, `%${q}%`).limit(8);
+            const { data, error } = await _db
+                .from('institutions')
+                .select('*')
+                .ilike('name', `%${value}%`)
+                .limit(8);
+
             if (error || !data || data.length === 0) {
-                drop.innerHTML = '<div class="search-loading">No results found.</div>';
+                drop.innerHTML = '<div class="search-loading">No universities found.</div>';
                 return;
             }
-            drop.innerHTML = data.map(row =>
-                `<div class="search-option" onclick="selectOption('${inputId}','${dropId}','${row[column].replace(/'/g,"\\'")}')">
-                    ${row[column]}
-                </div>`
-            ).join('');
+            drop.innerHTML = '';
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'search-option';
+                div.textContent = item.name;
+                div.onclick = () => selectInstitution(item);
+                drop.appendChild(div);
+            });
         } catch(e) {
             drop.innerHTML = '<div class="search-loading">Search unavailable.</div>';
         }
     }, 350);
 }
 
-function selectOption(inputId, dropId, value) {
-    document.getElementById(inputId).value = value;
-    document.getElementById(dropId).classList.remove('open');
-    document.getElementById(dropId).innerHTML = '';
-}
+async function selectInstitution(item) {
+    selectedInstitution = item;
 
-// Close dropdowns on outside click
-document.addEventListener('click', e => {
-    if (!e.target.closest('.search-wrap')) {
-        document.querySelectorAll('.search-dropdown').forEach(d => {
-            d.classList.remove('open'); d.innerHTML = '';
+    // Update UI
+    document.getElementById('universitySearch').value = item.name;
+    const drop = document.getElementById('universityResults');
+    drop.innerHTML = ''; drop.classList.remove('open');
+    document.getElementById('selectedInstitutionName').textContent = item.name;
+    document.getElementById('selectedInstitutionBadge').style.display = 'inline-flex';
+
+    // Reset faculty/dept
+    selectedFaculty   = null;
+    selectedDepartment = null;
+    document.getElementById('selectedFacultyBadge').style.display   = 'none';
+    document.getElementById('selectedDepartmentBadge').style.display = 'none';
+    document.getElementById('departmentBox').classList.remove('visible');
+
+    // Load faculties for this institution
+    const facultyResultsEl = document.getElementById('facultyResults');
+    facultyResultsEl.innerHTML = '<div style="font-size:13px; color:var(--text-muted); padding:4px 0;">Loading faculties...</div>';
+    document.getElementById('facultyBox').classList.add('visible');
+
+    try {
+        const { data, error } = await _db
+            .from('faculties')
+            .select('*')
+            .eq('institution_id', item.id);
+
+        if (error || !data || data.length === 0) {
+            facultyResultsEl.innerHTML = '<div style="font-size:13px; color:var(--text-muted); padding:4px 0;">No faculties found for this institution.</div>';
+            return;
+        }
+        facultyResultsEl.innerHTML = '';
+        data.forEach(f => {
+            const div = document.createElement('div');
+            div.className = 'search-option';
+            div.style.cssText = 'border-radius:12px; border:1px solid var(--border-strong);';
+            div.textContent = f.name;
+            div.onclick = () => selectFaculty(f);
+            facultyResultsEl.appendChild(div);
         });
+    } catch(e) {
+        facultyResultsEl.innerHTML = '<div style="font-size:13px; color:var(--text-muted); padding:4px 0;">Could not load faculties.</div>';
     }
-});
-
-// ════ SOCIALS TOGGLE ════
-const socialMap = { x:'trigX', instagram:'trigIg', facebook:'trigFb', whatsapp:'trigWa', linkedin:'trigLi', github:'trigGh', tiktok:'trigTt' };
-function toggleSocial(key) {
-    const row = document.getElementById(`social-${key}`);
-    const trig = document.getElementById(socialMap[key]);
-    const isVisible = row.classList.contains('visible');
-    row.classList.toggle('visible', !isVisible);
-    trig.classList.toggle('active', !isVisible);
-    if (!isVisible) document.getElementById(`social-${key}-val`).focus();
 }
 
-function getSocials() {
-    const obj = {};
-    Object.keys(socialMap).forEach(key => {
-        const val = (document.getElementById(`social-${key}-val`)?.value || '').trim();
-        if (val) obj[key] = val;
-    });
-    return obj;
-}
+async function selectFaculty(f) {
+    selectedFaculty   = f;
+    selectedDepartment = null;
 
-// ════ IMAGE HANDLING (high quality — no downsizing) ════
-document.getElementById('regPhoto').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    studentImageBlob = file;
-    const reader = new FileReader();
-    reader.onload = ev => {
-        const preview = document.getElementById('avatarPreview');
-        preview.src = ev.target.result;
-        preview.style.display = 'block';
-        document.getElementById('dropText').innerHTML = `<span style="font-size:14px; font-weight:600; color:var(--text-main);">✓ Photo selected</span>`;
-    };
-    reader.readAsDataURL(file);
-});
+    // Update UI
+    document.getElementById('selectedFacultyName').textContent = f.name;
+    document.getElementById('selectedFacultyBadge').style.display = 'inline-flex';
+    document.getElementById('selectedDepartmentBadge').style.display = 'none';
 
-// ════ PASSWORD HASH ════
-async function hashPassword(pw) {
-    const enc = new TextEncoder();
-    const buf = await crypto.subtle.digest('SHA-256', enc.encode(pw + 'znode_salt_2026'));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
+    // Collapse faculty list visually (keep box open for badge)
+    document.getElementById('facultyResults').innerHTML = '';
 
-// ════════════════════════════════
-// CREATE YEARBOOK FLOW
-// ════════════════════════════════
-let cyStep = 0;
-const cyTotalSteps = 2;
-const cyStepNames = ['DOS IDENTITY', 'DEPARTMENT'];
+    // Load departments for this faculty
+    const deptResultsEl = document.getElementById('departmentResults');
+    deptResultsEl.innerHTML = '<div style="font-size:13px; color:var(--text-muted); padding:4px 0;">Loading departments...</div>';
+    document.getElementById('departmentBox').classList.add('visible');
 
-function cyUpdateView() {
-    document.querySelectorAll('#createYearbookPortal .step-view').forEach((el, i) => {
-        el.classList.toggle('active', i === cyStep);
-    });
-    document.getElementById('cyStepCounter').textContent = `STAGE ${cyStep+1}/${cyTotalSteps}`;
-    document.getElementById('cyStepName').textContent = cyStepNames[cyStep];
-    document.getElementById('cyProgressFill').style.width = `${((cyStep+1)/cyTotalSteps)*100}%`;
-    document.getElementById('cyBtnBack').style.visibility = cyStep === 0 ? 'hidden' : 'visible';
-    document.getElementById('cyBtnNext').textContent = cyStep === cyTotalSteps - 1 ? 'Create Yearbook' : 'Proceed';
-}
+    try {
+        const { data, error } = await _db
+            .from('departments')
+            .select('*')
+            .eq('faculty_id', f.id);
 
-function cyValidateStep() {
-    if (cyStep === 0) {
-        if (!document.getElementById('cyFullName').value || !document.getElementById('cyUsername').value || !document.getElementById('cyPosition').value || !document.getElementById('cyMatric').value || !document.getElementById('cyEmail').value || !document.getElementById('cyPass').value) {
-            showToast('Please fill all fields including Matric Number.', 'error'); return false;
+        if (error || !data || data.length === 0) {
+            deptResultsEl.innerHTML = '<div style="font-size:13px; color:var(--text-muted); padding:4px 0;">No departments found for this faculty.</div>';
+            return;
         }
+        deptResultsEl.innerHTML = '';
+        data.forEach(d => {
+            const div = document.createElement('div');
+            div.className = 'search-option';
+            div.style.cssText = 'border-radius:12px; border:1px solid var(--border-strong);';
+            div.textContent = d.name;
+            div.onclick = () => {
+                selectedDepartment = d;
+                // Update UI badge
+                document.getElementById('selectedDepartmentName').textContent = d.name;
+                document.getElementById('selectedDepartmentBadge').style.display = 'inline-flex';
+                // Collapse dept list
+                deptResultsEl.innerHTML = '';
+                showToast(`Department selected: ${d.name}`);
+            };
+            deptResultsEl.appendChild(div);
+        });
+    } catch(e) {
+        deptResultsEl.innerHTML = '<div style="font-size:13px; color:var(--text-muted); padding:4px 0;">Could not load departments.</div>';
     }
-    if (cyStep === 1) {
-        if (!document.getElementById('cyUni').value || !document.getElementById('cyDept').value || !document.getElementById('cyYear').value) {
-            showToast('University, Department and Year are required.', 'error'); return false;
-        }
-        const dp = document.getElementById('cyDeptPass').value;
-        const dc = document.getElementById('cyDeptPassConfirm').value;
-        if (!dp) { showToast('Please set a Department Join Password.', 'error'); return false; }
-        if (dp.length < 6) { showToast('Department password must be at least 6 characters.', 'error'); return false; }
-        if (dp !== dc) { showToast('Department passwords do not match.', 'error'); return false; }
-    }
-    return true;
 }
 
-function cyNextStep() {
-    if (!cyValidateStep()) return;
-    if (cyStep < cyTotalSteps - 1) { cyStep++; cyUpdateView(); }
-    else submitCreateYearbook();
-}
-function cyPrevStep() {
-    if (cyStep > 0) { cyStep--; cyUpdateView(); }
-}
+// ════ DOS SUBMIT — writes to institution_admins + profiles via supabase.auth ════
+async function submitDOS() {
+    const name     = document.getElementById('dosName').value.trim();
+    const email    = document.getElementById('dosEmail').value.trim();
+    const password = document.getElementById('dosPassword').value;
 
-async function submitCreateYearbook() {
+    if (!name || !email || !password) {
+        showToast('Name, email and password are required.', 'error'); return;
+    }
+    if (!selectedInstitution) {
+        showToast('Please search and select your university.', 'error'); return;
+    }
+    if (!selectedFaculty) {
+        showToast('Please select a faculty.', 'error'); return;
+    }
+    if (!selectedDepartment) {
+        showToast('Please select a department.', 'error'); return;
+    }
+
+    const dp = document.getElementById('cyDeptPass').value;
+    const dc = document.getElementById('cyDeptPassConfirm').value;
+    if (!dp) { showToast('Please set a Department Join Password.', 'error'); return; }
+    if (dp.length < 6) { showToast('Department password must be at least 6 characters.', 'error'); return; }
+    if (dp !== dc) { showToast('Department passwords do not match.', 'error'); return; }
+    if (!document.getElementById('cyYear').value) {
+        showToast('Graduating year is required.', 'error'); return;
+    }
+
     createYearbookPortal.style.display = 'none';
     submittingOverlay.classList.add('active');
     const msg = document.getElementById('submitMsg');
+
     try {
-        msg.textContent = 'Verifying handle...';
-        const username = document.getElementById('cyUsername').value.trim();
-        const { data: existing } = await _db.from('students').select('id').eq('username', username).maybeSingle();
-        if (existing) throw new Error(`@${username} is already taken.`);
+        msg.textContent = 'Creating account...';
+        const { data: authData, error: authError } = await _db.auth.signUp({ email, password });
+        if (authError) throw new Error(authError.message);
+        const user = authData.user;
 
-        msg.textContent = 'Securing credentials...';
-        const pwdHash = await hashPassword(document.getElementById('cyPass').value);
-
-        msg.textContent = 'Creating yearbook...';
-        const deptPwdHash = await hashPassword(document.getElementById('cyDeptPass').value);
+        msg.textContent = 'Registering DOS record...';
+        const deptPwdHash = await hashPassword(dp);
+        const cyYearVal   = parseInt(document.getElementById('cyYear').value);
         const cyMatricVal = document.getElementById('cyMatric').value.trim();
-        const cyUniVal = document.getElementById('cyUni').value.trim();
-        const cyYearVal = document.getElementById('cyYear').value;
+        const username    = document.getElementById('cyUsername').value.trim();
         const cyMatricSuffix = cyMatricVal.replace(/[^a-zA-Z0-9]/g,'').slice(-6).toUpperCase();
-        const cyPassportId = `ZNP-${cyUniVal.toUpperCase().replace(/\s/g,'').slice(0,8)}-${cyYearVal}-${cyMatricSuffix}`;
+        const cyPassportId = `ZNP-${selectedInstitution.name.toUpperCase().replace(/\s/g,'').slice(0,8)}-${cyYearVal}-${cyMatricSuffix}`;
 
-        const payload = {
+        const { error: adminError } = await _db
+            .from('institution_admins')
+            .insert({
+                user_id:        user.id,
+                institution_id: selectedInstitution.id,
+                faculty_id:     selectedFaculty.id,
+                department_id:  selectedDepartment.id,
+                role:           'DOS',
+                status:         'pending'
+            });
+        if (adminError) throw new Error(adminError.message);
+
+        msg.textContent = 'Building profile...';
+        const { error: profileError } = await _db
+            .from('profiles')
+            .insert({
+                id:                user.id,
+                name:              name,
+                email:             email,
+                role:              'DOS',
+                username:          username || null,
+                matric_number:     cyMatricVal || null,
+                znode_passport_id: cyPassportId,
+                position:          document.getElementById('cyPosition').value.trim() || null,
+                graduation_year:   cyYearVal,
+                dept_password_hash: deptPwdHash,
+                theme:             document.body.getAttribute('data-theme') || 'dark',
+                is_dos:            true,
+                is_verified:       false
+            });
+        if (profileError) throw new Error(profileError.message);
+
+        // Cache locally so app.html can read it
+        localStorage.setItem('znodeStudentProfile', JSON.stringify({
+            id:             user.id,
+            name,
+            email,
+            role:           'DOS',
             username,
-            full_name: document.getElementById('cyFullName').value.trim(),
-            email: document.getElementById('cyEmail').value.trim(),
-            password_hash: pwdHash,
-            matric_number: cyMatricVal,
-            znode_passport_id: cyPassportId,
-            department: document.getElementById('cyDept').value.trim().toLowerCase(),
-            faculty: document.getElementById('cyFaculty').value.trim().toLowerCase(),
-            institution: cyUniVal.toLowerCase(),
-            graduation_year: parseInt(cyYearVal),
-            role: document.getElementById('cyPosition').value.trim(),
-            dept_password_hash: deptPwdHash,
-            is_dos: true,
-            theme: document.body.getAttribute('data-theme') || 'dark',
-            is_verified: false
-        };
+            institution_id: selectedInstitution.id,
+            faculty_id:     selectedFaculty.id,
+            department_id:  selectedDepartment.id,
+            status:         'pending'
+        }));
 
-        const { data: dos, error } = await _db.from('students').insert(payload).select().maybeSingle();
-        if (error) throw new Error(error.message);
-
-        localStorage.setItem('znodeStudentProfile', JSON.stringify(dos));
         document.querySelector('#submittingOverlay h2').textContent = 'Yearbook Created ✓';
         msg.textContent = 'Redirecting to your dashboard...';
         setTimeout(() => { window.location.href = 'app.html'; }, 1500);
+
     } catch(err) {
         submittingOverlay.classList.remove('active');
         createYearbookPortal.style.display = 'block';
@@ -772,21 +845,63 @@ async function submitCreateYearbook() {
 }
 
 // ════════════════════════════════
-// JOIN YEARBOOK FLOW
+// CREATE YEARBOOK STEP NAVIGATION
+// ════════════════════════════════
+let cyStep = 0;
+const cyTotalSteps = 2;
+const cyStepNames  = ['DOS IDENTITY', 'DEPARTMENT'];
+
+function cyUpdateView() {
+    document.querySelectorAll('#createYearbookPortal .step-view').forEach((el, i) => {
+        el.classList.toggle('active', i === cyStep);
+    });
+    document.getElementById('cyStepCounter').textContent = `STAGE ${cyStep+1}/${cyTotalSteps}`;
+    document.getElementById('cyStepName').textContent     = cyStepNames[cyStep];
+    document.getElementById('cyProgressFill').style.width = `${((cyStep+1)/cyTotalSteps)*100}%`;
+    document.getElementById('cyBtnBack').style.visibility = cyStep === 0 ? 'hidden' : 'visible';
+    document.getElementById('cyBtnNext').textContent      = cyStep === cyTotalSteps - 1 ? 'Create Yearbook' : 'Proceed';
+}
+
+function cyValidateStep() {
+    if (cyStep === 0) {
+        if (!document.getElementById('dosName').value ||
+            !document.getElementById('dosEmail').value ||
+            !document.getElementById('dosPassword').value) {
+            showToast('Name, email and password are required.', 'error'); return false;
+        }
+        if (!document.getElementById('cyMatric').value) {
+            showToast('Matriculation number is required.', 'error'); return false;
+        }
+    }
+    // Step 1 validation is handled inside submitDOS()
+    return true;
+}
+
+function cyNextStep() {
+    if (!cyValidateStep()) return;
+    if (cyStep < cyTotalSteps - 1) { cyStep++; cyUpdateView(); }
+    else submitDOS();
+}
+function cyPrevStep() {
+    if (cyStep > 0) { cyStep--; cyUpdateView(); }
+}
+
+// ════════════════════════════════
+// JOIN YEARBOOK FLOW (unchanged)
 // ════════════════════════════════
 let jyStep = 0;
 const jyTotalSteps = 3;
-const jyStepNames = ['YOUR IDENTITY', 'YOUR INSTITUTION', 'YOUR PRESENCE'];
+const jyStepNames  = ['YOUR IDENTITY', 'YOUR INSTITUTION', 'YOUR PRESENCE'];
 
 function jyUpdateView() {
     document.querySelectorAll('#joinYearbookPortal .step-view').forEach((el, i) => {
         el.classList.toggle('active', i === jyStep);
     });
-    document.getElementById('jyStepCounter').textContent = `STAGE ${jyStep+1}/${jyTotalSteps}`;
-    document.getElementById('jyStepName').textContent = jyStepNames[jyStep];
-    document.getElementById('jyProgressFill').style.width = `${((jyStep+1)/jyTotalSteps)*100}%`;
-    document.getElementById('jyBtnBack').style.visibility = jyStep === 0 ? 'hidden' : 'visible';
-    document.getElementById('jyBtnNext').textContent = jyStep === jyTotalSteps - 1 ? 'Deploy Profile' : 'Proceed';
+    document.getElementById('jyStepCounter').textContent  = `STAGE ${jyStep+1}/${jyTotalSteps}`;
+    document.getElementById('jyStepName').textContent      = jyStepNames[jyStep];
+    document.getElementById('jyProgressFill').style.width  = `${((jyStep+1)/jyTotalSteps)*100}%`;
+    document.getElementById('jyBtnBack').style.visibility  = jyStep === 0 ? 'hidden' : 'visible';
+    document.getElementById('jyBtnNext').textContent       = jyStep === jyTotalSteps - 1 ? 'Deploy Profile' : 'Proceed';
 }
 
 function jyValidateStep() {
@@ -812,7 +927,6 @@ function jyValidateStep() {
 async function jyNextStep() {
     if (!jyValidateStep()) return;
 
-    // Check if yearbook exists for this dept + year on step 1
     if (jyStep === 1) {
         const dept = document.getElementById('jyDept').value.trim().toLowerCase();
         const year = parseInt(document.getElementById('jyYear').value);
@@ -829,8 +943,7 @@ async function jyNextStep() {
                 showToast('No yearbook found for this department & year. Ask your DOS to create one first, or create it yourself!', 'error');
                 return;
             }
-            // Verify dept join password
-            const enteredPwd = document.getElementById('jyDeptPass').value;
+            const enteredPwd  = document.getElementById('jyDeptPass').value;
             const enteredHash = await hashPassword(enteredPwd);
             if (yb.dept_password_hash && enteredHash !== yb.dept_password_hash) {
                 showToast('Incorrect Department Join Password. Ask your DOS for the correct password.', 'error');
@@ -868,28 +981,28 @@ async function submitJoinYearbook() {
             avatarUrl = _db.storage.from('avatars').getPublicUrl(fileName).data.publicUrl;
         }
 
-        const suffix = (document.getElementById('jyMatric').value || username).replace(/[^a-zA-Z0-9]/g,'').slice(-6).toUpperCase();
-        const uni = document.getElementById('jyUni').value.trim();
+        const suffix     = (document.getElementById('jyMatric').value || username).replace(/[^a-zA-Z0-9]/g,'').slice(-6).toUpperCase();
+        const uni        = document.getElementById('jyUni').value.trim();
         const passportId = `ZNP-${uni.toUpperCase().replace(/\s/g,'').slice(0,8)}-${document.getElementById('jyYear').value}-${suffix}`;
 
         msg.textContent = 'Writing to the grid...';
         const payload = {
             username,
-            full_name: document.getElementById('jyFullName').value.trim(),
-            email: document.getElementById('jyEmail').value.trim(),
-            password_hash: pwdHash,
-            avatar_url: avatarUrl,
-            institution: uni.toLowerCase(),
-            faculty: document.getElementById('jyFaculty').value.trim().toLowerCase(),
-            department: document.getElementById('jyDept').value.trim().toLowerCase(),
-            graduation_year: parseInt(document.getElementById('jyYear').value),
-            matric_number: document.getElementById('jyMatric').value.trim(),
+            full_name:        document.getElementById('jyFullName').value.trim(),
+            email:            document.getElementById('jyEmail').value.trim(),
+            password_hash:    pwdHash,
+            avatar_url:       avatarUrl,
+            institution:      uni.toLowerCase(),
+            faculty:          document.getElementById('jyFaculty').value.trim().toLowerCase(),
+            department:       document.getElementById('jyDept').value.trim().toLowerCase(),
+            graduation_year:  parseInt(document.getElementById('jyYear').value),
+            matric_number:    document.getElementById('jyMatric').value.trim(),
             eternal_statement: document.getElementById('jyQuote').value.trim(),
             znode_passport_id: passportId,
-            theme: document.body.getAttribute('data-theme') || 'dark',
-            socials: getSocials(),
-            is_dos: false,
-            is_verified: false
+            theme:            document.body.getAttribute('data-theme') || 'dark',
+            socials:          getSocials(),
+            is_dos:           false,
+            is_verified:      false
         };
 
         const { data: student, error } = await _db.from('students').insert(payload).select().maybeSingle();
@@ -906,10 +1019,91 @@ async function submitJoinYearbook() {
     }
 }
 
+// ════ GENERIC SEARCH FIELD (used by join flow) ════
+let searchTimers = {};
+async function searchField(inputId, dropId, table, column) {
+    const input = document.getElementById(inputId);
+    const drop  = document.getElementById(dropId);
+    const q = input.value.trim();
+    if (q.length < 2) { drop.innerHTML = ''; drop.classList.remove('open'); return; }
+    clearTimeout(searchTimers[inputId]);
+    drop.innerHTML = '<div class="search-loading">Searching...</div>';
+    drop.classList.add('open');
+    searchTimers[inputId] = setTimeout(async () => {
+        try {
+            const { data, error } = await _db.from(table).select(column).ilike(column, `%${q}%`).limit(8);
+            if (error || !data || data.length === 0) {
+                drop.innerHTML = '<div class="search-loading">No results found.</div>';
+                return;
+            }
+            drop.innerHTML = data.map(row =>
+                `<div class="search-option" onclick="selectOption('${inputId}','${dropId}','${row[column].replace(/'/g,"\\'")}')">
+                    ${row[column]}
+                </div>`
+            ).join('');
+        } catch(e) {
+            drop.innerHTML = '<div class="search-loading">Search unavailable.</div>';
+        }
+    }, 350);
+}
+function selectOption(inputId, dropId, value) {
+    document.getElementById(inputId).value = value;
+    document.getElementById(dropId).classList.remove('open');
+    document.getElementById(dropId).innerHTML = '';
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('.search-wrap') && !e.target.closest('#universityResults') && !e.target.closest('#facultyResults') && !e.target.closest('#departmentResults')) {
+        document.querySelectorAll('.search-dropdown').forEach(d => {
+            d.classList.remove('open'); d.innerHTML = '';
+        });
+    }
+});
+
+// ════ SOCIALS TOGGLE ════
+const socialMap = { x:'trigX', instagram:'trigIg', facebook:'trigFb', whatsapp:'trigWa', linkedin:'trigLi', github:'trigGh', tiktok:'trigTt' };
+function toggleSocial(key) {
+    const row  = document.getElementById(`social-${key}`);
+    const trig = document.getElementById(socialMap[key]);
+    const isVisible = row.classList.contains('visible');
+    row.classList.toggle('visible', !isVisible);
+    trig.classList.toggle('active', !isVisible);
+    if (!isVisible) document.getElementById(`social-${key}-val`).focus();
+}
+function getSocials() {
+    const obj = {};
+    Object.keys(socialMap).forEach(key => {
+        const val = (document.getElementById(`social-${key}-val`)?.value || '').trim();
+        if (val) obj[key] = val;
+    });
+    return obj;
+}
+
+// ════ IMAGE HANDLING ════
+document.getElementById('regPhoto').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    studentImageBlob = file;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        const preview = document.getElementById('avatarPreview');
+        preview.src = ev.target.result;
+        preview.style.display = 'block';
+        document.getElementById('dropText').innerHTML = `<span style="font-size:14px; font-weight:600; color:var(--text-main);">✓ Photo selected</span>`;
+    };
+    reader.readAsDataURL(file);
+});
+
+// ════ PASSWORD HASH ════
+async function hashPassword(pw) {
+    const enc = new TextEncoder();
+    const buf = await crypto.subtle.digest('SHA-256', enc.encode(pw + 'znode_salt_2026'));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
 // ════ LOGIN ════
 async function processLogin() {
-    const id = document.getElementById('loginId').value.trim();
-    const pw = document.getElementById('loginPass').value;
+    const id  = document.getElementById('loginId').value.trim();
+    const pw  = document.getElementById('loginPass').value;
     const btn = document.getElementById('loginBtn');
     if (!id || !pw) return showToast('Enter credentials.', 'error');
     btn.textContent = 'Authenticating...'; btn.disabled = true;
