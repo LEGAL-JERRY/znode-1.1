@@ -3,464 +3,422 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Z-Node // Yearbook</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@400;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <title>Z-Node // Core Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- PATCH 1: Paystack inline SDK -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
     <style>
         :root {
-            --paper:      #f0ebe0;
-            --paper-mid:  #e4dac8;
-            --paper-dark: #d4c8b0;
-            --navy:       #1a2744;
-            --gold:       #c8823a;
-            --tape:       rgba(208, 182, 128, 0.72);
-            --text-main:  #1a2744;
-            --text-muted: #6b5e4a;
-            --text-faint: #a89880;
-            --ease:       cubic-bezier(0.16, 1, 0.3, 1);
+            --bg-base: #000000;
+            --bg-surface: #0a0a0a;
+            --border-light: #222222;
+            --border-strong: #333333;
+            --text-main: #ffffff;
+            --text-muted: #666666;
+            --accent: #ffffff;
+            --accent-text: #000000;
+            --radius-panel: 0px;
+            --radius-btn: 0px;
+            --radius-input: 0px;
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+            --bottom-nav-h: 64px;
+            --mobile-top-h: 60px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        [data-theme="light"] {
+            --bg-base: #ffffff;
+            --bg-surface: #f4f4f4;
+            --border-light: #e5e5e5;
+            --border-strong: #cccccc;
+            --text-main: #000000;
+            --text-muted: #888888;
+            --accent: #000000;
+            --accent-text: #ffffff;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; font-family:'Inter', sans-serif; border-radius: 0 !important; }
 
         body {
-            background: var(--paper);
-            color: var(--text-main);
-            min-height: 100vh;
-            font-family: 'Inter', sans-serif;
+            width:100vw; height:100vh; overflow:hidden;
+            background-color:var(--bg-base); color:var(--text-main);
+            display:grid; grid-template-columns:280px 1fr;
+            transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
         }
 
-        /* ══════════════════════════════
-           TOP BAR
-        ══════════════════════════════ */
-        .top-bar {
-            position: sticky; top: 0; z-index: 50;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 18px;
-            background: var(--paper);
-            border-bottom: 1px dashed var(--paper-dark);
+        h1, h2, h3, .brand-logo-text { font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; }
+        .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 800; color: var(--text-muted); }
+
+        .stealth-grid { position:fixed; inset:0; background-image:linear-gradient(var(--border-strong) 1px,transparent 1px),linear-gradient(90deg,var(--border-strong) 1px,transparent 1px); background-size:60px 60px; mask-image:radial-gradient(circle at 50% 50%, black 20%, transparent 80%); -webkit-mask-image:radial-gradient(circle at 50% 50%, black 20%, transparent 80%); pointer-events:none; z-index:0; opacity: 0.15; }
+
+        /* ── SIDEBAR ── */
+        .desktop-sidebar { background:var(--bg-base); border-right:1px solid var(--border-strong); padding:32px 24px; display:flex; flex-direction:column; z-index:10; overflow-y:auto; }
+        .brand-logo-cluster { display:flex; align-items:center; gap:12px; margin-bottom:48px; padding-left:12px; }
+        .brand-logo-text { font-size:22px; color:var(--text-main); }
+        .nav-menu { display:flex; flex-direction:column; gap:8px; flex-grow:1; }
+        .nav-item { display:flex; align-items:center; gap:16px; padding:16px 20px; color:var(--text-muted); font-weight:700; font-size:14px; cursor:pointer; transition:all 0.2s var(--ease); border:1px solid transparent; }
+        .nav-item svg { width:20px; height:20px; transition:stroke 0.2s var(--ease); flex-shrink:0; }
+        .nav-item:hover { color:var(--text-main); background:var(--bg-surface); border-color: var(--border-strong); }
+        .nav-item.active-nav { background:var(--text-main); color:var(--bg-base); border-color: var(--text-main); }
+
+        .sidebar-user-widget { display:flex; align-items:center; gap:14px; padding:16px; background:var(--bg-surface); border:1px solid var(--border-strong); margin-bottom: 12px; }
+        .sidebar-avatar { width:40px; height:40px; border:1px solid var(--border-strong); background:var(--bg-base); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; color:var(--text-main); flex-shrink:0; overflow:hidden; }
+        .sidebar-avatar img { width:100%; height:100%; object-fit:cover; filter: grayscale(100%); }
+        .user-widget-info h4 { font-size:14px; margin-bottom:4px; font-weight: 800; }
+
+        .sign-out-btn { width:100%; padding:14px; border:1px solid var(--border-strong); background:transparent; color:var(--text-muted); font-weight: 700; font-size:13px; cursor:pointer; transition:all 0.2s; }
+        .sign-out-btn:hover { border-color:var(--text-main); color: var(--text-main); background: var(--bg-surface); }
+
+        /* ── MAIN LAYOUT ── */
+        .desktop-main-content { position:relative; height:100vh; overflow-y:auto; z-index: 5; }
+
+        .view-container { display: none; width: 100%; padding: 64px 80px; }
+        .view-container.active-view { display: block; animation: viewIn 0.3s var(--ease) forwards; }
+
+        @keyframes viewIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .back-btn {
-            display: flex; align-items: center; gap: 7px;
-            background: none; border: none; cursor: pointer;
-            color: var(--text-muted); font-size: 11px; font-weight: 800;
-            font-family: 'Inter', sans-serif;
-            text-transform: uppercase; letter-spacing: 0.1em;
-            padding: 6px 0;
-            transition: color 0.2s;
-        }
-        .back-btn:hover { color: var(--navy); }
+        .view-header { margin-bottom:32px; border-bottom: 1px solid var(--text-main); padding-bottom: 20px; }
+        .view-header h1 { font-size: 32px; }
 
-        .top-brand {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 20px; letter-spacing: 4px; color: var(--navy);
-        }
+        .content-card { background: var(--bg-surface); border: 1px solid var(--border-strong); padding: 32px; }
 
-        .user-chip {
-            display: flex; align-items: center; gap: 8px;
-        }
+        .greeting-title { font-size: 28px; font-weight: 900; text-transform: lowercase; letter-spacing: -0.04em; }
 
-        .user-avatar {
-            width: 28px; height: 28px; overflow: hidden;
-            border: 2px solid var(--navy);
-            background: var(--paper-mid);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: 900; color: var(--navy);
-            flex-shrink: 0;
-        }
-        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-hero-frame { display: grid; grid-template-columns: 340px 1fr; gap: 48px; align-items: start; }
+        .profile-main-image-card { background: var(--bg-surface); border: 1px solid var(--border-strong); padding: 16px; }
+        .profile-main-image-card img { width: 100%; height: 420px; object-fit: cover; filter: grayscale(100%); transition: filter 0.3s; }
+        .profile-main-image-card img:hover { filter: grayscale(0%); }
+        .profile-image-fallback { width: 100%; height: 420px; background: var(--border-light); display: flex; align-items: center; justify-content: center; font-size: 64px; }
 
-        #navUsername {
-            font-size: 11px; font-weight: 700; color: var(--text-muted);
-            display: none;
-        }
-        @media (min-width: 420px) { #navUsername { display: block; } }
+        .hierarchy-list { display: flex; flex-direction: column; gap: 20px; margin-top: 8px; }
+        .hierarchy-node { border-bottom: 1px solid var(--border-light); padding-bottom: 16px; }
+        .hierarchy-node:last-child { border-bottom: none; }
+        .hierarchy-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 800; color: var(--text-muted); margin-bottom: 6px; }
+        .hierarchy-value { font-size: 24px; font-weight: 700; color: var(--text-main); letter-spacing: -0.02em; }
+        .hierarchy-value.subtext { font-size: 18px; font-weight: 600; color: var(--text-muted); }
 
-        /* ══════════════════════════════
-           MAIN CONTENT
-        ══════════════════════════════ */
-        .page-content {
-            max-width: 480px; margin: 0 auto;
-        }
+        .custom-fields-wrapper { margin-top: 32px; padding-top: 24px; border-top: 1px dashed var(--border-strong); }
+        .field-injection-panel { display: flex; gap: 12px; margin-top: 16px; }
 
-        /* ══════════════════════════════
-           COVER HEADER
-        ══════════════════════════════ */
-        .cover-header {
-            text-align: center;
-            padding: 24px 20px 16px;
-        }
+        input, select, textarea { width: 100%; background: var(--bg-surface); border: 1px solid var(--border-strong); color: var(--text-main); padding: 14px 20px; font-size: 14px; font-weight: 600; transition: border-color 0.2s var(--ease); }
+        select { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23666666%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 16px; padding-right: 40px; }
+        input:focus, select:focus { border-color: var(--text-main); outline: none; background: var(--bg-base); }
+        .form-group { margin-bottom: 20px; }
 
-        .cover-top-deco {
-            display: flex; justify-content: space-between;
-            font-size: 15px; color: var(--navy); opacity: 0.3;
-            margin-bottom: 6px;
-            font-family: 'Caveat', cursive;
-        }
+        .action-btn { padding: 14px 28px; border: 1px solid var(--text-main); background: var(--text-main); color: var(--bg-base); font-size: 13px; font-weight: 800; cursor: pointer; transition: all 0.2s var(--ease); white-space: nowrap; text-transform: uppercase; letter-spacing: 0.05em; }
+        .action-btn:hover { background: transparent; color: var(--text-main); }
+        .action-btn.secondary { background: transparent; color: var(--text-main); }
+        .action-btn.secondary:hover { background: var(--text-main); color: var(--bg-base); }
 
-        .cover-znode {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 72px; letter-spacing: 8px; line-height: 1;
-            color: var(--navy);
-        }
+        /* ── SETTINGS ── */
+        .settings-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; }
 
-        .znode-bolt {
-            font-family: 'Inter', sans-serif;
-            font-size: 30px; font-weight: 900; letter-spacing: 0;
-            color: var(--gold); vertical-align: super; line-height: 0;
+        /* ── YEARBOOK QUERY FORM ── */
+        .yearbook-dept-input {
+            width: 100%; background: var(--bg-surface); border: 1px solid var(--border-strong);
+            color: var(--text-main); padding: 14px 20px; font-size: 14px; font-weight: 600;
         }
+        .yearbook-dept-input::placeholder { color: var(--text-muted); opacity: 0.6; }
+        .yearbook-dept-input:focus { border-color: var(--text-main); outline: none; background: var(--bg-base); }
 
-        .cover-ephoto {
-            font-family: 'Caveat', cursive;
-            font-size: 22px; color: var(--gold); font-weight: 600;
-            letter-spacing: 0.02em; margin-top: 1px;
-        }
-
-        .cover-class-banner {
+        /* ── PATCH: Yearbook gate status dot ── */
+        .status-dot {
+            width: 8px; height: 8px; flex-shrink: 0;
             display: inline-block;
-            background: var(--navy); color: #fff;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px; font-weight: 900;
-            letter-spacing: 6px; text-transform: uppercase;
-            padding: 9px 32px;
-            margin: 14px 0 7px;
         }
+        .status-dot.red  { background: #ff4444; }
+        .status-dot.green { background: #00ff88; }
 
-        .cover-dept {
-            font-family: 'Caveat', cursive;
-            font-size: 18px; color: var(--text-muted);
-        }
+        /* ── PATCH: DOS voucher panel transition ── */
+        #dosVoucherPanel { transition: all 0.2s var(--ease); }
 
-        /* Stats row */
-        .stats-row {
-            display: flex; align-items: stretch; justify-content: center;
-            margin: 14px 0 0;
-            border-top: 1px dashed var(--paper-dark);
-            border-bottom: 1px dashed var(--paper-dark);
-            padding: 8px 0;
-        }
-
-        .stat {
-            display: flex; align-items: center; gap: 6px;
-            padding: 4px 10px;
-            border-right: 1px solid var(--paper-dark);
-        }
-        .stat:last-child { border-right: none; }
-
-        .stat-ico { font-size: 13px; line-height: 1; }
-
-        .stat-vals { display: flex; flex-direction: column; }
-        .stat-n {
-            font-size: 13px; font-weight: 800; color: var(--navy); line-height: 1.1;
-        }
-        .stat-lbl {
-            font-size: 8px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.1em;
-            color: var(--text-faint);
-        }
-
-        /* ══════════════════════════════
-           HIDDEN FUNCTIONAL HEADER
-           (kept intact for JS refs)
-        ══════════════════════════════ */
-        .page-header, .header-meta { display: none; }
-
-        /* ══════════════════════════════
-           STATE PANELS
-        ══════════════════════════════ */
-        .state-panel {
-            border: 2px dashed var(--paper-dark);
-            padding: 52px 24px; text-align: center;
-            margin: 20px 18px;
-        }
-
-        .eyebrow {
-            font-size: 10px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.18em;
-            color: var(--text-muted); margin-bottom: 10px;
-        }
-
-        .state-panel h3 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 28px; color: var(--navy); margin-bottom: 6px;
-        }
-
-        .state-panel p {
-            font-family: 'Caveat', cursive;
-            font-size: 17px; color: var(--text-muted); line-height: 1.5;
-        }
-
-        /* ══════════════════════════════
-           COUNT BAR
-        ══════════════════════════════ */
-        .count-bar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 9px 18px;
-            background: var(--navy);
-        }
-
-        .count-bar .eyebrow { color: rgba(255,255,255,0.5); }
-        #studentCount { color: rgba(255,255,255,0.92) !important; }
-
-        /* ══════════════════════════════
-           STUDENT LIST
-        ══════════════════════════════ */
-        #studentGrid {
-            flex-direction: column;
-            background: var(--paper);
-        }
-
-        /* ══════════════════════════════
-           STUDENT ENTRY
-        ══════════════════════════════ */
-        .student-entry {
-            display: flex; align-items: flex-start; gap: 16px;
-            padding: 36px 18px 28px;
-            position: relative;
-            border-bottom: 1px solid var(--paper-mid);
-        }
-
-        /* Alternating photo left / right */
-        .entry-r .photo-col { order: 1; }
-        .entry-r .info-col  { order: 2; }
-        .entry-l .photo-col { order: 2; }
-        .entry-l .info-col  { order: 1; }
-
-        /* ══════════════════════════════
-           PHOTO FRAME  (double-frame
-           polaroid scrapbook effect)
-        ══════════════════════════════ */
-        .photo-col {
-            position: relative;
-            min-width: 128px; width: 128px;
-            flex-shrink: 0;
-            margin-top: 8px;
-        }
-
-        /* Navy shadow frame — sits behind polaroid */
-        .frame-bg {
-            position: absolute; inset: 0;
-            background: var(--navy);
-            z-index: 0;
-            /* rotation applied inline per card */
-        }
-
-        /* White polaroid frame — on top */
-        .frame-fg {
-            position: relative; z-index: 1;
-            background: #fff;
-            padding: 7px 7px 24px;
-            box-shadow: 3px 4px 14px rgba(0,0,0,0.18);
-            /* rotation applied inline per card */
-        }
-
-        /* Masking tape strip */
-        .frame-tape {
-            position: absolute;
-            top: -10px; left: 50%;
-            width: 46px; height: 17px;
-            background: var(--tape);
-            z-index: 4;
-            /* transform (translateX + rotate) applied inline */
-        }
-
-        .student-photo {
-            width: 100%;
-            aspect-ratio: 3 / 4;
-            object-fit: cover;
-            display: block;
-        }
-
-        .photo-empty {
-            width: 100%; aspect-ratio: 3 / 4;
-            background: var(--paper-mid);
+        /* ── PATCH: Avatar preview in settings ── */
+        .settings-avatar-preview {
+            width: 80px; height: 80px; border: 1px solid var(--border-strong);
+            overflow: hidden; margin-bottom: 16px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 32px;
+            font-size: 28px; background: var(--border-light);
         }
+        .settings-avatar-preview img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); }
 
-        /* ══════════════════════════════
-           STUDENT INFO
-        ══════════════════════════════ */
-        .info-col {
-            flex: 1; min-width: 0;
-            display: flex; flex-direction: column;
-            padding-top: 14px;
-        }
+        /* Toast */
+        .toast-container { position:fixed; bottom:32px; right:32px; z-index:9999; display:flex; flex-direction:column; gap:12px; }
+        .toast { padding:16px 24px; font-size:13px; font-weight:700; background: var(--bg-surface); border: 1px solid var(--text-main); color: var(--text-main); animation:toastIn 0.3s var(--ease); box-shadow: 8px 8px 0px rgba(255,255,255,0.1); }
+        [data-theme="light"] .toast { box-shadow: 8px 8px 0px rgba(0,0,0,0.1); }
+        @keyframes toastIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
 
-        .info-crown {
-            font-size: 16px; color: var(--gold);
-            line-height: 1; margin-bottom: 4px;
-        }
+        .mobile-top-bar { display:none; }
+        .mobile-bottom-nav { display:none; }
 
-        .info-name {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 32px; line-height: 0.95; letter-spacing: 1px;
-            color: var(--navy);
-            word-break: break-word;
-        }
+        /* ── MOBILE ── */
+        @media (max-width: 767px) {
+            body { display:flex; flex-direction:column; grid-template-columns:unset; }
+            .desktop-sidebar { display:none; }
 
-        .info-role {
-            font-size: 12px; font-weight: 700;
-            color: var(--gold);
-            margin: 5px 0 9px;
-        }
+            .mobile-top-bar { position: fixed; top: 0; left: 0; right: 0; display:flex; align-items:center; justify-content:space-between; padding:0 20px; height:var(--mobile-top-h); background:var(--bg-base); border-bottom:1px solid var(--border-strong); z-index:50; }
 
-        .info-quote {
-            font-family: 'Caveat', cursive;
-            font-size: 15px; line-height: 1.4;
-            color: var(--text-main);
-        }
+            .desktop-main-content { flex:1; overflow-y:auto; padding-top: var(--mobile-top-h); padding-bottom:calc(var(--bottom-nav-h) + env(safe-area-inset-bottom)); }
+            .view-container { padding: 24px 20px; }
+            .view-header { margin-bottom: 16px; padding-bottom: 12px; }
 
-        .info-quote-line {
-            width: 32px; height: 2px;
-            background: var(--gold);
-            margin-top: 8px;
-            transform: rotate(-1deg);
-        }
+            .view-header h1 { font-size: 24px; }
+            .greeting-title { font-size: 22px; }
 
-        .info-handle {
-            font-size: 9px; font-weight: 700;
-            color: var(--text-faint); margin-top: 10px;
-            text-transform: uppercase; letter-spacing: 0.08em;
-        }
+            .profile-hero-frame { grid-template-columns: 1fr; gap: 24px; }
+            .profile-main-image-card img, .profile-image-fallback { height: 260px; }
+            .hierarchy-list { gap: 16px; }
+            .hierarchy-value { font-size: 20px; }
 
-        /* Small decorative mark per entry */
-        .entry-deco {
-            position: absolute;
-            bottom: 14px;
-            font-size: 14px; color: var(--navy);
-            opacity: 0.28; user-select: none; line-height: 1;
-        }
+            .content-card { padding: 16px; }
+            .form-group { margin-bottom: 16px; }
+            .settings-grid { gap: 16px !important; grid-template-columns: 1fr !important; }
 
-        /* ══════════════════════════════
-           SCROLL CTA
-        ══════════════════════════════ */
-        .scroll-cta {
-            text-align: center;
-            padding: 26px 20px;
-            font-family: 'Caveat', cursive;
-            font-size: 15px; color: var(--text-muted);
-            border-top: 1px dashed var(--paper-dark);
-        }
-        .scroll-cta .cta-arrow {
-            display: block; font-size: 22px; margin-top: 4px;
-        }
+            .mobile-bottom-nav { display:flex; align-items:center; justify-content:space-around; height:calc(var(--bottom-nav-h) + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); background:var(--bg-base); border-top:1px solid var(--border-strong); position:fixed; bottom:0; left:0; right:0; z-index:50; }
+            .mob-nav-btn { display:flex; flex-direction:column; align-items:center; justify-content: center; gap:6px; border:none; background:transparent; color:var(--text-muted); font-size:10px; font-weight:800; cursor:pointer; flex:1; height: 100%; border-top: 1.5px solid transparent; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em; }
+            .mob-nav-btn.active-nav { color:var(--text-main); border-top-color: var(--text-main); background: var(--bg-surface); }
+            .mob-nav-btn svg { width:20px; height:20px; }
 
-        /* ══════════════════════════════
-           RESPONSIVE
-        ══════════════════════════════ */
-        @media (max-width: 375px) {
-            .cover-znode           { font-size: 56px; }
-            .cover-class-banner    { font-size: 12px; letter-spacing: 4px; padding: 8px 20px; }
-            .info-name             { font-size: 27px; }
-            .photo-col             { min-width: 108px; width: 108px; }
-            .stat                  { padding: 4px 7px; }
-            .stat-ico              { display: none; }
+            .field-injection-panel { flex-direction: column; }
+
+            /* Mobile: yearbook gate button stack */
+            #yearbookPayGate .content-card > div[style*="flex"] { flex-direction: column; }
         }
     </style>
 </head>
-<body>
+<body data-theme="dark">
 
-<!-- ══════════ TOP BAR ══════════ -->
-<header class="top-bar">
-    <button class="back-btn" onclick="window.location.href='app.html'">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-        </svg>
-        Back
-    </button>
-    <span class="top-brand">Z-NODE</span>
-    <div class="user-chip">
-        <div class="user-avatar" id="navAvatar">?</div>
-        <span id="navUsername"></span>
-    </div>
+<div class="stealth-grid"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<header class="mobile-top-bar">
+    <span class="brand-logo-text">Z-NODE</span>
+    <div class="sidebar-avatar" id="mobileAvatarNode">?</div>
 </header>
 
-<main class="page-content">
+<!-- Mobile Bottom Nav — 3 tabs -->
+<nav class="mobile-bottom-nav">
+    <button class="mob-nav-btn active-nav" data-target="view-profile" onclick="switchView('view-profile')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Profile</span>
+    </button>
+    <button class="mob-nav-btn" data-target="view-yearbook" onclick="switchView('view-yearbook')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V3.5A2.5 2.5 0 0 1 6.5 1H20v21H6.5a2.5 2.5 0 0 1-2.5-2.5z"/></svg>
+        <span>Yearbook</span>
+    </button>
+    <button class="mob-nav-btn" data-target="view-settings" onclick="switchView('view-settings')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Settings</span>
+    </button>
+</nav>
 
-    <!-- ══ YEARBOOK COVER ══ -->
-    <div class="cover-header">
-        <div class="cover-top-deco">
-            <span>⊞</span><span>✦</span><span>⊞</span>
+<!-- Desktop Sidebar — 3 items -->
+<aside class="desktop-sidebar">
+    <div class="brand-logo-cluster">
+        <span class="brand-logo-text">Z-NODE</span>
+    </div>
+
+    <nav class="nav-menu">
+        <div class="nav-item active-nav" data-target="view-profile" onclick="switchView('view-profile')">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            1. Profile
         </div>
+        <div class="nav-item" data-target="view-yearbook" onclick="switchView('view-yearbook')">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V3.5A2.5 2.5 0 0 1 6.5 1H20v21H6.5a2.5 2.5 0 0 1-2.5-2.5z"/></svg>
+            2. Dept Yearbook
+        </div>
+        <div class="nav-item" data-target="view-settings" onclick="switchView('view-settings')">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            3. Settings
+        </div>
+    </nav>
 
-        <div class="cover-znode">Z-NODE<span class="znode-bolt">↗</span></div>
-        <div class="cover-ephoto">— E-Photo Album —</div>
-
-        <div class="cover-class-banner" id="classbanner">CLASS OF —</div>
-        <br>
-        <div class="cover-dept" id="deptLabel">Department of —</div>
-
-        <div class="stats-row">
-            <div class="stat">
-                <span class="stat-ico">👥</span>
-                <div class="stat-vals">
-                    <span class="stat-n" id="statStudents">—</span>
-                    <span class="stat-lbl">Students</span>
-                </div>
-            </div>
-            <div class="stat">
-                <span class="stat-ico">📷</span>
-                <div class="stat-vals">
-                    <span class="stat-n">∞</span>
-                    <span class="stat-lbl">Photos</span>
-                </div>
-            </div>
-            <div class="stat">
-                <span class="stat-ico">📖</span>
-                <div class="stat-vals">
-                    <span class="stat-n">10</span>
-                    <span class="stat-lbl">Sections</span>
-                </div>
-            </div>
-            <div class="stat">
-                <span class="stat-ico">⭐</span>
-                <div class="stat-vals">
-                    <span class="stat-n">∞</span>
-                    <span class="stat-lbl">Memories</span>
-                </div>
-            </div>
+    <div class="sidebar-user-widget">
+        <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+        <div class="user-widget-info">
+            <h4 id="sidebarName">Initializing Node...</h4>
+            <div class="eyebrow">NODE STATUS</div>
         </div>
     </div>
+    <button class="sign-out-btn" onclick="signOut()">Disconnect Session</button>
+</aside>
 
-    <!-- ══ HIDDEN FUNCTIONAL HEADER (JS refs kept intact) ══ -->
-    <div class="page-header">
-        <div class="eyebrow" id="queryLabel">YEARBOOK DIRECTORY</div>
-        <h1 id="pageTitle">Loading...</h1>
-        <div class="header-meta">
-            <span class="meta-tag" id="deptTag">DEPT —</span>
-            <span class="meta-tag" id="yearTag">CLASS —</span>
+<main class="desktop-main-content">
+
+    <!-- ══ VIEW 1: PROFILE ══ -->
+    <section class="view-container active-view" id="view-profile">
+        <div class="view-header">
+            <h1 id="greetingText" class="greeting-title">hey [username]</h1>
         </div>
-    </div>
 
-    <!-- ══ LOADING STATE ══ -->
-    <div class="state-panel" id="loadingState">
-        <div class="eyebrow">Z-NODE // OPENING ALBUM</div>
-        <h3>Leafing Through Pages...</h3>
-        <p>Fetching student memories from the archive.</p>
-    </div>
+        <div class="profile-hero-frame">
+            <div class="profile-main-image-card" id="profileImageWrap">
+                <div class="profile-image-fallback">👤</div>
+            </div>
 
-    <!-- ══ COUNT BAR ══ -->
-    <div class="count-bar" id="countBar" style="display:none;">
-        <span class="eyebrow" id="studentCount">0 found</span>
-        <span class="eyebrow">ACTIVE DIRECTORY</span>
-    </div>
+            <div class="profile-details-card">
+                <div class="hierarchy-list" id="profileHierarchyTarget">
+                    <div class="hierarchy-node">
+                        <div class="hierarchy-label">1. Full Name</div>
+                        <div class="hierarchy-value" id="nodeFullName">—</div>
+                    </div>
+                    <div class="hierarchy-node">
+                        <div class="hierarchy-label">2. Matric Number</div>
+                        <div class="hierarchy-value" id="nodeMatricNo">—</div>
+                    </div>
+                    <div class="hierarchy-node">
+                        <div class="hierarchy-label">3. Z-Node Passport ID</div>
+                        <div class="hierarchy-value" id="nodePassportId" style="font-family:'Space Mono', monospace; font-size:16px;">—</div>
+                    </div>
+                    <div class="hierarchy-node">
+                        <div class="hierarchy-label">4. University</div>
+                        <div class="hierarchy-value" id="nodeUniversity">—</div>
+                    </div>
+                    <div class="hierarchy-node">
+                        <div class="hierarchy-label">5. Academic Unit</div>
+                        <div class="hierarchy-value subtext" id="nodeDeptFaculty">—</div>
+                    </div>
 
-    <!-- ══ STUDENT LIST ══ -->
-    <div id="studentGrid" style="display:none;"></div>
+                    <div id="dynamicFieldsTarget"></div>
+                </div>
 
-    <!-- ══ EMPTY STATE ══ -->
-    <div class="state-panel" id="emptyState" style="display:none;">
-        <div class="eyebrow">Z-NODE // NULL RESPONSE</div>
-        <h3>Empty Album.</h3>
-        <p>No students found for this department and year.<br>They may not have registered yet.</p>
-    </div>
+                <div class="custom-fields-wrapper">
+                    <h4 class="eyebrow" style="margin-bottom: 12px;">Extend Profile Architecture</h4>
+                    <div class="field-injection-panel">
+                        <input type="text" id="newFieldLabel" placeholder="e.g. GitHub, Portfolio">
+                        <input type="text" id="newFieldValue" placeholder="Value / Target link">
+                        <button class="action-btn" onclick="injectCustomProfileAttribute()">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <!-- ══ SCROLL CTA ══ -->
-    <div class="scroll-cta" id="scrollCta" style="display:none;">
-        ✦ Scroll to discover more ✦
-        <span class="cta-arrow">↓</span>
-    </div>
+    <!-- ══ VIEW 2: YEARBOOK ══ (PATCH 3: Payment gate added) -->
+    <section class="view-container" id="view-yearbook">
+        <div class="view-header">
+            <h1>Yearbook Directory.</h1>
+        </div>
+
+        <!-- Gate: shown when NOT verified -->
+        <div id="yearbookPayGate" style="display:none; margin-bottom:32px;">
+            <div class="content-card">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                    <span class="status-dot red"></span>
+                    <h3>You are not in the Yearbook yet</h3>
+                </div>
+                <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px; line-height:1.6;">
+                    You can browse the directory and edit your profile freely. When you are ready to have your entry published, complete verification below.
+                </p>
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <button class="action-btn" onclick="initiatePaystackPayment()">Pay via Paystack</button>
+                    <button class="action-btn secondary" onclick="toggleDOSVoucherPanel()">Pay via DOS Voucher</button>
+                </div>
+
+                <!-- DOS Voucher input — hidden until toggled -->
+                <div id="dosVoucherPanel" style="display:none; margin-top:24px; padding-top:24px; border-top:1px solid var(--border-strong);">
+                    <label class="eyebrow" style="display:block; margin-bottom:10px;">Enter DOS Voucher Code</label>
+                    <div style="display:flex; gap:12px;">
+                        <input type="text" id="voucherCodeInput" placeholder="e.g. DOS-XXXX-XXXX" style="flex:1; text-transform:uppercase;">
+                        <button class="action-btn" onclick="redeemVoucherCode()">Redeem</button>
+                    </div>
+                    <p id="voucherFeedback" style="font-size:12px; margin-top:10px; font-weight:700; min-height:16px;"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Badge: shown when verified -->
+        <div id="yearbookVerifiedBadge" style="display:none; margin-bottom:24px;">
+            <div class="content-card" style="display:flex; align-items:center; gap:12px;">
+                <span class="status-dot green"></span>
+                <span style="font-weight:800; font-size:13px; text-transform:uppercase; letter-spacing:0.05em;">Yearbook Verified — Your entry is live in the directory.</span>
+            </div>
+        </div>
+
+        <!-- Query form — always visible -->
+        <div class="content-card" style="max-width: 500px;">
+            <h3 style="margin-bottom:8px;">Access Student Database</h3>
+            <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px;">Enter department name and graduating year to query the network.</p>
+
+            <form onsubmit="accessYearbook(event)" style="display:flex; flex-direction:column; gap:0;">
+                <div class="form-group">
+                    <label class="eyebrow" style="display:block; margin-bottom:8px;">Academic Department</label>
+                    <input type="text" class="yearbook-dept-input" id="directoryDept" placeholder="e.g. Economics, Computer Science..." required>
+                </div>
+
+                <div class="form-group">
+                    <label class="eyebrow" style="display:block; margin-bottom:8px;">Graduating Class (Year)</label>
+                    <input type="number" class="yearbook-dept-input" id="directoryYear" placeholder="e.g. 2025, 2026..." min="2020" max="2035" required>
+                </div>
+
+                <button type="submit" class="action-btn" style="margin-top: 8px;">Initialize Connection</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- ══ VIEW 3: SETTINGS ══ -->
+    <section class="view-container" id="view-settings">
+        <div class="view-header">
+            <h1>System Settings.</h1>
+        </div>
+        <div class="settings-grid">
+            <div class="content-card">
+                <h3 style="margin-bottom:20px;">Identity Base Modifications</h3>
+
+                <div style="display:flex; flex-direction:column;">
+                    <div class="form-group">
+                        <label class="eyebrow" style="display:block; margin-bottom:8px;">Full Name</label>
+                        <input type="text" id="editFullName">
+                    </div>
+                    <div class="form-group">
+                        <label class="eyebrow" style="display:block; margin-bottom:8px;">Matric Number</label>
+                        <input type="text" id="editMatricNo">
+                    </div>
+                    <div class="form-group">
+                        <label class="eyebrow" style="display:block; margin-bottom:8px;">University Name</label>
+                        <input type="text" id="editUniversity">
+                    </div>
+                    <div class="form-group" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div>
+                            <label class="eyebrow" style="display:block; margin-bottom:8px;">Department</label>
+                            <input type="text" id="editDept">
+                        </div>
+                        <div>
+                            <label class="eyebrow" style="display:block; margin-bottom:8px;">Faculty</label>
+                            <input type="text" id="editFaculty">
+                        </div>
+                    </div>
+                    <button class="action-btn" onclick="commitProfileEdits()" style="margin-top:4px;">Sync State</button>
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:16px;">
+
+                <!-- PATCH 4: Avatar upload card -->
+                <div class="content-card">
+                    <h3 style="margin-bottom:12px;">Update Identity Image</h3>
+                    <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Upload a new profile photo. Updates across your entire node.</p>
+                    <div class="settings-avatar-preview" id="settingsAvatarPreview">👤</div>
+                    <input type="file" id="avatarFileInput" accept="image/*" style="margin-bottom:16px; font-size:12px; padding:10px 14px;">
+                    <button class="action-btn" onclick="uploadNewAvatar()">Upload Image</button>
+                    <p id="avatarUploadStatus" style="font-size:12px; margin-top:10px; font-weight:700; min-height:16px;"></p>
+                </div>
+
+                <div class="content-card">
+                    <h3 style="margin-bottom:12px;">Visual Interface Config</h3>
+                    <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Toggle system lighting state environments instantly.</p>
+                    <button class="action-btn secondary" onclick="toggleThemeSystem()">Invert Paradigm</button>
+                </div>
+                <div class="content-card">
+                    <h3 style="margin-bottom:12px;">Data Diagnostics</h3>
+                    <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Clear runtime buffers and system caches to reset state vectors.</p>
+                    <button class="action-btn secondary" style="border-color:#ff4444; color:#ff4444;" onclick="resetTestingEnvironment()">Flush Memory</button>
+                </div>
+            </div>
+        </div>
+    </section>
 
 </main>
 
@@ -470,154 +428,401 @@ const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const { createClient } = supabase;
 const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ── Session ──────────────────────────────────────────────────────────────────
-function initSession() {
-    const raw = localStorage.getItem('znodeStudentProfile');
-    if (!raw) { window.location.href = 'onboarding.html'; return null; }
-    try {
-        const s = JSON.parse(raw);
-        if (s.theme) document.body.setAttribute('data-theme', s.theme);
+// PATCH 5a: Paystack config — change YEARBOOK_PRICE_KOBO to set your price (kobo = NGN × 100)
+const PAYSTACK_PUBLIC_KEY  = 'pk_live_ad4252161bf61d466256573cb5b5fd8a4d3bb07a';
+const YEARBOOK_PRICE_KOBO  = 500000; // ← ₦5,000. Change as needed.
 
-        const av = document.getElementById('navAvatar');
-        if (s.avatar_url) {
-            av.innerHTML = `<img src="${s.avatar_url}" alt="avatar">`;
-        } else {
-            av.textContent = (s.username || '?')[0].toUpperCase();
-        }
-        document.getElementById('navUsername').textContent = `@${s.username || '—'}`;
-        return s;
-    } catch(e) {
-        window.location.href = 'onboarding.html';
-        return null;
+// PATCH 2: Added yearbook_verified and email to session object
+let studentSessionData = {
+    username: "",
+    full_name: "",
+    matric_no: "",
+    passport_id: "",
+    university: "",
+    department: "",
+    faculty: "",
+    avatar_url: "",
+    email: "",
+    yearbook_verified: false,
+    custom_attributes: []
+};
+
+// ── NAVIGATION ──
+function switchView(targetId) {
+    document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
+    const el = document.getElementById(targetId);
+    if (el) { el.classList.add('active-view'); document.querySelector('.desktop-main-content').scrollTop = 0; }
+    document.querySelectorAll('.nav-item, .mob-nav-btn').forEach(node => {
+        node.classList.toggle('active-nav', node.getAttribute('data-target') === targetId);
+    });
+}
+
+// ── RENDER ──
+function syncViewRenderState() {
+    document.getElementById('greetingText').textContent = `hey ${studentSessionData.username}`;
+
+    const avatarContainer = document.getElementById('profileImageWrap');
+    if (studentSessionData.avatar_url) {
+        avatarContainer.innerHTML = `<img src="${studentSessionData.avatar_url}" alt="${studentSessionData.full_name}">`;
+        document.getElementById('sidebarAvatar').innerHTML = `<img src="${studentSessionData.avatar_url}" alt="avatar">`;
+        document.getElementById('mobileAvatarNode').innerHTML = `<img src="${studentSessionData.avatar_url}" alt="avatar" style="width:100%;height:100%;object-fit:cover;">`;
+        // PATCH: update settings avatar preview
+        document.getElementById('settingsAvatarPreview').innerHTML = `<img src="${studentSessionData.avatar_url}" alt="avatar">`;
+    } else {
+        avatarContainer.innerHTML = `<div class="profile-image-fallback">👤</div>`;
+        const initial = (studentSessionData.username || '?').charAt(0).toUpperCase();
+        document.getElementById('sidebarAvatar').textContent = initial;
+        document.getElementById('mobileAvatarNode').textContent = initial;
+        document.getElementById('settingsAvatarPreview').textContent = '👤';
+    }
+
+    document.getElementById('nodeFullName').textContent   = studentSessionData.full_name  || '—';
+    document.getElementById('nodeMatricNo').textContent   = studentSessionData.matric_no  || '—';
+    document.getElementById('nodePassportId').textContent = studentSessionData.passport_id || '—';
+    document.getElementById('nodeUniversity').textContent = studentSessionData.university  || '—';
+    document.getElementById('nodeDeptFaculty').textContent = `${studentSessionData.department || '—'} // ${studentSessionData.faculty || '—'}`;
+
+    document.getElementById('sidebarName').textContent = studentSessionData.full_name || studentSessionData.username;
+
+    // Custom attributes
+    const injectionTarget = document.getElementById('dynamicFieldsTarget');
+    injectionTarget.innerHTML = '';
+    (studentSessionData.custom_attributes || []).forEach((attr, idx) => {
+        const block = document.createElement('div');
+        block.className = 'hierarchy-node';
+        block.style.borderLeft = '1.5px solid var(--text-main)';
+        block.style.paddingLeft = '14px';
+        block.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="hierarchy-label">${attr.label}</div>
+                <span style="font-size:10px; color:#ff4444; cursor:pointer; font-weight:800; border: 1px solid #ff4444; padding: 2px 6px;" onclick="removeAttributeNode(${idx})">DEL</span>
+            </div>
+            <div class="hierarchy-value" style="font-size:20px;">${attr.value}</div>
+        `;
+        injectionTarget.appendChild(block);
+    });
+
+    // Settings fields
+    document.getElementById('editFullName').value  = studentSessionData.full_name;
+    document.getElementById('editMatricNo').value  = studentSessionData.matric_no;
+    document.getElementById('editUniversity').value = studentSessionData.university;
+    document.getElementById('editDept').value      = studentSessionData.department;
+    document.getElementById('editFaculty').value   = studentSessionData.faculty;
+
+    // PATCH: update yearbook gate UI
+    updateYearbookGateUI();
+}
+
+function injectCustomProfileAttribute() {
+    const labelInput = document.getElementById('newFieldLabel');
+    const valueInput = document.getElementById('newFieldValue');
+    if (!labelInput.value.trim() || !valueInput.value.trim()) {
+        showToast('Both label and value are required.'); return;
+    }
+    if (!studentSessionData.custom_attributes) studentSessionData.custom_attributes = [];
+    studentSessionData.custom_attributes.push({ label: labelInput.value.trim(), value: valueInput.value.trim() });
+    saveLocalState(); syncViewRenderState();
+    labelInput.value = ''; valueInput.value = '';
+    showToast('Custom attribute added.');
+}
+
+function removeAttributeNode(index) {
+    studentSessionData.custom_attributes.splice(index, 1);
+    saveLocalState(); syncViewRenderState();
+    showToast('Attribute removed.');
+}
+
+function commitProfileEdits() {
+    studentSessionData.full_name  = document.getElementById('editFullName').value;
+    studentSessionData.matric_no  = document.getElementById('editMatricNo').value;
+    studentSessionData.university = document.getElementById('editUniversity').value;
+    studentSessionData.department = document.getElementById('editDept').value;
+    studentSessionData.faculty    = document.getElementById('editFaculty').value;
+    saveLocalState(); syncViewRenderState();
+    showToast('Profile synced.');
+}
+
+// ── YEARBOOK ──
+function accessYearbook(event) {
+    event.preventDefault();
+    const dept = document.getElementById('directoryDept').value.trim();
+    const year = document.getElementById('directoryYear').value.trim();
+    if (dept && year) {
+        showToast(`Querying ${dept} — Class of ${year}...`);
+        setTimeout(() => {
+            window.location.href = `yearbook.html?dept=${encodeURIComponent(dept)}&year=${encodeURIComponent(year)}`;
+        }, 600);
     }
 }
 
-// ── URL Params ───────────────────────────────────────────────────────────────
-function getParams() {
-    const p = new URLSearchParams(window.location.search);
-    return { dept: p.get('dept') || '', year: p.get('year') || '' };
+// ── PATCH 5b: YEARBOOK GATE UI ──
+function updateYearbookGateUI() {
+    const gate   = document.getElementById('yearbookPayGate');
+    const badge  = document.getElementById('yearbookVerifiedBadge');
+    if (!gate || !badge) return;
+    if (studentSessionData.yearbook_verified) {
+        gate.style.display  = 'none';
+        badge.style.display = 'block';
+    } else {
+        gate.style.display  = 'block';
+        badge.style.display = 'none';
+    }
 }
 
-// ── Card Rendering ───────────────────────────────────────────────────────────
-// Variation arrays so every card looks slightly different
-const FRAME_ROTS  = [-2,   2,  -1.5,  2.5,  -3,   1.5,  -2.5,  3  ];
-const SHADOW_ROTS = [ 3,  -3,   2.5, -3.5,   4,  -2.5,   3.5, -4  ];
-const TAPE_ROTS   = [-4,   3,  -2,    4,   -3,    2,    -4,    3  ];
-const DECOS       = ['☆', '♡', '⚡', '◇', '✦', '☆', '♡', '⚡'];
-
-function renderCard(student, idx) {
-    const entry = document.createElement('div');
-    entry.className = `student-entry ${idx % 2 === 0 ? 'entry-r' : 'entry-l'}`;
-
-    const fr = FRAME_ROTS [idx % FRAME_ROTS.length];
-    const sr = SHADOW_ROTS[idx % SHADOW_ROTS.length];
-    const tr = TAPE_ROTS  [idx % TAPE_ROTS.length];
-    const isDOS = student.is_dos === true || student.is_dos === 'true';
-
-    const photoHTML = student.avatar_url
-        ? `<img class="student-photo" src="${student.avatar_url}" alt="${student.full_name || ''}" loading="lazy">`
-        : `<div class="photo-empty">👤</div>`;
-
-    const crownHTML = isDOS
-        ? `<div class="info-crown">♛</div>`
-        : `<div class="info-crown" style="visibility:hidden;">♛</div>`;
-
-    const quote   = student.quote || student.bio || '';
-    const quoteHTML = quote
-        ? `<div class="info-quote">"${quote}"</div><div class="info-quote-line"></div>`
-        : '';
-
-    const pid = student.znode_passport_id || student.matric_number || '';
-    const handleHTML = pid
-        ? `<div class="info-handle">${pid}</div>`
-        : `<div class="info-handle">@${student.username || '—'}</div>`;
-
-    const decoSide = idx % 2 === 0 ? 'right:14px' : 'left:14px';
-
-    entry.innerHTML = `
-        <div class="photo-col">
-            <div class="frame-bg" style="transform:rotate(${sr}deg);"></div>
-            <div class="frame-fg" style="transform:rotate(${fr}deg);">
-                <div class="frame-tape" style="transform:translateX(-50%) rotate(${tr}deg);"></div>
-                ${photoHTML}
-            </div>
-        </div>
-        <div class="info-col">
-            ${crownHTML}
-            <div class="info-name">${(student.full_name || 'Anonymous').toUpperCase()}</div>
-            <div class="info-role">${student.department || '—'}</div>
-            ${quoteHTML}
-            ${handleHTML}
-        </div>
-        <span class="entry-deco" style="bottom:14px;${decoSide};">${DECOS[idx % DECOS.length]}</span>
-    `;
-    return entry;
+function toggleDOSVoucherPanel() {
+    const panel = document.getElementById('dosVoucherPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
 }
 
-// ── Load Yearbook ─────────────────────────────────────────────────────────────
-// FIXED QUERY — uses graduation_year column, not created_at date range
-async function loadYearbook(dept, year) {
+// ── PATCH 5c: PAYSTACK PAYMENT ──
+function initiatePaystackPayment() {
+    // Use stored email or prompt once
+    const email = studentSessionData.email || prompt('Enter your email address for payment receipt:');
+    if (!email || !email.includes('@')) {
+        showToast('A valid email address is required.'); return;
+    }
+
+    const handler = PaystackPop.setup({
+        key:      PAYSTACK_PUBLIC_KEY,
+        email:    email,
+        amount:   YEARBOOK_PRICE_KOBO,
+        currency: 'NGN',
+        ref:      `ZN-${studentSessionData.passport_id}-${Date.now()}`,
+        metadata: {
+            passport_id: studentSessionData.passport_id,
+            full_name:   studentSessionData.full_name
+        },
+        callback: async function(response) {
+            showToast('Payment confirmed. Updating your node...');
+            await markStudentAsVerified();
+        },
+        onClose: function() {
+            showToast('Payment window closed.');
+        }
+    });
+    handler.openIframe();
+}
+
+// ── PATCH 5d: MARK VERIFIED IN DB + SESSION ──
+async function markStudentAsVerified() {
     try {
-        let query = _db.from('students').select('*');
-
-        if (dept) {
-            query = query.ilike('department', `%${dept}%`);
-        }
-        if (year) {
-            query = query.eq('graduation_year', parseInt(year));
-        }
-
-        const { data: students, error } = await query
-            .order('is_dos', { ascending: false })
-            .order('full_name', { ascending: true });
+        const { error } = await _db
+            .from('students')
+            .update({ yearbook_verified: true })
+            .eq('znode_passport_id', studentSessionData.passport_id);
 
         if (error) throw error;
-        return students || [];
 
-    } catch(e) {
-        console.error("Yearbook query error:", e);
-        return [];
+        studentSessionData.yearbook_verified = true;
+        saveLocalState();
+        updateYearbookGateUI();
+        showToast('Yearbook verification complete. Your entry is now live.');
+    } catch (err) {
+        console.error('Verification write failed:', err);
+        showToast('Verification error — contact support with your payment reference.');
     }
 }
 
-// ── Bootstrap ─────────────────────────────────────────────────────────────────
-async function bootstrap() {
-    const session = initSession();
-    if (!session) return;
+// ── PATCH 5e: DOS VOUCHER REDEMPTION ──
+async function redeemVoucherCode() {
+    const code     = document.getElementById('voucherCodeInput').value.trim().toUpperCase();
+    const feedback = document.getElementById('voucherFeedback');
 
-    const { dept, year } = getParams();
+    if (!code) { feedback.style.color = '#ff4444'; feedback.textContent = 'Please enter a voucher code.'; return; }
 
-    // Update cover header
-    document.getElementById('classbanner').textContent = year ? `CLASS OF ${year}` : 'CLASS OF —';
-    document.getElementById('deptLabel').textContent   = dept ? `Department of ${dept}` : 'Department of —';
+    feedback.style.color = 'var(--text-muted)';
+    feedback.textContent = 'Verifying code...';
 
-    // Keep hidden functional refs updated
-    document.getElementById('pageTitle').textContent  = dept ? `${dept} — Class of ${year}.` : 'Yearbook Directory.';
-    document.getElementById('queryLabel').textContent = 'YEARBOOK // STUDENT DIRECTORY';
-    document.getElementById('deptTag').textContent    = `DEPT: ${dept || 'ALL'}`;
-    document.getElementById('yearTag').textContent    = `CLASS OF ${year || 'ALL'}`;
+    try {
+        const { data, error } = await _db
+            .from('voucher_codes')
+            .select('*')
+            .eq('code', code)
+            .eq('used', false)
+            .single();
 
-    const students = await loadYearbook(dept, year);
-    document.getElementById('loadingState').style.display = 'none';
+        if (error || !data) {
+            feedback.style.color = '#ff4444';
+            feedback.textContent = 'Invalid or already used voucher code.';
+            return;
+        }
 
-    // Update student count stat
-    document.getElementById('statStudents').textContent = String(students.length);
+        // Mark voucher consumed
+        await _db
+            .from('voucher_codes')
+            .update({ used: true, used_by: studentSessionData.passport_id })
+            .eq('code', code);
 
-    if (!students.length) {
-        document.getElementById('emptyState').style.display = 'block';
+        feedback.textContent = '';
+        document.getElementById('voucherCodeInput').value = '';
+        await markStudentAsVerified();
+
+    } catch (err) {
+        console.error('Voucher error:', err);
+        feedback.style.color = '#ff4444';
+        feedback.textContent = 'Error redeeming voucher. Please try again.';
+    }
+}
+
+// ── PATCH 5f: AVATAR UPLOAD ──
+async function uploadNewAvatar() {
+    const fileInput = document.getElementById('avatarFileInput');
+    const status    = document.getElementById('avatarUploadStatus');
+
+    if (!fileInput.files || fileInput.files.length === 0) {
+        status.style.color = '#ff4444';
+        status.textContent = 'Please select an image file first.';
         return;
     }
 
-    document.getElementById('studentCount').textContent =
-        `${students.length} node${students.length !== 1 ? 's' : ''} found`;
-    document.getElementById('countBar').style.display = 'flex';
+    const file = fileInput.files[0];
+    const ext  = file.name.split('.').pop().toLowerCase();
+    const path = `${studentSessionData.passport_id}/avatar.${ext}`;
 
-    const grid = document.getElementById('studentGrid');
-    students.forEach((s, i) => grid.appendChild(renderCard(s, i)));
-    grid.style.display    = 'flex';
-    grid.style.flexDirection = 'column';
+    status.style.color = 'var(--text-muted)';
+    status.textContent = 'Uploading...';
 
-    document.getElementById('scrollCta').style.display = 'block';
+    try {
+        const { error: uploadError } = await _db.storage
+            .from('student-avatars')
+            .upload(path, file, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = _db.storage
+            .from('student-avatars')
+            .getPublicUrl(path);
+
+        const publicUrl = urlData.publicUrl;
+
+        // Write back to students table
+        await _db
+            .from('students')
+            .update({ avatar_url: publicUrl })
+            .eq('znode_passport_id', studentSessionData.passport_id);
+
+        // Sync local caches
+        studentSessionData.avatar_url = publicUrl;
+        const authRaw = localStorage.getItem('znodeStudentProfile');
+        if (authRaw) {
+            try {
+                const stored = JSON.parse(authRaw);
+                stored.avatar_url = publicUrl;
+                localStorage.setItem('znodeStudentProfile', JSON.stringify(stored));
+            } catch(e) {}
+        }
+
+        saveLocalState();
+        syncViewRenderState();
+        status.style.color = '#00ff88';
+        status.textContent = 'Image updated successfully.';
+        showToast('Avatar updated.');
+
+    } catch (err) {
+        console.error('Avatar upload failed:', err);
+        status.style.color = '#ff4444';
+        status.textContent = 'Upload failed. Check bucket permissions in Supabase.';
+    }
+}
+
+// ── PATCH 5g: FETCH LIVE YEARBOOK STATUS FROM SUPABASE ──
+async function fetchYearbookStatus() {
+    if (!studentSessionData.passport_id) return;
+    try {
+        const { data, error } = await _db
+            .from('students')
+            .select('yearbook_verified')
+            .eq('znode_passport_id', studentSessionData.passport_id)
+            .single();
+
+        if (!error && data) {
+            studentSessionData.yearbook_verified = data.yearbook_verified || false;
+            saveLocalState();
+            updateYearbookGateUI();
+        }
+    } catch(e) {
+        console.warn('Could not fetch yearbook status:', e);
+    }
+}
+
+// ── HELPERS ──
+function saveLocalState() {
+    localStorage.setItem('znode_test_session', JSON.stringify(studentSessionData));
+}
+
+function showToast(msg) {
+    const root = document.getElementById('toastContainer');
+    const chip = document.createElement('div');
+    chip.className = 'toast';
+    chip.textContent = msg;
+    root.appendChild(chip);
+    setTimeout(() => chip.remove(), 3000);
+}
+
+function toggleThemeSystem() {
+    const ctx = document.body.getAttribute('data-theme');
+    document.body.setAttribute('data-theme', ctx === 'dark' ? 'light' : 'dark');
+    showToast('Theme toggled.');
+}
+
+function resetTestingEnvironment() {
+    localStorage.removeItem('znodeStudentProfile');
+    localStorage.removeItem('znode_test_session');
+    window.location.href = 'onboarding.html';
+}
+
+function signOut() {
+    if (confirm("Terminate session?")) {
+        localStorage.removeItem('znodeStudentProfile');
+        localStorage.removeItem('znode_test_session');
+        window.location.href = 'onboarding.html';
+    }
+}
+
+// ── BOOTSTRAP (PATCH 6: reads email, fetches live yearbook status) ──
+function bootstrap() {
+    const authRaw  = localStorage.getItem('znodeStudentProfile');
+    const cacheRaw = localStorage.getItem('znode_test_session');
+
+    if (!authRaw && !cacheRaw) { window.location.href = 'onboarding.html'; return; }
+
+    if (authRaw) {
+        try {
+            const db = JSON.parse(authRaw);
+            if (db.theme) document.body.setAttribute('data-theme', db.theme);
+
+            studentSessionData.username    = db.username           || '';
+            studentSessionData.full_name   = db.full_name          || '';
+            studentSessionData.matric_no   = db.matric_number      || '';
+            studentSessionData.passport_id = db.znode_passport_id  || '';
+            studentSessionData.university  = db.institution        || '';
+            studentSessionData.department  = db.department         || '';
+            studentSessionData.faculty     = db.faculty            || '';
+            studentSessionData.avatar_url  = db.avatar_url         || '';
+            studentSessionData.email       = db.email              || ''; // PATCH 6a
+
+            if (cacheRaw) {
+                try {
+                    const cached = JSON.parse(cacheRaw);
+                    if (Array.isArray(cached.custom_attributes)) {
+                        studentSessionData.custom_attributes = cached.custom_attributes;
+                    }
+                    // Restore cached verified state as optimistic default
+                    if (typeof cached.yearbook_verified === 'boolean') {
+                        studentSessionData.yearbook_verified = cached.yearbook_verified;
+                    }
+                } catch(e) {}
+            }
+        } catch(e) { console.error("Session parse error", e); }
+
+    } else if (cacheRaw) {
+        try { studentSessionData = JSON.parse(cacheRaw); } catch(e) {}
+    }
+
+    syncViewRenderState();
+
+    // PATCH 6b: Always fetch authoritative verified status from Supabase
+    fetchYearbookStatus();
 }
 
 bootstrap();
