@@ -4,217 +4,426 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Z-Node // Yearbook</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@400;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-base: #000000;
-            --bg-surface: #0a0a0a;
-            --border-light: #222222;
-            --border-strong: #333333;
-            --text-main: #ffffff;
-            --text-muted: #666666;
-            --accent: #ffffff;
-            --accent-text: #000000;
-            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+            --paper:      #f0ebe0;
+            --paper-mid:  #e4dac8;
+            --paper-dark: #d4c8b0;
+            --navy:       #1a2744;
+            --gold:       #c8823a;
+            --tape:       rgba(208, 182, 128, 0.72);
+            --text-main:  #1a2744;
+            --text-muted: #6b5e4a;
+            --text-faint: #a89880;
+            --ease:       cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        [data-theme="light"] {
-            --bg-base: #ffffff;
-            --bg-surface: #f4f4f4;
-            --border-light: #e5e5e5;
-            --border-strong: #cccccc;
-            --text-main: #000000;
-            --text-muted: #888888;
-            --accent: #000000;
-            --accent-text: #ffffff;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: var(--bg-base);
+            background: var(--paper);
             color: var(--text-main);
             min-height: 100vh;
-            transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
+            font-family: 'Inter', sans-serif;
         }
 
-        h1, h2, h3 { font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; }
-        .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 800; color: var(--text-muted); }
-
-        .stealth-grid {
-            position: fixed; inset: 0;
-            background-image: linear-gradient(var(--border-strong) 1px, transparent 1px),
-                              linear-gradient(90deg, var(--border-strong) 1px, transparent 1px);
-            background-size: 60px 60px;
-            mask-image: radial-gradient(circle at 50% 50%, black 20%, transparent 80%);
-            -webkit-mask-image: radial-gradient(circle at 50% 50%, black 20%, transparent 80%);
-            pointer-events: none; z-index: 0; opacity: 0.15;
-        }
-
+        /* ══════════════════════════════
+           TOP BAR
+        ══════════════════════════════ */
         .top-bar {
-            position: sticky; top: 0;
+            position: sticky; top: 0; z-index: 50;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 48px; height: 64px;
-            background: var(--bg-base);
-            border-bottom: 1px solid var(--border-strong);
-            z-index: 50;
+            padding: 10px 18px;
+            background: var(--paper);
+            border-bottom: 1px dashed var(--paper-dark);
         }
 
         .back-btn {
-            display: flex; align-items: center; gap: 10px;
-            background: transparent; border: 1px solid var(--border-strong);
-            color: var(--text-muted); font-size: 13px; font-weight: 800;
-            padding: 10px 18px; cursor: pointer;
-            text-transform: uppercase; letter-spacing: 0.05em;
-            transition: all 0.2s var(--ease);
+            display: flex; align-items: center; gap: 7px;
+            background: none; border: none; cursor: pointer;
+            color: var(--text-muted); font-size: 11px; font-weight: 800;
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            padding: 6px 0;
+            transition: color 0.2s;
         }
-        .back-btn:hover { border-color: var(--text-main); color: var(--text-main); background: var(--bg-surface); }
+        .back-btn:hover { color: var(--navy); }
 
-        .brand-logo { font-size: 18px; font-weight: 900; letter-spacing: -0.03em; }
+        .top-brand {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 20px; letter-spacing: 4px; color: var(--navy);
+        }
 
         .user-chip {
-            display: flex; align-items: center; gap: 10px;
-            font-size: 13px; font-weight: 700; color: var(--text-muted);
+            display: flex; align-items: center; gap: 8px;
         }
+
         .user-avatar {
-            width: 32px; height: 32px;
-            border: 1px solid var(--border-strong);
-            background: var(--bg-surface);
+            width: 28px; height: 28px; overflow: hidden;
+            border: 2px solid var(--navy);
+            background: var(--paper-mid);
             display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 12px; overflow: hidden;
+            font-size: 11px; font-weight: 900; color: var(--navy);
+            flex-shrink: 0;
         }
-        .user-avatar img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
+        #navUsername {
+            font-size: 11px; font-weight: 700; color: var(--text-muted);
+            display: none;
+        }
+        @media (min-width: 420px) { #navUsername { display: block; } }
+
+        /* ══════════════════════════════
+           MAIN CONTENT
+        ══════════════════════════════ */
         .page-content {
-            position: relative; z-index: 5;
-            max-width: 1200px; margin: 0 auto;
-            padding: 56px 48px;
+            max-width: 480px; margin: 0 auto;
         }
 
-        .page-header { margin-bottom: 48px; border-bottom: 1px solid var(--text-main); padding-bottom: 24px; }
-        .page-header h1 { font-size: 40px; margin-top: 8px; }
-        .header-meta { display: flex; gap: 24px; margin-top: 12px; }
-        .meta-tag {
-            font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em;
-            border: 1px solid var(--border-strong); padding: 6px 12px; color: var(--text-muted);
+        /* ══════════════════════════════
+           COVER HEADER
+        ══════════════════════════════ */
+        .cover-header {
+            text-align: center;
+            padding: 24px 20px 16px;
         }
 
+        .cover-top-deco {
+            display: flex; justify-content: space-between;
+            font-size: 15px; color: var(--navy); opacity: 0.3;
+            margin-bottom: 6px;
+            font-family: 'Caveat', cursive;
+        }
+
+        .cover-znode {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 72px; letter-spacing: 8px; line-height: 1;
+            color: var(--navy);
+        }
+
+        .znode-bolt {
+            font-family: 'Inter', sans-serif;
+            font-size: 30px; font-weight: 900; letter-spacing: 0;
+            color: var(--gold); vertical-align: super; line-height: 0;
+        }
+
+        .cover-ephoto {
+            font-family: 'Caveat', cursive;
+            font-size: 22px; color: var(--gold); font-weight: 600;
+            letter-spacing: 0.02em; margin-top: 1px;
+        }
+
+        .cover-class-banner {
+            display: inline-block;
+            background: var(--navy); color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px; font-weight: 900;
+            letter-spacing: 6px; text-transform: uppercase;
+            padding: 9px 32px;
+            margin: 14px 0 7px;
+        }
+
+        .cover-dept {
+            font-family: 'Caveat', cursive;
+            font-size: 18px; color: var(--text-muted);
+        }
+
+        /* Stats row */
+        .stats-row {
+            display: flex; align-items: stretch; justify-content: center;
+            margin: 14px 0 0;
+            border-top: 1px dashed var(--paper-dark);
+            border-bottom: 1px dashed var(--paper-dark);
+            padding: 8px 0;
+        }
+
+        .stat {
+            display: flex; align-items: center; gap: 6px;
+            padding: 4px 10px;
+            border-right: 1px solid var(--paper-dark);
+        }
+        .stat:last-child { border-right: none; }
+
+        .stat-ico { font-size: 13px; line-height: 1; }
+
+        .stat-vals { display: flex; flex-direction: column; }
+        .stat-n {
+            font-size: 13px; font-weight: 800; color: var(--navy); line-height: 1.1;
+        }
+        .stat-lbl {
+            font-size: 8px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--text-faint);
+        }
+
+        /* ══════════════════════════════
+           HIDDEN FUNCTIONAL HEADER
+           (kept intact for JS refs)
+        ══════════════════════════════ */
+        .page-header, .header-meta { display: none; }
+
+        /* ══════════════════════════════
+           STATE PANELS
+        ══════════════════════════════ */
         .state-panel {
-            border: 1px solid var(--border-strong); background: var(--bg-surface);
-            padding: 64px; text-align: center;
-        }
-        .state-panel .eyebrow { margin-bottom: 12px; }
-        .state-panel h3 { font-size: 24px; margin-bottom: 8px; }
-        .state-panel p { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
-
-        .student-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 1px;
-            border: 1px solid var(--border-strong);
-            background: var(--border-strong);
+            border: 2px dashed var(--paper-dark);
+            padding: 52px 24px; text-align: center;
+            margin: 20px 18px;
         }
 
-        .student-card {
-            background: var(--bg-base);
-            padding: 0;
-            cursor: default;
-            transition: background 0.2s var(--ease);
-            position: relative;
-            overflow: hidden;
-        }
-        .student-card:hover { background: var(--bg-surface); }
-
-        .student-photo {
-            width: 100%; aspect-ratio: 3/4;
-            object-fit: cover;
-            filter: grayscale(100%);
-            display: block;
-            transition: filter 0.3s var(--ease);
-        }
-        .student-card:hover .student-photo { filter: grayscale(0%); }
-
-        .student-photo-fallback {
-            width: 100%; aspect-ratio: 3/4;
-            background: var(--bg-surface);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 48px;
-            border-bottom: 1px solid var(--border-strong);
+        .eyebrow {
+            font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.18em;
+            color: var(--text-muted); margin-bottom: 10px;
         }
 
-        .student-info {
-            padding: 16px;
-            border-top: 1px solid var(--border-strong);
+        .state-panel h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px; color: var(--navy); margin-bottom: 6px;
         }
 
-        .student-name {
-            font-size: 15px; font-weight: 800;
-            letter-spacing: -0.02em; margin-bottom: 4px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        .state-panel p {
+            font-family: 'Caveat', cursive;
+            font-size: 17px; color: var(--text-muted); line-height: 1.5;
         }
 
-        .student-handle {
-            font-size: 12px; color: var(--text-muted);
-            font-weight: 700; margin-bottom: 8px;
-        }
-
-        .student-passport {
-            font-family: 'Space Mono', monospace;
-            font-size: 10px; color: var(--text-muted);
-            letter-spacing: 0.05em;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-
-        /* DOS badge — distinct from verified */
-        .dos-badge {
-            position: absolute; top: 10px; left: 10px;
-            background: var(--text-main); color: var(--bg-base);
-            padding: 3px 7px;
-            font-size: 9px; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 0.1em;
-        }
-
-        .verified-badge {
-            position: absolute; top: 10px; right: 10px;
-            background: var(--bg-base); border: 1px solid var(--text-main);
-            padding: 3px 7px;
-            font-size: 9px; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 0.1em;
-        }
-
+        /* ══════════════════════════════
+           COUNT BAR
+        ══════════════════════════════ */
         .count-bar {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 16px 0; margin-bottom: 24px;
+            padding: 9px 18px;
+            background: var(--navy);
         }
-        .count-bar .eyebrow { color: var(--text-muted); }
 
-        @media (max-width: 640px) {
-            .top-bar { padding: 0 20px; }
-            .page-content { padding: 32px 20px; }
-            .page-header h1 { font-size: 28px; }
-            .student-grid { grid-template-columns: repeat(2, 1fr); }
+        .count-bar .eyebrow { color: rgba(255,255,255,0.5); }
+        #studentCount { color: rgba(255,255,255,0.92) !important; }
+
+        /* ══════════════════════════════
+           STUDENT LIST
+        ══════════════════════════════ */
+        #studentGrid {
+            flex-direction: column;
+            background: var(--paper);
+        }
+
+        /* ══════════════════════════════
+           STUDENT ENTRY
+        ══════════════════════════════ */
+        .student-entry {
+            display: flex; align-items: flex-start; gap: 16px;
+            padding: 36px 18px 28px;
+            position: relative;
+            border-bottom: 1px solid var(--paper-mid);
+        }
+
+        /* Alternating photo left / right */
+        .entry-r .photo-col { order: 1; }
+        .entry-r .info-col  { order: 2; }
+        .entry-l .photo-col { order: 2; }
+        .entry-l .info-col  { order: 1; }
+
+        /* ══════════════════════════════
+           PHOTO FRAME  (double-frame
+           polaroid scrapbook effect)
+        ══════════════════════════════ */
+        .photo-col {
+            position: relative;
+            min-width: 128px; width: 128px;
+            flex-shrink: 0;
+            margin-top: 8px;
+        }
+
+        /* Navy shadow frame — sits behind polaroid */
+        .frame-bg {
+            position: absolute; inset: 0;
+            background: var(--navy);
+            z-index: 0;
+            /* rotation applied inline per card */
+        }
+
+        /* White polaroid frame — on top */
+        .frame-fg {
+            position: relative; z-index: 1;
+            background: #fff;
+            padding: 7px 7px 24px;
+            box-shadow: 3px 4px 14px rgba(0,0,0,0.18);
+            /* rotation applied inline per card */
+        }
+
+        /* Masking tape strip */
+        .frame-tape {
+            position: absolute;
+            top: -10px; left: 50%;
+            width: 46px; height: 17px;
+            background: var(--tape);
+            z-index: 4;
+            /* transform (translateX + rotate) applied inline */
+        }
+
+        .student-photo {
+            width: 100%;
+            aspect-ratio: 3 / 4;
+            object-fit: cover;
+            display: block;
+        }
+
+        .photo-empty {
+            width: 100%; aspect-ratio: 3 / 4;
+            background: var(--paper-mid);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px;
+        }
+
+        /* ══════════════════════════════
+           STUDENT INFO
+        ══════════════════════════════ */
+        .info-col {
+            flex: 1; min-width: 0;
+            display: flex; flex-direction: column;
+            padding-top: 14px;
+        }
+
+        .info-crown {
+            font-size: 16px; color: var(--gold);
+            line-height: 1; margin-bottom: 4px;
+        }
+
+        .info-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px; line-height: 0.95; letter-spacing: 1px;
+            color: var(--navy);
+            word-break: break-word;
+        }
+
+        .info-role {
+            font-size: 12px; font-weight: 700;
+            color: var(--gold);
+            margin: 5px 0 9px;
+        }
+
+        .info-quote {
+            font-family: 'Caveat', cursive;
+            font-size: 15px; line-height: 1.4;
+            color: var(--text-main);
+        }
+
+        .info-quote-line {
+            width: 32px; height: 2px;
+            background: var(--gold);
+            margin-top: 8px;
+            transform: rotate(-1deg);
+        }
+
+        .info-handle {
+            font-size: 9px; font-weight: 700;
+            color: var(--text-faint); margin-top: 10px;
+            text-transform: uppercase; letter-spacing: 0.08em;
+        }
+
+        /* Small decorative mark per entry */
+        .entry-deco {
+            position: absolute;
+            bottom: 14px;
+            font-size: 14px; color: var(--navy);
+            opacity: 0.28; user-select: none; line-height: 1;
+        }
+
+        /* ══════════════════════════════
+           SCROLL CTA
+        ══════════════════════════════ */
+        .scroll-cta {
+            text-align: center;
+            padding: 26px 20px;
+            font-family: 'Caveat', cursive;
+            font-size: 15px; color: var(--text-muted);
+            border-top: 1px dashed var(--paper-dark);
+        }
+        .scroll-cta .cta-arrow {
+            display: block; font-size: 22px; margin-top: 4px;
+        }
+
+        /* ══════════════════════════════
+           RESPONSIVE
+        ══════════════════════════════ */
+        @media (max-width: 375px) {
+            .cover-znode           { font-size: 56px; }
+            .cover-class-banner    { font-size: 12px; letter-spacing: 4px; padding: 8px 20px; }
+            .info-name             { font-size: 27px; }
+            .photo-col             { min-width: 108px; width: 108px; }
+            .stat                  { padding: 4px 7px; }
+            .stat-ico              { display: none; }
         }
     </style>
 </head>
-<body data-theme="dark">
+<body>
 
-<div class="stealth-grid"></div>
-
+<!-- ══════════ TOP BAR ══════════ -->
 <header class="top-bar">
     <button class="back-btn" onclick="window.location.href='app.html'">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-        Back to Grid
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        Back
     </button>
-    <span class="brand-logo">Z-NODE</span>
+    <span class="top-brand">Z-NODE</span>
     <div class="user-chip">
         <div class="user-avatar" id="navAvatar">?</div>
-        <span id="navUsername">—</span>
+        <span id="navUsername"></span>
     </div>
 </header>
 
 <main class="page-content">
 
+    <!-- ══ YEARBOOK COVER ══ -->
+    <div class="cover-header">
+        <div class="cover-top-deco">
+            <span>⊞</span><span>✦</span><span>⊞</span>
+        </div>
+
+        <div class="cover-znode">Z-NODE<span class="znode-bolt">↗</span></div>
+        <div class="cover-ephoto">— E-Photo Album —</div>
+
+        <div class="cover-class-banner" id="classbanner">CLASS OF —</div>
+        <br>
+        <div class="cover-dept" id="deptLabel">Department of —</div>
+
+        <div class="stats-row">
+            <div class="stat">
+                <span class="stat-ico">👥</span>
+                <div class="stat-vals">
+                    <span class="stat-n" id="statStudents">—</span>
+                    <span class="stat-lbl">Students</span>
+                </div>
+            </div>
+            <div class="stat">
+                <span class="stat-ico">📷</span>
+                <div class="stat-vals">
+                    <span class="stat-n">∞</span>
+                    <span class="stat-lbl">Photos</span>
+                </div>
+            </div>
+            <div class="stat">
+                <span class="stat-ico">📖</span>
+                <div class="stat-vals">
+                    <span class="stat-n">10</span>
+                    <span class="stat-lbl">Sections</span>
+                </div>
+            </div>
+            <div class="stat">
+                <span class="stat-ico">⭐</span>
+                <div class="stat-vals">
+                    <span class="stat-n">∞</span>
+                    <span class="stat-lbl">Memories</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ HIDDEN FUNCTIONAL HEADER (JS refs kept intact) ══ -->
     <div class="page-header">
         <div class="eyebrow" id="queryLabel">YEARBOOK DIRECTORY</div>
         <h1 id="pageTitle">Loading...</h1>
@@ -224,24 +433,33 @@
         </div>
     </div>
 
+    <!-- ══ LOADING STATE ══ -->
     <div class="state-panel" id="loadingState">
-        <div class="eyebrow" style="margin-bottom: 12px;">Z-NODE // QUERYING</div>
-        <h3>Accessing Network.</h3>
-        <p>Fetching student records from the database...</p>
+        <div class="eyebrow">Z-NODE // OPENING ALBUM</div>
+        <h3>Leafing Through Pages...</h3>
+        <p>Fetching student memories from the archive.</p>
     </div>
 
+    <!-- ══ COUNT BAR ══ -->
     <div class="count-bar" id="countBar" style="display:none;">
-        <span class="eyebrow" id="studentCount">0 nodes found</span>
-        <span class="eyebrow" style="color: var(--text-main);">ACTIVE DIRECTORY</span>
+        <span class="eyebrow" id="studentCount">0 found</span>
+        <span class="eyebrow">ACTIVE DIRECTORY</span>
     </div>
 
-    <div class="student-grid" id="studentGrid" style="display:none;"></div>
+    <!-- ══ STUDENT LIST ══ -->
+    <div id="studentGrid" style="display:none;"></div>
 
+    <!-- ══ EMPTY STATE ══ -->
     <div class="state-panel" id="emptyState" style="display:none;">
-        <div class="eyebrow" style="margin-bottom: 12px;">Z-NODE // NULL RESPONSE</div>
-        <h3>No Nodes Found.</h3>
-        <p>No students match this department and graduation year in the network.<br>
-           They may not have registered yet or the query parameters don't match.</p>
+        <div class="eyebrow">Z-NODE // NULL RESPONSE</div>
+        <h3>Empty Album.</h3>
+        <p>No students found for this department and year.<br>They may not have registered yet.</p>
+    </div>
+
+    <!-- ══ SCROLL CTA ══ -->
+    <div class="scroll-cta" id="scrollCta" style="display:none;">
+        ✦ Scroll to discover more ✦
+        <span class="cta-arrow">↓</span>
     </div>
 
 </main>
@@ -252,63 +470,92 @@ const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const { createClient } = supabase;
 const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// ── Session ──────────────────────────────────────────────────────────────────
 function initSession() {
-    const authRaw = localStorage.getItem('znodeStudentProfile');
-    if (!authRaw) { window.location.href = 'onboarding.html'; return null; }
+    const raw = localStorage.getItem('znodeStudentProfile');
+    if (!raw) { window.location.href = 'onboarding.html'; return null; }
     try {
-        const student = JSON.parse(authRaw);
-        if (student.theme) document.body.setAttribute('data-theme', student.theme);
+        const s = JSON.parse(raw);
+        if (s.theme) document.body.setAttribute('data-theme', s.theme);
 
-        const avatar = document.getElementById('navAvatar');
-        if (student.avatar_url) {
-            avatar.innerHTML = `<img src="${student.avatar_url}" alt="avatar">`;
+        const av = document.getElementById('navAvatar');
+        if (s.avatar_url) {
+            av.innerHTML = `<img src="${s.avatar_url}" alt="avatar">`;
         } else {
-            avatar.textContent = (student.username || '?').charAt(0).toUpperCase();
+            av.textContent = (s.username || '?')[0].toUpperCase();
         }
-        document.getElementById('navUsername').textContent = `@${student.username || '—'}`;
-        return student;
+        document.getElementById('navUsername').textContent = `@${s.username || '—'}`;
+        return s;
     } catch(e) {
         window.location.href = 'onboarding.html';
         return null;
     }
 }
 
+// ── URL Params ───────────────────────────────────────────────────────────────
 function getParams() {
     const p = new URLSearchParams(window.location.search);
     return { dept: p.get('dept') || '', year: p.get('year') || '' };
 }
 
-function renderCard(student) {
-    const card = document.createElement('div');
-    card.className = 'student-card';
+// ── Card Rendering ───────────────────────────────────────────────────────────
+// Variation arrays so every card looks slightly different
+const FRAME_ROTS  = [-2,   2,  -1.5,  2.5,  -3,   1.5,  -2.5,  3  ];
+const SHADOW_ROTS = [ 3,  -3,   2.5, -3.5,   4,  -2.5,   3.5, -4  ];
+const TAPE_ROTS   = [-4,   3,  -2,    4,   -3,    2,    -4,    3  ];
+const DECOS       = ['☆', '♡', '⚡', '◇', '✦', '☆', '♡', '⚡'];
+
+function renderCard(student, idx) {
+    const entry = document.createElement('div');
+    entry.className = `student-entry ${idx % 2 === 0 ? 'entry-r' : 'entry-l'}`;
+
+    const fr = FRAME_ROTS [idx % FRAME_ROTS.length];
+    const sr = SHADOW_ROTS[idx % SHADOW_ROTS.length];
+    const tr = TAPE_ROTS  [idx % TAPE_ROTS.length];
+    const isDOS = student.is_dos === true || student.is_dos === 'true';
 
     const photoHTML = student.avatar_url
         ? `<img class="student-photo" src="${student.avatar_url}" alt="${student.full_name || ''}" loading="lazy">`
-        : `<div class="student-photo-fallback">👤</div>`;
+        : `<div class="photo-empty">👤</div>`;
 
-    // is_dos is stored as text "true"/"false" in your schema
-    const isDOS = student.is_dos === true || student.is_dos === 'true';
-    const dosBadge   = isDOS ? `<span class="dos-badge">DOS</span>` : '';
-    const verifiedBadge = student.is_verified
-        ? `<span class="verified-badge">✓ VERIFIED</span>` : '';
+    const crownHTML = isDOS
+        ? `<div class="info-crown">♛</div>`
+        : `<div class="info-crown" style="visibility:hidden;">♛</div>`;
 
-    card.innerHTML = `
-        ${photoHTML}
-        ${dosBadge}
-        ${verifiedBadge}
-        <div class="student-info">
-            <div class="student-name">${student.full_name || 'Anonymous'}</div>
-            <div class="student-handle">@${student.username || '—'}</div>
-            <div class="student-passport">${student.znode_passport_id || student.matric_number || '—'}</div>
+    const quote   = student.quote || student.bio || '';
+    const quoteHTML = quote
+        ? `<div class="info-quote">"${quote}"</div><div class="info-quote-line"></div>`
+        : '';
+
+    const pid = student.znode_passport_id || student.matric_number || '';
+    const handleHTML = pid
+        ? `<div class="info-handle">${pid}</div>`
+        : `<div class="info-handle">@${student.username || '—'}</div>`;
+
+    const decoSide = idx % 2 === 0 ? 'right:14px' : 'left:14px';
+
+    entry.innerHTML = `
+        <div class="photo-col">
+            <div class="frame-bg" style="transform:rotate(${sr}deg);"></div>
+            <div class="frame-fg" style="transform:rotate(${fr}deg);">
+                <div class="frame-tape" style="transform:translateX(-50%) rotate(${tr}deg);"></div>
+                ${photoHTML}
+            </div>
         </div>
+        <div class="info-col">
+            ${crownHTML}
+            <div class="info-name">${(student.full_name || 'Anonymous').toUpperCase()}</div>
+            <div class="info-role">${student.department || '—'}</div>
+            ${quoteHTML}
+            ${handleHTML}
+        </div>
+        <span class="entry-deco" style="bottom:14px;${decoSide};">${DECOS[idx % DECOS.length]}</span>
     `;
-    return card;
+    return entry;
 }
 
-// ════════════════════════════════════════
-// FIXED QUERY — uses graduation_year column
-// not created_at date range (which was the bug)
-// ════════════════════════════════════════
+// ── Load Yearbook ─────────────────────────────────────────────────────────────
+// FIXED QUERY — uses graduation_year column, not created_at date range
 async function loadYearbook(dept, year) {
     try {
         let query = _db.from('students').select('*');
@@ -316,13 +563,13 @@ async function loadYearbook(dept, year) {
         if (dept) {
             query = query.ilike('department', `%${dept}%`);
         }
-
-        // KEY FIX: filter by graduation_year column, not created_at
         if (year) {
             query = query.eq('graduation_year', parseInt(year));
         }
 
-        const { data: students, error } = await query.order('is_dos', { ascending: false }).order('full_name', { ascending: true });
+        const { data: students, error } = await query
+            .order('is_dos', { ascending: false })
+            .order('full_name', { ascending: true });
 
         if (error) throw error;
         return students || [];
@@ -333,23 +580,30 @@ async function loadYearbook(dept, year) {
     }
 }
 
+// ── Bootstrap ─────────────────────────────────────────────────────────────────
 async function bootstrap() {
     const session = initSession();
     if (!session) return;
 
     const { dept, year } = getParams();
 
-    document.getElementById('pageTitle').textContent =
-        dept ? `${dept} — Class of ${year}.` : 'Yearbook Directory.';
+    // Update cover header
+    document.getElementById('classbanner').textContent = year ? `CLASS OF ${year}` : 'CLASS OF —';
+    document.getElementById('deptLabel').textContent   = dept ? `Department of ${dept}` : 'Department of —';
+
+    // Keep hidden functional refs updated
+    document.getElementById('pageTitle').textContent  = dept ? `${dept} — Class of ${year}.` : 'Yearbook Directory.';
     document.getElementById('queryLabel').textContent = 'YEARBOOK // STUDENT DIRECTORY';
-    document.getElementById('deptTag').textContent  = `DEPT: ${dept || 'ALL'}`;
-    document.getElementById('yearTag').textContent  = `CLASS OF ${year || 'ALL'}`;
+    document.getElementById('deptTag').textContent    = `DEPT: ${dept || 'ALL'}`;
+    document.getElementById('yearTag').textContent    = `CLASS OF ${year || 'ALL'}`;
 
     const students = await loadYearbook(dept, year);
-
     document.getElementById('loadingState').style.display = 'none';
 
-    if (students.length === 0) {
+    // Update student count stat
+    document.getElementById('statStudents').textContent = String(students.length);
+
+    if (!students.length) {
         document.getElementById('emptyState').style.display = 'block';
         return;
     }
@@ -359,8 +613,11 @@ async function bootstrap() {
     document.getElementById('countBar').style.display = 'flex';
 
     const grid = document.getElementById('studentGrid');
-    students.forEach(s => grid.appendChild(renderCard(s)));
-    grid.style.display = 'grid';
+    students.forEach((s, i) => grid.appendChild(renderCard(s, i)));
+    grid.style.display    = 'flex';
+    grid.style.flexDirection = 'column';
+
+    document.getElementById('scrollCta').style.display = 'block';
 }
 
 bootstrap();
