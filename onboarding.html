@@ -509,12 +509,12 @@ async function submitDOS(){
     const suffix=cyMatricVal.replace(/[^a-zA-Z0-9]/g,'').slice(-6).toUpperCase();
     const passportId=`ZNP-${selInst.name.toUpperCase().replace(/\s/g,'').slice(0,8)}-${cyYearVal}-${suffix}`;
     msg.textContent='Registering DOS record...';
-    const{error:adminError}=await _db.from('institution_admins').insert({user_id:user.id,institution_id:selInst.id,faculty_id:selFac.id,department_id:selDept.id,role:'DOS',status:'pending'});
+    const{error:adminError}=await _db.from('institution_admins').insert({institution_id:selInst.id,faculty:selFac.name,department:selDept.name,role:'DOS',status:'pending',full_name:name,email,username:username||null,password_hash:await hashPassword(password)});
     if(adminError)throw new Error(adminError.message);
     msg.textContent='Building profile...';
     const{error:profileError}=await _db.from('profiles').insert({id:user.id,name,email,role:'DOS',username:username||null,matric_number:cyMatricVal||null,znode_passport_id:passportId,position:document.getElementById('cyPosition').value.trim()||null,graduation_year:cyYearVal,theme:document.body.getAttribute('data-theme')||'dark',is_dos:true,is_verified:false});
     if(profileError)throw new Error(profileError.message);
-    localStorage.setItem('znodeStudentProfile',JSON.stringify({id:user.id,name,email,role:'DOS',username,institution_id:selInst.id,faculty_id:selFac.id,department_id:selDept.id,status:'pending'}));
+    localStorage.setItem('znodeStudentProfile',JSON.stringify({id:user.id,name,email,role:'DOS',username,institution_id:selInst.id,institution:selInst.name,faculty:selFac.name,department:selDept.name,status:'pending'}));
     document.querySelector('#submittingOverlay h2').textContent='Yearbook Created ✓';
     msg.textContent='Redirecting to your dashboard...';
     setTimeout(()=>{window.location.href='app.html';},1500);
@@ -588,7 +588,7 @@ async function submitJoinYearbook(){
     const suffix=matric.replace(/[^a-zA-Z0-9]/g,'').slice(-6).toUpperCase();
     const passportId=`ZNP-${jySelInst.name.toUpperCase().replace(/\s/g,'').slice(0,8)}-${year}-${suffix}`;
     msg.textContent='Writing to the grid...';
-    const payload={username,full_name:document.getElementById('jyFullName').value.trim(),email:document.getElementById('jyEmail').value.trim(),password_hash:pwdHash,avatar_url:avatarUrl,institution:jySelInst.name.toLowerCase(),institution_id:jySelInst.id,faculty:jySelFac.name.toLowerCase(),faculty_id:jySelFac.id,department:jySelDept.name.toLowerCase(),department_id:jySelDept.id,graduation_year:parseInt(year),matric_number:matric,eternal_statement:document.getElementById('jyQuote').value.trim(),znode_passport_id:passportId,theme:document.body.getAttribute('data-theme')||'dark',socials:getSocials(),is_dos:false,is_verified:false};
+    const payload={username,full_name:document.getElementById('jyFullName').value.trim(),email:document.getElementById('jyEmail').value.trim(),password_hash:pwdHash,avatar_url:avatarUrl,institution:jySelInst.name,institution_id:jySelInst.id,faculty:jySelFac.name,department:jySelDept.name,graduation_year:parseInt(year),matric_number:matric,eternal_statement:document.getElementById('jyQuote').value.trim(),znode_passport_id:passportId,theme:document.body.getAttribute('data-theme')||'dark',socials:getSocials(),is_dos:false,is_verified:false};
     const{data:student,error}=await _db.from('students').insert(payload).select().maybeSingle();
     if(error)throw new Error(error.message);
     localStorage.setItem('znodeStudentProfile',JSON.stringify(student));
