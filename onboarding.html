@@ -406,7 +406,7 @@ async function selectInstitution(item){
   el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:4px 0;">Loading faculties...</div>';
   document.getElementById('facultyBox').classList.add('visible');
   try{
-    const{data,error}=await _db.from('faculties').select('*').eq('institution_id',item.id).order('name');
+    const{data,error}=await _db.from('nuc_faculties').select('*').order('name');
     if(error||!data||!data.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:4px 0;">No faculties found.</div>';return;}
     el.innerHTML='';
     data.forEach(f=>{const div=document.createElement('div');div.className='search-option';div.style.cssText='border-radius:12px;border:1px solid var(--border-strong);';div.textContent=f.name;div.onclick=()=>selectFaculty(f);el.appendChild(div);});
@@ -423,7 +423,7 @@ async function selectFaculty(f){
   el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:4px 0;">Loading departments...</div>';
   document.getElementById('departmentBox').classList.add('visible');
   try{
-    const{data,error}=await _db.from('departments').select('*').eq('faculty_id',f.id).order('name');
+    const{data,error}=await _db.from('nuc_departments').select('*').eq('faculty_id',f.id).order('name');
     if(error||!data||!data.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:4px 0;">No departments found.</div>';return;}
     el.innerHTML='';
     data.forEach(d=>{const div=document.createElement('div');div.className='search-option';div.style.cssText='border-radius:12px;border:1px solid var(--border-strong);';div.textContent=d.name;div.onclick=()=>{selDept=d;document.getElementById('selectedDepartmentName').textContent=d.name;document.getElementById('selectedDepartmentBadge').style.display='inline-flex';el.innerHTML='';showToast(`Department: ${d.name}`);};el.appendChild(div);});
@@ -464,7 +464,7 @@ async function jySelectInstitution(item){
   el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:4px 0;">Loading faculties...</div>';
   document.getElementById('jyFacultyBox').classList.add('visible');
   try{
-    const{data,error}=await _db.from('faculties').select('*').eq('institution_id',item.id).order('name');
+    const{data,error}=await _db.from('nuc_faculties').select('*').order('name');
     if(error||!data||!data.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:4px 0;">No faculties found.</div>';return;}
     el.innerHTML='';
     data.forEach(f=>{const div=document.createElement('div');div.className='search-option';div.style.cssText='border-radius:12px;border:1px solid var(--border-strong);';div.textContent=f.name;div.onclick=()=>jySelectFaculty(f);el.appendChild(div);});
@@ -481,7 +481,7 @@ async function jySelectFaculty(f){
   el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:4px 0;">Loading departments...</div>';
   document.getElementById('jyDepartmentBox').classList.add('visible');
   try{
-    const{data,error}=await _db.from('departments').select('*').eq('faculty_id',f.id).order('name');
+    const{data,error}=await _db.from('nuc_departments').select('*').eq('faculty_id',f.id).order('name');
     if(error||!data||!data.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:4px 0;">No departments found.</div>';return;}
     el.innerHTML='';
     data.forEach(d=>{const div=document.createElement('div');div.className='search-option';div.style.cssText='border-radius:12px;border:1px solid var(--border-strong);';div.textContent=d.name;div.onclick=()=>{jySelDept=d;document.getElementById('jySelectedDepartmentName').textContent=d.name;document.getElementById('jySelectedDepartmentBadge').style.display='inline-flex';el.innerHTML='';showToast(`Department: ${d.name}`);};el.appendChild(div);});
