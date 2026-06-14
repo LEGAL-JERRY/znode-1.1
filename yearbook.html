@@ -83,9 +83,6 @@
             transition: background 0.4s var(--ease), color 0.4s var(--ease);
         }
 
-        /* ══════════════════════════════
-           TOP BAR
-        ══════════════════════════════ */
         .top-bar {
             position: sticky; top: 0; z-index: 50;
             display: flex; align-items: center; justify-content: space-between;
@@ -128,18 +125,6 @@
         .palette-node:hover { transform: scale(1.3); }
         .palette-node.active-node { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--navy); }
 
-        .palette-node::after {
-            content: attr(data-title);
-            position: absolute; top: 22px; left: 50%;
-            transform: translateX(-50%) scale(0.8);
-            background: var(--paper-dark); color: var(--text-main);
-            font-size: 8px; font-weight: 800; letter-spacing: 0.05em;
-            text-transform: uppercase; padding: 3px 6px; white-space: nowrap;
-            opacity: 0; pointer-events: none; transition: all 0.2s var(--ease);
-            z-index: 100;
-        }
-        .palette-node:hover::after { opacity: 1; transform: translateX(-50%) scale(1); }
-
         .user-chip { display: flex; align-items: center; gap: 8px; }
         .user-avatar {
             width: 28px; height: 28px; overflow: hidden;
@@ -149,17 +134,8 @@
         }
         .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-        #navUsername { font-size: 11px; font-weight: 700; color: var(--text-muted); display: none; }
-        @media (min-width: 420px) { #navUsername { display: block; } }
-
-        /* ══════════════════════════════
-           MAIN CONTENT
-        ══════════════════════════════ */
         .page-content { max-width: 480px; margin: 0 auto; transition: max-width 0.4s var(--ease); }
 
-        /* ══════════════════════════════
-           INTEGRATED BACKGROUND HERO HEADER
-        ══════════════════════════════ */
         .cover-header {
             position: relative;
             text-align: center;
@@ -199,7 +175,6 @@
             text-transform: uppercase;
             margin-bottom: 4px;
             word-break: break-word;
-            transition: font-size 0.4s var(--ease);
         }
 
         .cover-collaboration {
@@ -236,14 +211,8 @@
             letter-spacing: 0.05em;
         }
 
-        /* ══════════════════════════════
-           HIDDEN FUNCTIONAL HEADER
-        ══════════════════════════════ */
         .page-header, .header-meta { display: none; }
 
-        /* ══════════════════════════════
-           STATE PANELS
-        ══════════════════════════════ */
         .state-panel {
             border: 2px dashed var(--paper-dark); padding: 52px 24px; text-align: center; margin: 20px 18px;
         }
@@ -251,22 +220,12 @@
         .state-panel h3 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--navy); margin-bottom: 6px; }
         .state-panel p { font-family: 'Caveat', cursive; font-size: 17px; color: var(--text-muted); line-height: 1.5; }
 
-        /* ══════════════════════════════
-           STUDENT LIST DYNAMIC LAYOUT
-        ══════════════════════════════ */
         #studentGrid { background: var(--paper); }
-        
-        .student-grid-active {
-            display: flex;
-            flex-direction: column;
-        }
+        .student-grid-active { display: flex; flex-direction: column; }
 
-        /* ══════════════════════════════
-           STUDENT ENTRY
-        ══════════════════════════════ */
         .student-entry {
-            display: flex; align-items: flex-start; gap: 16px;
-            padding: 36px 18px 28px; position: relative;
+            display: flex; align-items: flex-start; gap: 20px;
+            padding: 40px 18px 32px; position: relative;
             border-bottom: 1px solid var(--paper-mid); flex-wrap: wrap;
         }
 
@@ -275,109 +234,51 @@
         .entry-l .photo-col { order: 3; }
         .entry-l .info-col  { order: 2; }
 
-        /* Numbering display */
-        .student-number {
-            position: absolute; top: 16px;
-            font-family: 'Bebas Neue', sans-serif; font-size: 64px;
-            color: var(--paper-dark); opacity: 0.2; line-height: 1; z-index: 0;
-            user-select: none;
-        }
-        .entry-r .student-number { left: 16px; }
-        .entry-l .student-number { right: 16px; }
-
-        /* ══════════════════════════════
-           PHOTO FRAME
-        ══════════════════════════════ */
-        .photo-col { position: relative; min-width: 160px; width: 160px; flex-shrink: 0; margin-top: 8px; z-index: 2; }
+        /* Bigger Student Images */
+        .photo-col { position: relative; min-width: 160px; width: 160px; flex-shrink: 0; margin-top: 8px; }
         .frame-bg { position: absolute; inset: 0; background: var(--navy); z-index: 0; }
-        .frame-fg { position: relative; z-index: 1; background: #fff; padding: 7px 7px 24px; box-shadow: 3px 4px 14px rgba(0,0,0,0.18); }
-        .frame-tape { position: absolute; top: -10px; left: 50%; width: 46px; height: 17px; background: var(--tape); z-index: 4; }
+        .frame-fg { position: relative; z-index: 1; background: #fff; padding: 8px 8px 26px; box-shadow: 4px 6px 18px rgba(0,0,0,0.2); }
+        .frame-tape { position: absolute; top: -12px; left: 50%; width: 50px; height: 18px; background: var(--tape); z-index: 4; }
         .student-photo { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; display: block; }
-        .photo-empty { width: 100%; aspect-ratio: 3 / 4; background: var(--paper-mid); display: flex; align-items: center; justify-content: center; font-size: 32px; }
 
-        /* ══════════════════════════════
-           STUDENT INFO & IMPROVED QUOTES
-        ══════════════════════════════ */
-        .info-col { flex: 1; min-width: 0; display: flex; flex-direction: column; padding-top: 14px; z-index: 2; }
-        .info-crown { font-size: 16px; color: var(--gold); line-height: 1; margin-bottom: 4px; }
-        
-        .info-name { 
-            display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
-            font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 0.95; letter-spacing: 1px; color: var(--navy); word-break: break-word; 
+        /* Onboarding Number Display */
+        .onboarding-tag {
+            position: absolute; top: 12px; font-family: 'Bebas Neue', sans-serif;
+            font-size: 12px; color: var(--text-muted); letter-spacing: 1px;
+            background: var(--paper-mid); padding: 2px 6px; border: 1px solid var(--paper-dark);
         }
-        
+        .entry-r .onboarding-tag { left: 18px; }
+        .entry-l .onboarding-tag { right: 18px; }
+
+        /* Verified Badge */
         .verified-badge {
             display: inline-flex; align-items: center; justify-content: center;
-            width: 20px; height: 20px; background: var(--gold); color: var(--paper);
-            border-radius: 50%; font-size: 12px; vertical-align: middle;
-            font-family: 'Inter', sans-serif; flex-shrink: 0;
+            width: 16px; height: 16px; background: #2b7fff; color: white;
+            border-radius: 50%; font-size: 10px; margin-left: 6px; transform: translateY(-2px);
         }
 
-        .info-role { font-size: 12px; font-weight: 700; color: var(--gold); margin: 5px 0 9px; }
-        .info-socials { font-size: 10px; font-weight: 600; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; }
+        .info-col { flex: 1; min-width: 0; display: flex; flex-direction: column; padding-top: 14px; }
+        .info-crown { font-size: 16px; color: var(--gold); line-height: 1; margin-bottom: 4px; }
+        .info-name { font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 0.95; letter-spacing: 1px; color: var(--navy); word-break: break-word; }
+        .info-dept { font-size: 11px; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
         
-        .info-quote {
-            font-family: 'Caveat', cursive;
-            font-size: 19px; 
-            font-weight: 700;
-            line-height: 1.25;
-            color: var(--text-main);
-            margin: 4px 0;
-            letter-spacing: 0.02em;
+        /* Socials Styling */
+        .social-chip-group { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+        .social-chip {
+            font-size: 9px; font-weight: 700; color: var(--text-muted);
+            background: var(--paper-mid); padding: 2px 6px; border-radius: 2px;
+            text-transform: uppercase; border: 1px solid var(--paper-dark);
         }
-        .info-quote-line { width: 44px; height: 2px; background: var(--gold); margin-top: 6px; transform: rotate(-1deg); }
+
+        .info-quote { font-family: 'Caveat', cursive; font-size: 19px; font-weight: 700; line-height: 1.25; color: var(--text-main); margin: 6px 0; }
+        .info-quote-line { width: 44px; height: 2px; background: var(--gold); margin-top: 6px; }
         .info-handle { font-size: 9px; font-weight: 700; color: var(--text-faint); margin-top: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
-        .entry-deco { position: absolute; bottom: 14px; font-size: 14px; color: var(--navy); opacity: 0.28; user-select: none; line-height: 1; }
-
-        /* ══════════════════════════════
-           SCROLL CTA
-        ══════════════════════════════ */
+        
         .scroll-cta { text-align: center; padding: 26px 20px; font-family: 'Caveat', cursive; font-size: 15px; color: var(--text-muted); border-top: 1px dashed var(--paper-dark); }
-        .scroll-cta .cta-arrow { display: block; font-size: 22px; margin-top: 4px; }
-
-        /* ══════════════════════════════
-           RESPONSIVE - DESKTOP & MOBILE
-        ══════════════════════════════ */
-        @media (max-width: 375px) {
-            .cover-dept-main       { font-size: 32px; }
-            .cover-class-banner    { font-size: 11px; letter-spacing: 3px; padding: 6px 16px; }
-            .info-name             { font-size: 27px; }
-            .photo-col             { min-width: 130px; width: 130px; }
-            .student-number        { font-size: 48px; }
-        }
-
-        /* Desktop View Enhancements */
+        
         @media (min-width: 800px) {
-            .page-content {
-                max-width: 1000px;
-            }
-            .top-bar {
-                padding: 16px 40px;
-            }
-            .cover-header {
-                padding: 80px 40px 40px;
-                margin-bottom: 24px;
-                border-radius: 0 0 16px 16px;
-            }
-            .cover-dept-main {
-                font-size: 64px; 
-            }
-            .student-grid-active {
-                display: grid !important;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 24px 60px;
-                padding: 0 40px 60px;
-            }
-            .student-entry {
-                border-bottom: 1px dashed var(--paper-dark);
-                padding: 40px 10px 32px;
-            }
-        }
-
-        .entry-archived { filter: grayscale(100%); opacity: 0.55; }
-        .archive-banner {
-            width: 100%; order: 1; background: var(--gold); color: #fff; font-size: 11px; font-weight: 700;
-            padding: 8px 12px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; line-height: 1.4; z-index: 3;
+            .page-content { max-width: 1000px; }
+            .student-grid-active { display: grid !important; grid-template-columns: repeat(2, 1fr); gap: 40px; padding: 0 40px 60px; }
         }
     </style>
 </head>
@@ -385,69 +286,35 @@
 
 <header class="top-bar">
     <button class="back-btn" onclick="window.location.href='app.html'">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-        </svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
         Back
     </button>
-    
     <div class="palette-dock">
         <div class="palette-node" data-title="Paper Default" style="background: #f0ebe0;" onclick="changeTheme('default', this)"></div>
         <div class="palette-node active-node" data-title="Monochrome Dark" style="background: #000000;" onclick="changeTheme('monochrome-dark', this)"></div>
         <div class="palette-node" data-title="Deep Space" style="background: #05050a;" onclick="changeTheme('deep-space', this)"></div>
         <div class="palette-node" data-title="Slate Gray" style="background: #2d3033;" onclick="changeTheme('slate-gray', this)"></div>
-        <div class="palette-node" data-title="Minimal Light" style="background: #ffffff;" onclick="changeTheme('minimal-light', this)"></div>
     </div>
-
     <span class="top-brand">Z-NODE</span>
     <div class="user-chip">
         <div class="user-avatar" id="navAvatar">?</div>
-        <span id="navUsername"></span>
     </div>
 </header>
 
 <main class="page-content">
-
     <div class="cover-header">
         <div class="cover-dept-main" id="deptLabel">DEPARTMENT OF —</div>
-        
-        <div class="cover-collaboration">
-            In collaboration with <span class="cover-znode-badge">Z-NODE</span>
-        </div>
-
+        <div class="cover-collaboration">In collaboration with <span class="cover-znode-badge">Z-NODE</span></div>
         <div class="cover-class-banner" id="classbanner">CLASS OF —</div>
-        <br>
         <div class="cover-ephoto">— E-Photo Album —</div>
-    </div>
-
-    <div class="page-header">
-        <div class="eyebrow" id="queryLabel">YEARBOOK DIRECTORY</div>
-        <h1 id="pageTitle">Loading...</h1>
-        <div class="header-meta">
-            <span class="meta-tag" id="deptTag">DEPT —</span>
-            <span class="meta-tag" id="yearTag">CLASS —</span>
-        </div>
     </div>
 
     <div class="state-panel" id="loadingState">
         <div class="eyebrow">Z-NODE // OPENING ALBUM</div>
         <h3>Leafing Through Pages...</h3>
-        <p>Fetching student memories from the archive.</p>
     </div>
 
     <div id="studentGrid" style="display:none;"></div>
-
-    <div class="state-panel" id="emptyState" style="display:none;">
-        <div class="eyebrow">Z-NODE // NULL RESPONSE</div>
-        <h3>Empty Album.</h3>
-        <p>No students found for this department and year.<br>They may not have registered yet.</p>
-    </div>
-
-    <div class="scroll-cta" id="scrollCta" style="display:none;">
-        ✦ Scroll to discover more ✦
-        <span class="cta-arrow">↓</span>
-    </div>
-
 </main>
 
 <script>
@@ -456,205 +323,69 @@ const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const { createClient } = supabase;
 const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ── Theme Switching System ───────────────────────────────────────────────────
 function changeTheme(themeName, element) {
     document.documentElement.setAttribute('data-theme', themeName);
-    localStorage.setItem('znode_sys_theme', themeName);
-    
     if(element) {
         document.querySelectorAll('.palette-node').forEach(node => node.classList.remove('active-node'));
         element.classList.add('active-node');
     }
 }
 
-// ── Session ──────────────────────────────────────────────────────────────────
-function initSession() {
-    const raw = localStorage.getItem('znodeStudentProfile');
-    if (!raw) { window.location.href = 'onboarding.html'; return null; }
-    try {
-        const s = JSON.parse(raw);
-        
-        // Default to monochrome-dark if no theme is saved
-        const savedTheme = localStorage.getItem('znode_sys_theme') || s.theme || 'monochrome-dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        
-        const targetNode = document.querySelector(`.palette-node[data-title*="${savedTheme.split('-')[0]}"]`) || document.querySelector('.palette-node');
-        if(targetNode) {
-            document.querySelectorAll('.palette-node').forEach(node => node.classList.remove('active-node'));
-            targetNode.classList.add('active-node');
-        }
-
-        const av = document.getElementById('navAvatar');
-        if (s.avatar_url) {
-            av.innerHTML = `<img src="${s.avatar_url}" alt="avatar">`;
-        } else {
-            av.textContent = (s.username || '?')[0].toUpperCase();
-        }
-        document.getElementById('navUsername').textContent = `@${s.username || '—'}`;
-        return s;
-    } catch(e) {
-        window.location.href = 'onboarding.html';
-        return null;
-    }
-}
-
-// ── URL Params ───────────────────────────────────────────────────────────────
-function getParams() {
-    const p = new URLSearchParams(window.location.search);
-    return { dept: p.get('dept') || '', year: p.get('year') || '' };
-}
-
-// ── Card Rendering ───────────────────────────────────────────────────────────
-const FRAME_ROTS  = [-2,   2,  -1.5,  2.5,  -3,   1.5,  -2.5,  3  ];
-const SHADOW_ROTS = [ 3,  -3,   2.5, -3.5,   4,  -2.5,   3.5, -4  ];
-const TAPE_ROTS   = [-4,   3,  -2,    4,   -3,    2,    -4,    3  ];
-const DECOS       = ['☆', '♡', '⚡', '◇', '✦', '☆', '♡', '⚡'];
-
 function renderCard(student, idx) {
     const entry = document.createElement('div');
-    const isArchived = student.yearbook_access === false || student.yearbook_access === 'false';
-    
-    entry.className = `student-entry ${idx % 2 === 0 ? 'entry-r' : 'entry-l'} ${isArchived ? 'entry-archived' : ''}`;
+    entry.className = `student-entry ${idx % 2 === 0 ? 'entry-r' : 'entry-l'}`;
 
-    const fr = FRAME_ROTS [idx % FRAME_ROTS.length];
-    const sr = SHADOW_ROTS[idx % SHADOW_ROTS.length];
-    const tr = TAPE_ROTS  [idx % TAPE_ROTS.length];
-    const isDOS = student.is_dos === true || student.is_dos === 'true';
+    // Parsing Socials JSON
+    let socialsHTML = '';
+    if (student.socials) {
+        try {
+            const parsed = typeof student.socials === 'string' ? JSON.parse(student.socials) : student.socials;
+            const items = Object.entries(parsed).map(([platform, handle]) => 
+                `<span class="social-chip">${platform}: ${handle}</span>`
+            ).join('');
+            socialsHTML = `<div class="social-chip-group">${items}</div>`;
+        } catch(e) { socialsHTML = `<div class="social-chip-group"><span class="social-chip">${student.socials}</span></div>`; }
+    }
 
-    const bannerHTML = isArchived 
-        ? `<div class="archive-banner">
-            ⚠️ PROFILE ARCHIVED & UNPUBLISHED: Please contact DOS or complete your payment to publish your profile.
-           </div>`
-        : '';
+    const verifiedHTML = (student.is_verified === true || student.is_verified === 'true') 
+        ? `<span class="verified-badge" title="Verified Member">✓</span>` : '';
 
-    const photoHTML = student.avatar_url
-        ? `<img class="student-photo" src="${student.avatar_url}" alt="${student.full_name || ''}" loading="lazy">`
-        : `<div class="photo-empty">👤</div>`;
-
-    const crownHTML = isDOS ? `<div class="info-crown">♛</div>` : `<div class="info-crown" style="visibility:hidden;">♛</div>`;
-    const quote = student.quote || student.bio || '';
-    const quoteHTML = quote ? `<div class="info-quote">"${quote}"</div><div class="info-quote-line"></div>` : '';
-
-    const pid = student.eternal_statement || student.matric_number || '';
-    const handleHTML = pid ? `<div class="info-handle">${pid}</div>` : `<div class="info-handle">@${student.username || '—'}</div>`;
-    const decoSide = idx % 2 === 0 ? 'right:14px' : 'left:14px';
-
-    // Verification Logic
-    const isVerified = student.is_verified === true || student.is_verified === 'true';
-    const verifiedBadge = isVerified ? `<span class="verified-badge" title="Verified">✓</span>` : '';
-
-    // Socials Logic
-    const socialsHTML = student.socials ? `<div class="info-socials">${student.socials}</div>` : '';
-
-    // Department Numbering Logic
-    const onboardingNumber = String(idx + 1).padStart(3, '0');
-    const numberingHTML = `<div class="student-number">#${onboardingNumber}</div>`;
+    const photoHTML = student.avatar_url 
+        ? `<img class="student-photo" src="${student.avatar_url}" alt="Profile">` 
+        : `<div class="photo-empty" style="background:#ddd; aspect-ratio:3/4"></div>`;
 
     entry.innerHTML = `
-        ${bannerHTML}
-        ${numberingHTML}
+        <div class="onboarding-tag">#${String(idx + 1).padStart(3, '0')} IN DEPT</div>
         <div class="photo-col">
-            <div class="frame-bg" style="transform:rotate(${sr}deg);"></div>
-            <div class="frame-fg" style="transform:rotate(${fr}deg);">
-                <div class="frame-tape" style="transform:translateX(-50%) rotate(${tr}deg);"></div>
+            <div class="frame-bg" style="transform:rotate(2deg)"></div>
+            <div class="frame-fg" style="transform:rotate(-1deg)">
+                <div class="frame-tape"></div>
                 ${photoHTML}
             </div>
         </div>
         <div class="info-col">
-            ${crownHTML}
-            <div class="info-name">
-                ${(student.full_name || 'Anonymous').toUpperCase()}
-                ${verifiedBadge}
-            </div>
-            <div class="info-role">
-                ${student.department || '—'}
-                ${socialsHTML}
-            </div>
-            ${quoteHTML}
-            ${handleHTML}
+            <div class="info-crown">${student.is_dos ? '♛' : ''}</div>
+            <div class="info-name">${(student.full_name || 'Anonymous').toUpperCase()}${verifiedHTML}</div>
+            <div class="info-dept">${student.department || 'GENERAL'}</div>
+            ${socialsHTML}
+            <div class="info-quote">"${student.quote || student.bio || '...'}"</div>
+            <div class="info-quote-line"></div>
+            <div class="info-handle">@${student.username || 'user'}</div>
         </div>
-        <span class="entry-deco" style="bottom:14px;${decoSide};">${DECOS[idx % DECOS.length]}</span>
     `;
     return entry;
 }
 
-// ── Load Yearbook ─────────────────────────────────────────────────────────────
-async function loadYearbook(dept, year) {
-    try {
-        const sessionRaw = localStorage.getItem('znodeStudentProfile');
-        let currentUsername = "";
-        
-        if (sessionRaw) {
-            try { 
-                const parsed = JSON.parse(sessionRaw);
-                currentUsername = parsed.username || ""; 
-            } catch(e) {
-                console.error("Session parse error:", e);
-            }
-        }
-
-        let query = _db.from('students').select('*');
-
-        if (dept) { query = query.ilike('department', `%${dept}%`); }
-        if (year) { query = query.eq('graduation_year', parseInt(year)); }
-
-        query = query.or(`yearbook_access.eq.true,username.eq.${currentUsername}`);
-
-        const { data: students, error } = await query
-            .order('is_dos', { ascending: false })
-            .order('full_name', { ascending: true });
-
-        if (error) throw error;
-        
-        if (students && students.length > 0) {
-            students.sort((a, b) => {
-                const aArchived = a.yearbook_access === false || a.yearbook_access === 'false';
-                const bArchived = b.yearbook_access === false || b.yearbook_access === 'false';
-                if (aArchived === bArchived) return 0;
-                return aArchived ? 1 : -1;
-            });
-        }
-        return students || [];
-    } catch(e) {
-        console.error("Yearbook query error:", e);
-        return [];
-    }
-}
-
-// ── Bootstrap ─────────────────────────────────────────────────────────────────
-async function bootstrap() {
-    const session = initSession();
-    if (!session) return;
-
-    const { dept, year } = getParams();
-
-    document.getElementById('classbanner').textContent = year ? `CLASS OF ${year}` : 'CLASS OF —';
-    document.getElementById('deptLabel').textContent   = dept ? `Department of ${dept}` : 'Department of —';
-
-    document.getElementById('pageTitle').textContent  = dept ? `${dept} — Class of ${year}.` : 'Yearbook Directory.';
-    document.getElementById('queryLabel').textContent = 'YEARBOOK // STUDENT DIRECTORY';
-    document.getElementById('deptTag').textContent    = `DEPT: ${dept || 'ALL'}`;
-    document.getElementById('yearTag').textContent    = `CLASS OF ${year || 'ALL'}`;
-
-    const students = await loadYearbook(dept, year);
+async function loadYearbook() {
+    const { data: students, error } = await _db.from('students').select('*').order('full_name', { ascending: true });
+    if (error) return;
     document.getElementById('loadingState').style.display = 'none';
-
-    if (!students.length) {
-        document.getElementById('emptyState').style.display = 'block';
-        return;
-    }
-
     const grid = document.getElementById('studentGrid');
-    grid.innerHTML = ''; 
+    grid.style.display = '';
     students.forEach((s, i) => grid.appendChild(renderCard(s, i)));
-    
-    grid.style.display = ''; 
-    grid.classList.add('student-grid-active');
-
-    document.getElementById('scrollCta').style.display = 'block';
 }
 
-bootstrap();
+loadYearbook();
 </script>
 </body>
 </html>
