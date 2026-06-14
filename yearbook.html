@@ -499,9 +499,13 @@ function initSession() {
 }
 
 // ── URL Params ───────────────────────────────────────────────────────────────
-function getParams() {
-    const p = new URLSearchParams(window.location.search);
-    return { dept: p.get('dept') || '', year: p.get('year') || '' };
+// function getParams() {
+//     const p = new URLSearchParams(window.location.search);
+//     return { dept: p.get('dept') || '', year: p.get('year') || '' };
+// }
+
+    function getParams() {
+    return { dept: 'Economics', year: '2025' };
 }
 
 // ── Card Rendering ───────────────────────────────────────────────────────────
