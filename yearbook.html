@@ -73,6 +73,79 @@
             --hero-mask:  rgba(255, 255, 255, 0.85);
         }
 
+        /* 🎨 NEW VIBRANT BRIGHT THEMES WITH IMAGE BOX & SHAPE ALTERATIONS */
+        [data-theme='pink-vibe'] {
+            --paper:      #fff0f5;
+            --paper-mid:  #ffe4e1;
+            --paper-dark: #ffb6c1;
+            --navy:       #ff1493;
+            --gold:       #ff69b4;
+            --tape:       rgba(255, 20, 147, 0.3);
+            --text-main:  #4a002a;
+            --text-muted: #c71585;
+            --text-faint: #db7093;
+            --hero-mask:  rgba(255, 240, 245, 0.85);
+        }
+        [data-theme='pink-vibe'] .frame-fg {
+            border-radius: 40% 60% 50% 50% / 50% 40% 60% 50%;
+            border: 3px dashed var(--navy);
+            background: #fffdfc;
+            padding: 12px 12px 28px;
+        }
+        [data-theme='pink-vibe'] .student-photo, [data-theme='pink-vibe'] .photo-empty {
+            border-radius: 40% 60% 50% 50% / 50% 40% 60% 50%;
+        }
+
+        [data-theme='sky-blue'] {
+            --paper:      #f0f8ff;
+            --paper-mid:  #e6f2ff;
+            --paper-dark: #b0e2ff;
+            --navy:       #00688b;
+            --gold:       #00bfff;
+            --tape:       rgba(0, 191, 255, 0.4);
+            --text-main:  #002244;
+            --text-muted: #4682b4;
+            --text-faint: #5cacee;
+            --hero-mask:  rgba(240, 248, 255, 0.85);
+        }
+        [data-theme='sky-blue'] .frame-fg {
+            border-radius: 24px;
+            border: 2px solid var(--navy);
+            box-shadow: 0 10px 25px rgba(0, 104, 139, 0.15);
+            padding: 10px 10px 24px;
+        }
+        [data-theme='sky-blue'] .student-photo, [data-theme='sky-blue'] .photo-empty {
+            border-radius: 16px;
+        }
+        [data-theme='sky-blue'] .frame-tape {
+            border-radius: 6px;
+            height: 12px;
+            width: 55px;
+        }
+
+        [data-theme='orange-burst'] {
+            --paper:      #fff5ee;
+            --paper-mid:  #ffebcd;
+            --paper-dark: #ffcc99;
+            --navy:       #ff4500;
+            --gold:       #ff8c00;
+            --tape:       rgba(255, 69, 0, 0.35);
+            --text-main:  #3a1a00;
+            --text-muted: #cd853f;
+            --text-faint: #f4a460;
+            --hero-mask:  rgba(255, 245, 238, 0.85);
+        }
+        [data-theme='orange-burst'] .frame-fg {
+            transform: skewY(-2deg) rotate(2deg) !important;
+            border-radius: 4px;
+            border: 4px solid var(--navy);
+            padding: 8px 8px 24px;
+        }
+        [data-theme='orange-burst'] .frame-bg {
+            transform: skewY(2deg) rotate(-3deg) !important;
+            background: var(--gold) !important;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
@@ -108,11 +181,12 @@
 
         .top-brand {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 20px; letter-spacing: 4px; color: var(--navy);
+            font-size: 18px; letter-spacing: 2px; color: var(--navy);
+            text-transform: uppercase; text-align: center; max-width: 35%;
         }
 
         .palette-dock {
-            display: flex; align-items: center; gap: 10px;
+            display: flex; align-items: center; gap: 8px;
             background: var(--paper-mid);
             padding: 6px 12px;
             border-radius: 20px;
@@ -139,6 +213,22 @@
 
         #navUsername { font-size: 11px; font-weight: 700; color: var(--text-muted); display: none; }
         @media (min-width: 420px) { #navUsername { display: block; } }
+
+        /* ══════════════════════════════
+           SEARCH ENGINE
+        ══════════════════════════════ */
+        .search-container {
+            padding: 0 18px; margin: 20px auto 0; max-width: 480px;
+        }
+        .search-container input {
+            width: 100%; padding: 13px 18px; border-radius: 30px;
+            border: 1px solid var(--paper-dark); background: var(--paper-mid);
+            color: var(--text-main); font-family: 'Inter', sans-serif; font-size: 13px;
+            outline: none; transition: all 0.3s var(--ease);
+        }
+        .search-container input:focus {
+            border-color: var(--navy); box-shadow: 0 0 0 3px var(--tape);
+        }
 
         /* ══════════════════════════════
            MAIN CONTENT & HERO HEADER
@@ -210,10 +300,10 @@
 
         .photo-col { position: relative; min-width: 160px; width: 160px; flex-shrink: 0; margin-top: 8px; }
         .frame-bg { position: absolute; inset: 0; background: var(--navy); z-index: 0; }
-        .frame-fg { position: relative; z-index: 1; background: #fff; padding: 8px 8px 26px; box-shadow: 4px 6px 18px rgba(0,0,0,0.2); }
+        .frame-fg { position: relative; z-index: 1; background: #fff; padding: 8px 8px 26px; box-shadow: 4px 6px 18px rgba(0,0,0,0.2); transition: all 0.3s var(--ease); }
         .frame-tape { position: absolute; top: -12px; left: 50%; width: 50px; height: 18px; background: var(--tape); z-index: 4; }
-        .student-photo { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; display: block; }
-        .photo-empty { width: 100%; aspect-ratio: 3 / 4; background: var(--paper-mid); display: flex; align-items: center; justify-content: center; font-size: 32px; }
+        .student-photo { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; display: block; transition: all 0.3s var(--ease); }
+        .photo-empty { width: 100%; aspect-ratio: 3 / 4; background: var(--paper-mid); display: flex; align-items: center; justify-content: center; font-size: 32px; transition: all 0.3s var(--ease); }
 
         .onboarding-tag {
             position: absolute; top: 12px; font-family: 'Bebas Neue', sans-serif;
@@ -240,7 +330,7 @@
             text-transform: uppercase; border: 1px solid var(--paper-dark);
         }
 
-        /* METADATA SECTION */
+        /* METADATA SECTION WITH TRUNCATION */
         .card-meta-box {
             margin-top: 10px; font-family: 'Inter', sans-serif; font-size: 11px;
             background: var(--paper-mid); border: 1px dashed var(--paper-dark);
@@ -253,11 +343,11 @@
         .truncate-line:last-child { margin-bottom: 0; }
         .truncate-line strong { font-weight: 800; color: var(--navy); text-transform: uppercase; font-size: 10px; letter-spacing: 0.05em; margin-right: 4px;}
 
-        /* LIKE FEATURE */
-        .like-section { margin-top: 14px; display: flex; align-items: center; gap: 8px; }
+        /* LIKE INTERACTION */
+        .like-section { margin-top: 12px; display: flex; align-items: center; gap: 8px; }
         .like-btn {
             background: var(--paper-mid); border: 1px solid var(--paper-dark);
-            color: var(--text-main); padding: 6px 12px; border-radius: 20px;
+            color: var(--text-main); padding: 6px 14px; border-radius: 20px;
             cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700;
             display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;
         }
@@ -319,6 +409,7 @@
         @media (min-width: 800px) {
             .page-content { max-width: 1000px; }
             .top-bar { padding: 16px 40px; }
+            .search-container { max-width: 920px; padding: 0 40px; margin-top: 30px; }
             .cover-header { padding: 80px 40px 40px; margin-bottom: 24px; border-radius: 0 0 16px 16px; }
             .cover-dept-main { font-size: 64px; }
             .student-grid-active { display: grid !important; grid-template-columns: repeat(2, 1fr); gap: 24px 60px; padding: 0 40px 60px; }
@@ -343,17 +434,24 @@
         <div class="palette-node" data-title="Deep Space" style="background: #05050a;" onclick="changeTheme('deep-space', this)"></div>
         <div class="palette-node" data-title="Slate Gray" style="background: #2d3033;" onclick="changeTheme('slate-gray', this)"></div>
         <div class="palette-node" data-title="Minimal Light" style="background: #ffffff;" onclick="changeTheme('minimal-light', this)"></div>
+        <div class="palette-node" data-title="Pink Vibe" style="background: #ff66b2;" onclick="changeTheme('pink-vibe', this)"></div>
+        <div class="palette-node" data-title="Sky Blue" style="background: #33ccff;" onclick="changeTheme('sky-blue', this)"></div>
+        <div class="palette-node" data-title="Orange Burst" style="background: #ff9933;" onclick="changeTheme('orange-burst', this)"></div>
     </div>
-    <span class="top-brand">Z-NODE</span>
+    <span class="top-brand" id="topBrand">ARCHIVE</span>
     <div class="user-chip">
         <div class="user-avatar" id="navAvatar">?</div>
         <span id="navUsername"></span>
     </div>
 </header>
 
+<div class="search-container">
+    <input type="text" id="studentSearchInput" placeholder="🔍 Search profiles by name, matric number, or shared niche traits...">
+</div>
+
 <main class="page-content">
     <div class="cover-header">
-        <div class="cover-dept-main" id="deptLabel">DEPARTMENT OF —</div>
+        <div class="cover-dept-main" id="deptLabel">the department of economics</div>
         <div class="cover-collaboration">In collaboration with <span class="cover-znode-badge">Z-NODE</span></div>
         <div class="cover-class-banner" id="classbanner">CLASS OF —</div><br>
         <div class="cover-ephoto">— E-Photo Album —</div>
@@ -369,8 +467,8 @@
 
     <div class="state-panel" id="emptyState" style="display:none;">
         <div class="eyebrow">Z-NODE // NULL RESPONSE</div>
-        <h3>Empty Album.</h3>
-        <p>No students found for this department and year.<br>They may not have registered yet.</p>
+        <h3>No Profiles Found</h3>
+        <p>No matches fit your search criteria or department criteria.</p>
     </div>
 
     <div class="scroll-cta" id="scrollCta" style="display:none;">
@@ -379,7 +477,6 @@
     </div>
 </main>
 
-<!-- PROFILE MODAL SYSTEM -->
 <div class="modal-overlay" id="profileModal" onclick="closeProfileModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeProfileModal()">✕</button>
@@ -400,6 +497,9 @@ const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const { createClient } = supabase;
 const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// Memory safe instance pointer for global search caching
+let allStudentsGlobal = [];
+
 function changeTheme(themeName, element) {
     document.documentElement.setAttribute('data-theme', themeName);
     localStorage.setItem('znode_sys_theme', themeName);
@@ -416,7 +516,8 @@ function initSession() {
         const s = JSON.parse(raw);
         const savedTheme = localStorage.getItem('znode_sys_theme') || 'monochrome-dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
-        const targetNode = document.querySelector(`.palette-node[data-title*="${savedTheme.split('-')[0]}"]`) || document.querySelector('.palette-node');
+        const prefix = savedTheme.split('-')[0];
+        const targetNode = document.querySelector(`.palette-node[data-title*="${prefix.charAt(0).toUpperCase() + prefix.slice(1)}"]`) || document.querySelector('.palette-node');
         if(targetNode) {
             document.querySelectorAll('.palette-node').forEach(node => node.classList.remove('active-node'));
             targetNode.classList.add('active-node');
@@ -451,8 +552,7 @@ function openProfileModal(student) {
 
     tbody.innerHTML = '';
     
-    // Iterate over all database columns for this person
-    const excludeKeys = ['avatar_url', 'id', 'yearbook_access', 'is_dos']; // Fields to hide from table
+    const excludeKeys = ['avatar_url', 'id', 'yearbook_access', 'is_dos']; 
     for (const [key, value] of Object.entries(student)) {
         if (excludeKeys.includes(key)) continue;
         
@@ -469,18 +569,18 @@ function openProfileModal(student) {
     }
 
     modal.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Lock background scroll
+    document.body.style.overflow = 'hidden'; 
 }
 
 function closeProfileModal(e) {
     if (e && e.target.classList.contains('modal-content')) return;
     document.getElementById('profileModal').classList.remove('active');
-    document.body.style.overflow = ''; // Release scroll lock
+    document.body.style.overflow = ''; 
 }
 
 // ── Like Interaction Logic ───────────────────────────────────────────────────
 async function toggleLike(e, id, btnElement) {
-    e.stopPropagation(); // Prevents the modal from opening when the like button is clicked
+    e.stopPropagation(); 
 
     const isLiked = btnElement.classList.contains('liked');
     const counterSpan = btnElement.querySelector('.like-counter');
@@ -500,11 +600,94 @@ async function toggleLike(e, id, btnElement) {
     
     counterSpan.textContent = currentVal;
 
-    // Supabase update query for the 'likes_count'
     try {
         await _db.from('students').update({ likes_count: currentVal }).eq('id', id);
+        // Sync to global memory bank to keep state perfect across searches
+        const memObj = allStudentsGlobal.find(x => x.id === id);
+        if (memObj) memObj.likes_count = currentVal;
     } catch(err) {
         console.error("Like update failed", err);
+    }
+}
+
+// ── Touch 3: Niche Cluster Search Implementation ──────────────────────────────
+function handleSearch(queryText) {
+    const q = queryText.toLowerCase().trim();
+    const grid = document.getElementById('studentGrid');
+    
+    if (!q) {
+        renderFilteredGrid(allStudentsGlobal);
+        return;
+    }
+
+    // Step 3A: Identify directly matched individuals
+    let directMatches = allStudentsGlobal.filter(s => {
+        return (s.full_name && s.full_name.toLowerCase().includes(q)) ||
+               (s.username && s.username.toLowerCase().includes(q)) ||
+               (s.matric_number && s.matric_number.toLowerCase().includes(q));
+    });
+
+    // Step 3B: Extract niche keywords from directly searched profiles to discover their friends
+    let nicheTraits = new Set();
+    directMatches.forEach(student => {
+        const fields = [student.skills_of_student, student.hobbies, student.current_project, student.aspirations, student.tribe, student.state_of_origin];
+        fields.forEach(f => {
+            if (f) {
+                f.toLowerCase().split(/[\s,./\-\(\)]+/).forEach(token => {
+                    if (token.length > 3) nicheTraits.add(token);
+                });
+            }
+        });
+    });
+
+    // Step 3C: Scan and accumulate peers who share the niche space or direct search matches
+    let compoundCluster = [];
+    allStudentsGlobal.forEach(s => {
+        // Direct profile match
+        const standardMatch = directMatches.some(dm => dm.id === s.id);
+        
+        // Directly matches search text as keyword inside a trait field
+        const rawNicheMatch = 
+            (s.skills_of_student && s.skills_of_student.toLowerCase().includes(q)) ||
+            (s.hobbies && s.hobbies.toLowerCase().includes(q)) ||
+            (s.current_project && s.current_project.toLowerCase().includes(q)) ||
+            (s.aspirations && s.aspirations.toLowerCase().includes(q)) ||
+            (s.tribe && s.tribe.toLowerCase().includes(q)) ||
+            (s.state_of_origin && s.state_of_origin.toLowerCase().includes(q));
+
+        // Shared trait overlap with the target friend group 
+        let peerNicheMatch = false;
+        if (nicheTraits.size > 0) {
+            const currentFields = [s.skills_of_student, s.hobbies, s.current_project];
+            currentFields.forEach(f => {
+                if (f) {
+                    f.toLowerCase().split(/[\s,./\-\(\)]+/).forEach(token => {
+                        if (nicheTraits.has(token)) peerNicheMatch = true;
+                    });
+                }
+            });
+        }
+
+        if (standardMatch || rawNicheMatch || peerNicheMatch) {
+            compoundCluster.push(s);
+        }
+    });
+
+    renderFilteredGrid(compoundCluster);
+}
+
+function renderFilteredGrid(list) {
+    const grid = document.getElementById('studentGrid');
+    grid.innerHTML = '';
+    if (!list.length) {
+        document.getElementById('emptyState').style.display = 'block';
+        grid.style.display = 'none';
+        document.getElementById('scrollCta').style.display = 'none';
+    } else {
+        document.getElementById('emptyState').style.display = 'none';
+        grid.style.display = '';
+        list.forEach((s, i) => grid.appendChild(renderCard(s, i)));
+        document.getElementById('scrollCta').style.display = 'block';
     }
 }
 
@@ -519,8 +702,6 @@ function renderCard(student, idx) {
     const isArchived = student.yearbook_access === false || student.yearbook_access === 'false';
     
     entry.className = `student-entry ${idx % 2 === 0 ? 'entry-r' : 'entry-l'} ${isArchived ? 'entry-archived' : ''}`;
-    
-    // Add click event listener to open the profile modal
     entry.onclick = () => openProfileModal(student);
 
     const fr = FRAME_ROTS [idx % FRAME_ROTS.length];
@@ -553,7 +734,6 @@ function renderCard(student, idx) {
         } catch(e) { socialsHTML = `<div class="social-chip-group"><span class="social-chip">${student.socials}</span></div>`; }
     }
 
-    // Selected extra fields displayed natively on the card
     const extraFieldsHTML = `
         <div class="card-meta-box">
             <div class="truncate-line"><strong>Institution:</strong> ${student.institution || '—'}</div>
@@ -564,7 +744,6 @@ function renderCard(student, idx) {
         </div>
     `;
 
-    // Like Button Component (initialized with db like count)
     const likes = student.likes_count || 0;
     const likeHTML = `
         <div class="like-section">
@@ -605,7 +784,7 @@ async function loadYearbook(dept, year) {
         let currentUsername = "";
         if (sessionRaw) { try { currentUsername = JSON.parse(sessionRaw).username || ""; } catch(e) {} }
 
-        // STRICT SELECTION QUERY: Only querying the requested tables/columns plus absolute essentials for logic mapping (id, avatar_url, yearbook_access, is_dos)
+        // EXPLICIT SELECTION SECURITY CAPTURE AS DEFINED
         const fetchColumns = 'id, department, faculty, state_of_origin, tribe, gender, dob, aspirations, hobbies, skills_of_student, current_project, lga, religion, study_habit, keeps_notes, likes_count, graduation_year, full_name, username, matric_number, eternal_statement, socials, institution, yearbook_verified, avatar_url, yearbook_access, is_dos';
         let query = _db.from('students').select(fetchColumns); 
         
@@ -633,21 +812,20 @@ async function bootstrap() {
     if (!session) return;
     const { dept, year } = getParams();
 
+    // 🏛️ TOUCH 1 & 2: REPLACED STRINGS WITH THE DYNAMICALLY TAILORED ARCHIVE META IDENTIFICATION
+    document.getElementById('topBrand').textContent   = dept ? `${dept} ARCHIVE`.toUpperCase() : 'DEPARTMENT ARCHIVE';
     document.getElementById('classbanner').textContent = year ? `CLASS OF ${year}` : 'CLASS OF —';
-    document.getElementById('deptLabel').textContent   = dept ? `Department of ${dept}` : 'Department of —';
+    document.getElementById('deptLabel').textContent   = dept ? `the department of ${dept.toLowerCase()}` : 'the department';
 
-    const students = await loadYearbook(dept, year);
+    allStudentsGlobal = await loadYearbook(dept, year);
     document.getElementById('loadingState').style.display = 'none';
 
-    if (!students.length) { document.getElementById('emptyState').style.display = 'block'; return; }
+    // Set up search routing engine event triggers
+    document.getElementById('studentSearchInput').addEventListener('input', (e) => {
+        handleSearch(e.target.value);
+    });
 
-    const grid = document.getElementById('studentGrid');
-    grid.innerHTML = ''; 
-    students.forEach((s, i) => grid.appendChild(renderCard(s, i)));
-    
-    grid.style.display = ''; 
-    grid.classList.add('student-grid-active');
-    document.getElementById('scrollCta').style.display = 'block';
+    renderFilteredGrid(allStudentsGlobal);
 }
 
 bootstrap();
