@@ -155,7 +155,7 @@
         /* ══════════════════════════════
            MAIN CONTENT
         ══════════════════════════════ */
-        .page-content { max-width: 480px; margin: 0 auto; }
+        .page-content { max-width: 480px; margin: 0 auto; transition: max-width 0.4s var(--ease); }
 
         /* ══════════════════════════════
            INTEGRATED BACKGROUND HERO HEADER
@@ -164,16 +164,26 @@
             position: relative;
             text-align: center;
             padding: 44px 20px 24px;
+            border-bottom: 1px solid var(--paper-dark);
+            z-index: 1;
+            overflow: hidden; /* Contains the pseudo-elements */
+            transition: padding 0.4s var(--ease);
+        }
+
+        /* The Black/Grayscale Image Layer */
+        .cover-header::before {
+            content: '';
+            position: absolute; inset: 0;
             background-image: url('WhatsApp Image 2026-06-11 at 8.58.01 PM (1).jpeg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            border-bottom: 1px solid var(--paper-dark);
-            z-index: 1;
+            filter: grayscale(100%) contrast(1.1); /* Forces the image to black and white */
+            z-index: -2;
         }
 
         /* Overlay color mask system tied directly into theme engine */
-        .cover-header::before {
+        .cover-header::after {
             content: '';
             position: absolute; inset: 0;
             background: var(--hero-mask);
@@ -197,6 +207,7 @@
             text-transform: uppercase;
             margin-bottom: 4px;
             word-break: break-word;
+            transition: font-size 0.4s var(--ease);
         }
 
         .cover-collaboration {
@@ -275,9 +286,14 @@
         #studentCount { color: var(--paper) !important; }
 
         /* ══════════════════════════════
-           STUDENT LIST
+           STUDENT LIST DYNAMIC LAYOUT
         ══════════════════════════════ */
-        #studentGrid { flex-direction: column; background: var(--paper); }
+        #studentGrid { background: var(--paper); }
+        
+        .student-grid-active {
+            display: flex;
+            flex-direction: column;
+        }
 
         /* ══════════════════════════════
            STUDENT ENTRY
@@ -311,7 +327,6 @@
         .info-name { font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 0.95; letter-spacing: 1px; color: var(--navy); word-break: break-word; }
         .info-role { font-size: 12px; font-weight: 700; color: var(--gold); margin: 5px 0 9px; }
         
-        /* High-visibility updates for handwritten quotes */
         .info-quote {
             font-family: 'Caveat', cursive;
             font-size: 19px; 
@@ -332,7 +347,7 @@
         .scroll-cta .cta-arrow { display: block; font-size: 22px; margin-top: 4px; }
 
         /* ══════════════════════════════
-           RESPONSIVE
+           RESPONSIVE - DESKTOP & MOBILE
         ══════════════════════════════ */
         @media (max-width: 375px) {
             .cover-dept-main       { font-size: 32px; }
@@ -341,6 +356,39 @@
             .photo-col             { min-width: 108px; width: 108px; }
             .stat                  { padding: 4px 7px; }
             .stat-ico              { display: none; }
+        }
+
+        /* ✨ Desktop View Enhancements */
+        @media (min-width: 800px) {
+            .page-content {
+                max-width: 1000px;
+            }
+            .top-bar {
+                padding: 16px 40px;
+            }
+            .cover-header {
+                padding: 80px 40px 40px;
+                margin-bottom: 24px;
+                border-radius: 0 0 16px 16px;
+            }
+            .cover-dept-main {
+                font-size: 64px; /* Larger impact */
+            }
+            .stats-row {
+                max-width: 500px;
+                margin: 24px auto 0;
+            }
+            /* Upgrades vertical list to 2-column grid */
+            .student-grid-active {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 24px 60px;
+                padding: 0 40px 60px;
+            }
+            .student-entry {
+                border-bottom: 1px dashed var(--paper-dark);
+                padding: 40px 10px 32px;
+            }
         }
 
         .entry-archived { filter: grayscale(100%); opacity: 0.55; }
@@ -641,8 +689,10 @@ async function bootstrap() {
     const grid = document.getElementById('studentGrid');
     grid.innerHTML = ''; 
     students.forEach((s, i) => grid.appendChild(renderCard(s, i)));
-    grid.style.display = 'flex';
-    grid.style.flexDirection = 'column';
+    
+    // JS layout trigger replacing hardcoded inline styles
+    grid.style.display = ''; 
+    grid.classList.add('student-grid-active');
 
     document.getElementById('scrollCta').style.display = 'block';
 }
