@@ -128,18 +128,6 @@
         .palette-node:hover { transform: scale(1.3); }
         .palette-node.active-node { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--navy); }
 
-        .palette-node::after {
-            content: attr(data-title);
-            position: absolute; top: 22px; left: 50%;
-            transform: translateX(-50%) scale(0.8);
-            background: var(--paper-dark); color: var(--text-main);
-            font-size: 8px; font-weight: 800; letter-spacing: 0.05em;
-            text-transform: uppercase; padding: 3px 6px; white-space: nowrap;
-            opacity: 0; pointer-events: none; transition: all 0.2s var(--ease);
-            z-index: 100;
-        }
-        .palette-node:hover::after { opacity: 1; transform: translateX(-50%) scale(1); }
-
         .user-chip { display: flex; align-items: center; gap: 8px; }
         .user-avatar {
             width: 28px; height: 28px; overflow: hidden;
@@ -153,131 +141,73 @@
         @media (min-width: 420px) { #navUsername { display: block; } }
 
         /* ══════════════════════════════
-           MAIN CONTENT
+           MAIN CONTENT & HERO HEADER
         ══════════════════════════════ */
         .page-content { max-width: 480px; margin: 0 auto; transition: max-width 0.4s var(--ease); }
 
-        /* ══════════════════════════════
-           INTEGRATED BACKGROUND HERO HEADER
-        ══════════════════════════════ */
         .cover-header {
-            position: relative;
-            text-align: center;
-            padding: 44px 20px 24px;
-            border-bottom: 1px solid var(--paper-dark);
-            z-index: 1;
-            overflow: hidden; 
-            transition: padding 0.4s var(--ease);
+            position: relative; text-align: center; padding: 44px 20px 24px;
+            border-bottom: 1px solid var(--paper-dark); z-index: 1; overflow: hidden; 
         }
-
         .cover-header::before {
-            content: '';
-            position: absolute; inset: 0;
+            content: ''; position: absolute; inset: 0;
             background-image: url('WhatsApp Image 2026-06-11 at 8.58.01 PM (1).jpeg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            filter: grayscale(100%) contrast(1.1);
-            z-index: -2;
+            background-size: cover; background-position: center;
+            filter: grayscale(100%) contrast(1.1); z-index: -2;
         }
-
         .cover-header::after {
-            content: '';
-            position: absolute; inset: 0;
-            background: var(--hero-mask);
-            mix-blend-mode: normal;
-            z-index: -1;
-            transition: background 0.4s var(--ease);
+            content: ''; position: absolute; inset: 0;
+            background: var(--hero-mask); mix-blend-mode: normal; z-index: -1;
         }
 
         .cover-dept-main {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 42px;
-            letter-spacing: 1.5px;
-            line-height: 1.05;
-            color: var(--navy);
-            text-transform: uppercase;
-            margin-bottom: 4px;
-            word-break: break-word;
-            transition: font-size 0.4s var(--ease);
+            font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 1.5px;
+            line-height: 1.05; color: var(--navy); text-transform: uppercase;
+            margin-bottom: 4px; word-break: break-word;
         }
-
         .cover-collaboration {
-            font-family: 'Inter', sans-serif;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--text-muted);
-            margin-bottom: 18px;
+            font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 3px; color: var(--text-muted); margin-bottom: 18px;
         }
-
         .cover-znode-badge {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 15px; letter-spacing: 2px;
-            color: var(--gold); background: var(--paper-mid);
-            padding: 2px 8px; border-radius: 4px;
+            font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 2px;
+            color: var(--gold); background: var(--paper-mid); padding: 2px 8px; border-radius: 4px;
             border: 1px solid var(--paper-dark);
         }
-
         .cover-class-banner {
-            display: inline-block;
-            background: var(--navy); color: var(--paper);
-            font-family: 'Inter', sans-serif;
-            font-size: 13px; font-weight: 900;
-            letter-spacing: 5px; text-transform: uppercase;
-            padding: 8px 24px;
-            margin: 12px 0 6px;
+            display: inline-block; background: var(--navy); color: var(--paper);
+            font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 900;
+            letter-spacing: 5px; text-transform: uppercase; padding: 8px 24px; margin: 12px 0 6px;
         }
+        .cover-ephoto { font-family: 'Caveat', cursive; font-size: 18px; color: var(--gold); font-weight: 600; letter-spacing: 0.05em; }
 
-        .cover-ephoto {
-            font-family: 'Caveat', cursive;
-            font-size: 18px; color: var(--gold); font-weight: 600;
-            letter-spacing: 0.05em;
-        }
-
-        /* ══════════════════════════════
-           HIDDEN FUNCTIONAL HEADER
-        ══════════════════════════════ */
         .page-header, .header-meta { display: none; }
 
         /* ══════════════════════════════
            STATE PANELS
         ══════════════════════════════ */
-        .state-panel {
-            border: 2px dashed var(--paper-dark); padding: 52px 24px; text-align: center; margin: 20px 18px;
-        }
+        .state-panel { border: 2px dashed var(--paper-dark); padding: 52px 24px; text-align: center; margin: 20px 18px; }
         .eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: var(--text-muted); margin-bottom: 10px; }
         .state-panel h3 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--navy); margin-bottom: 6px; }
         .state-panel p { font-family: 'Caveat', cursive; font-size: 17px; color: var(--text-muted); line-height: 1.5; }
 
         /* ══════════════════════════════
-           STUDENT LIST DYNAMIC LAYOUT
+           STUDENT ENTRY & GRID
         ══════════════════════════════ */
         #studentGrid { background: var(--paper); }
-        
-        .student-grid-active {
-            display: flex;
-            flex-direction: column;
-        }
+        .student-grid-active { display: flex; flex-direction: column; }
 
-        /* ══════════════════════════════
-           STUDENT ENTRY
-        ══════════════════════════════ */
         .student-entry {
             display: flex; align-items: flex-start; gap: 20px;
             padding: 40px 18px 32px; position: relative;
             border-bottom: 1px solid var(--paper-mid); flex-wrap: wrap;
+            cursor: pointer; transition: background 0.2s var(--ease);
         }
+        .student-entry:hover { background: var(--paper-mid); }
 
-        .entry-r .photo-col { order: 2; }
-        .entry-r .info-col  { order: 3; }
-        .entry-l .photo-col { order: 3; }
-        .entry-l .info-col  { order: 2; }
+        .entry-r .photo-col { order: 2; } .entry-r .info-col  { order: 3; }
+        .entry-l .photo-col { order: 3; } .entry-l .info-col  { order: 2; }
 
-        /* ══════════════════════════════
-           PHOTO FRAME (Bigger Images)
-        ══════════════════════════════ */
         .photo-col { position: relative; min-width: 160px; width: 160px; flex-shrink: 0; margin-top: 8px; }
         .frame-bg { position: absolute; inset: 0; background: var(--navy); z-index: 0; }
         .frame-fg { position: relative; z-index: 1; background: #fff; padding: 8px 8px 26px; box-shadow: 4px 6px 18px rgba(0,0,0,0.2); }
@@ -285,31 +215,24 @@
         .student-photo { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; display: block; }
         .photo-empty { width: 100%; aspect-ratio: 3 / 4; background: var(--paper-mid); display: flex; align-items: center; justify-content: center; font-size: 32px; }
 
-        /* Onboarding Number Tag */
         .onboarding-tag {
             position: absolute; top: 12px; font-family: 'Bebas Neue', sans-serif;
             font-size: 12px; color: var(--text-muted); letter-spacing: 1px;
             background: var(--paper-mid); padding: 2px 6px; border: 1px solid var(--paper-dark);
         }
-        .entry-r .onboarding-tag { left: 18px; }
-        .entry-l .onboarding-tag { right: 18px; }
+        .entry-r .onboarding-tag { left: 18px; } .entry-l .onboarding-tag { right: 18px; }
 
-        /* Verified Badge */
         .verified-badge {
             display: inline-flex; align-items: center; justify-content: center;
             width: 16px; height: 16px; background: #2b7fff; color: white;
             border-radius: 50%; font-size: 10px; margin-left: 6px; transform: translateY(-2px);
         }
 
-        /* ══════════════════════════════
-           STUDENT INFO & IMPROVED QUOTES
-        ══════════════════════════════ */
         .info-col { flex: 1; min-width: 0; display: flex; flex-direction: column; padding-top: 14px; }
         .info-crown { font-size: 16px; color: var(--gold); line-height: 1; margin-bottom: 4px; }
         .info-name { font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 0.95; letter-spacing: 1px; color: var(--navy); word-break: break-word; }
         .info-role { font-size: 12px; font-weight: 700; color: var(--gold); margin: 5px 0 4px; text-transform: uppercase; }
         
-        /* Socials Layout */
         .social-chip-group { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
         .social-chip {
             font-size: 9px; font-weight: 700; color: var(--text-muted);
@@ -317,63 +240,78 @@
             text-transform: uppercase; border: 1px solid var(--paper-dark);
         }
 
-        .info-quote {
-            font-family: 'Caveat', cursive;
-            font-size: 19px; 
-            font-weight: 700;
-            line-height: 1.25;
-            color: var(--text-main);
-            margin: 6px 0;
-            letter-spacing: 0.02em;
+        /* NEW METADATA SECTION WITH TRUNCATION */
+        .card-meta-box {
+            margin-top: 10px; font-family: 'Inter', sans-serif; font-size: 11px;
+            background: var(--paper-mid); border: 1px dashed var(--paper-dark);
+            padding: 10px 12px; border-radius: 6px; color: var(--text-main);
         }
+        .truncate-line {
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;
+        }
+        .truncate-line:last-child { margin-bottom: 0; }
+        .truncate-line strong { font-weight: 800; color: var(--navy); text-transform: uppercase; font-size: 10px; letter-spacing: 0.05em; margin-right: 4px;}
+
+        .info-quote { font-family: 'Caveat', cursive; font-size: 19px; font-weight: 700; line-height: 1.25; color: var(--text-main); margin: 8px 0; letter-spacing: 0.02em; }
         .info-quote-line { width: 44px; height: 2px; background: var(--gold); margin-top: 6px; transform: rotate(-1deg); }
         .info-handle { font-size: 9px; font-weight: 700; color: var(--text-faint); margin-top: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
         .entry-deco { position: absolute; bottom: 14px; font-size: 14px; color: var(--navy); opacity: 0.28; user-select: none; line-height: 1; }
 
-        /* ══════════════════════════════
-           SCROLL CTA
-        ══════════════════════════════ */
         .scroll-cta { text-align: center; padding: 26px 20px; font-family: 'Caveat', cursive; font-size: 15px; color: var(--text-muted); border-top: 1px dashed var(--paper-dark); }
         .scroll-cta .cta-arrow { display: block; font-size: 22px; margin-top: 4px; }
 
         /* ══════════════════════════════
-           RESPONSIVE - DESKTOP & MOBILE
+           MODAL STYLES (NEW FEATURE)
         ══════════════════════════════ */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 999;
+            display: none; align-items: center; justify-content: center; padding: 20px;
+            opacity: 0; transition: opacity 0.3s var(--ease);
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        
+        .modal-content {
+            background: var(--paper); color: var(--text-main); width: 100%; max-width: 600px;
+            max-height: 90vh; border-radius: 12px; overflow-y: auto; position: relative;
+            padding: 32px 24px; border: 1px solid var(--paper-dark); box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .modal-close {
+            position: absolute; top: 16px; right: 16px; background: var(--paper-mid);
+            border: 1px solid var(--paper-dark); color: var(--text-main); width: 32px; height: 32px;
+            border-radius: 50%; cursor: pointer; font-weight: 800; font-size: 14px;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+        }
+        .modal-close:hover { background: var(--navy); color: var(--paper); transform: scale(1.1); }
+        
+        .modal-header { text-align: center; margin-bottom: 24px; }
+        .modal-img { 
+            width: 100%; max-width: 220px; border-radius: 8px; margin: 0 auto 16px; 
+            display: block; border: 4px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+        }
+        .modal-name { font-family: 'Bebas Neue', sans-serif; font-size: 42px; line-height: 1; color: var(--navy); letter-spacing: 1px; margin-bottom: 4px;}
+        .modal-role { font-size: 13px; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 1px;}
+        
+        .modal-table { width: 100%; border-collapse: collapse; font-size: 13px; font-family: 'Inter', sans-serif; }
+        .modal-table tr { border-bottom: 1px solid var(--paper-mid); }
+        .modal-table th { padding: 12px 8px 12px 0; font-weight: 800; color: var(--navy); width: 35%; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; text-align: left; vertical-align: top;}
+        .modal-table td { padding: 12px 0 12px 8px; color: var(--text-muted); word-break: break-word; line-height: 1.5;}
+
+        /* Responsive Breakpoints */
         @media (max-width: 375px) {
-            .cover-dept-main       { font-size: 32px; }
-            .cover-class-banner    { font-size: 11px; letter-spacing: 3px; padding: 6px 16px; }
-            .info-name             { font-size: 27px; }
-            .photo-col             { min-width: 140px; width: 140px; }
+            .cover-dept-main { font-size: 32px; }
+            .cover-class-banner { font-size: 11px; letter-spacing: 3px; padding: 6px 16px; }
+            .info-name { font-size: 27px; }
+            .photo-col { min-width: 140px; width: 140px; }
         }
-
-        /* Desktop View Enhancements */
         @media (min-width: 800px) {
-            .page-content {
-                max-width: 1000px;
-            }
-            .top-bar {
-                padding: 16px 40px;
-            }
-            .cover-header {
-                padding: 80px 40px 40px;
-                margin-bottom: 24px;
-                border-radius: 0 0 16px 16px;
-            }
-            .cover-dept-main {
-                font-size: 64px; 
-            }
-            .student-grid-active {
-                display: grid !important;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 24px 60px;
-                padding: 0 40px 60px;
-            }
-            .student-entry {
-                border-bottom: 1px dashed var(--paper-dark);
-                padding: 40px 10px 32px;
-            }
+            .page-content { max-width: 1000px; }
+            .top-bar { padding: 16px 40px; }
+            .cover-header { padding: 80px 40px 40px; margin-bottom: 24px; border-radius: 0 0 16px 16px; }
+            .cover-dept-main { font-size: 64px; }
+            .student-grid-active { display: grid !important; grid-template-columns: repeat(2, 1fr); gap: 24px 60px; padding: 0 40px 60px; }
+            .student-entry { border-bottom: 1px dashed var(--paper-dark); padding: 40px 10px 32px; }
         }
-
         .entry-archived { filter: grayscale(100%); opacity: 0.55; }
         .archive-banner {
             width: 100%; order: 1; background: var(--gold); color: #fff; font-size: 11px; font-weight: 700;
@@ -385,12 +323,8 @@
 
 <header class="top-bar">
     <button class="back-btn" onclick="window.location.href='app.html'">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-        </svg>
-        Back
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back
     </button>
-    
     <div class="palette-dock">
         <div class="palette-node" data-title="Paper Default" style="background: #f0ebe0;" onclick="changeTheme('default', this)"></div>
         <div class="palette-node active-node" data-title="Monochrome Dark" style="background: #000000;" onclick="changeTheme('monochrome-dark', this)"></div>
@@ -398,7 +332,6 @@
         <div class="palette-node" data-title="Slate Gray" style="background: #2d3033;" onclick="changeTheme('slate-gray', this)"></div>
         <div class="palette-node" data-title="Minimal Light" style="background: #ffffff;" onclick="changeTheme('minimal-light', this)"></div>
     </div>
-
     <span class="top-brand">Z-NODE</span>
     <div class="user-chip">
         <div class="user-avatar" id="navAvatar">?</div>
@@ -407,26 +340,11 @@
 </header>
 
 <main class="page-content">
-
     <div class="cover-header">
         <div class="cover-dept-main" id="deptLabel">DEPARTMENT OF —</div>
-        
-        <div class="cover-collaboration">
-            In collaboration with <span class="cover-znode-badge">Z-NODE</span>
-        </div>
-
-        <div class="cover-class-banner" id="classbanner">CLASS OF —</div>
-        <br>
+        <div class="cover-collaboration">In collaboration with <span class="cover-znode-badge">Z-NODE</span></div>
+        <div class="cover-class-banner" id="classbanner">CLASS OF —</div><br>
         <div class="cover-ephoto">— E-Photo Album —</div>
-    </div>
-
-    <div class="page-header">
-        <div class="eyebrow" id="queryLabel">YEARBOOK DIRECTORY</div>
-        <h1 id="pageTitle">Loading...</h1>
-        <div class="header-meta">
-            <span class="meta-tag" id="deptTag">DEPT —</span>
-            <span class="meta-tag" id="yearTag">CLASS —</span>
-        </div>
     </div>
 
     <div class="state-panel" id="loadingState">
@@ -447,8 +365,22 @@
         ✦ Scroll to discover more ✦
         <span class="cta-arrow">↓</span>
     </div>
-
 </main>
+
+<!-- PROFILE MODAL SYSTEM -->
+<div class="modal-overlay" id="profileModal" onclick="closeProfileModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeProfileModal()">✕</button>
+        <div class="modal-header">
+            <img id="modalImg" class="modal-img" src="" alt="Profile Image" style="display:none;">
+            <h2 id="modalName" class="modal-name"></h2>
+            <div id="modalRole" class="modal-role"></div>
+        </div>
+        <table class="modal-table">
+            <tbody id="modalTableBody"></tbody>
+        </table>
+    </div>
+</div>
 
 <script>
 const SUPABASE_URL  = "https://yohndnmwvgcwadkytmix.supabase.co";
@@ -456,62 +388,88 @@ const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const { createClient } = supabase;
 const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ── Theme Switching System ───────────────────────────────────────────────────
 function changeTheme(themeName, element) {
     document.documentElement.setAttribute('data-theme', themeName);
     localStorage.setItem('znode_sys_theme', themeName);
-    
     if(element) {
         document.querySelectorAll('.palette-node').forEach(node => node.classList.remove('active-node'));
         element.classList.add('active-node');
     }
 }
 
-// ── Session ──────────────────────────────────────────────────────────────────
 function initSession() {
     const raw = localStorage.getItem('znodeStudentProfile');
     if (!raw) { window.location.href = 'onboarding.html'; return null; }
     try {
         const s = JSON.parse(raw);
-        
-        // Force default starting theme to monochrome-dark
         const savedTheme = localStorage.getItem('znode_sys_theme') || 'monochrome-dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
-        
         const targetNode = document.querySelector(`.palette-node[data-title*="${savedTheme.split('-')[0]}"]`) || document.querySelector('.palette-node');
         if(targetNode) {
             document.querySelectorAll('.palette-node').forEach(node => node.classList.remove('active-node'));
             targetNode.classList.add('active-node');
         }
-
         const av = document.getElementById('navAvatar');
-        if (s.avatar_url) {
-            av.innerHTML = `<img src="${s.avatar_url}" alt="avatar">`;
-        } else {
-            av.textContent = (s.username || '?')[0].toUpperCase();
-        }
+        if (s.avatar_url) av.innerHTML = `<img src="${s.avatar_url}" alt="avatar">`;
+        else av.textContent = (s.username || '?')[0].toUpperCase();
         document.getElementById('navUsername').textContent = `@${s.username || '—'}`;
         return s;
-    } catch(e) {
-        window.location.href = 'onboarding.html';
-        return null;
-    }
+    } catch(e) { window.location.href = 'onboarding.html'; return null; }
 }
 
-// ── URL Params ───────────────────────────────────────────────────────────────
-// function getParams() {
-//     const p = new URLSearchParams(window.location.search);
-//     return { dept: p.get('dept') || '', year: p.get('year') || '' };
-// }
+function getParams() { return { dept: 'Economics', year: '2025' }; }
 
-    function getParams() {
-    return { dept: 'Economics', year: '2025' };
+// ── Profile Modal Logic ───────────────────────────────────────────────────────
+function openProfileModal(student) {
+    const modal = document.getElementById('profileModal');
+    const img = document.getElementById('modalImg');
+    const name = document.getElementById('modalName');
+    const role = document.getElementById('modalRole');
+    const tbody = document.getElementById('modalTableBody');
+
+    if (student.avatar_url) {
+        img.src = student.avatar_url;
+        img.style.display = 'block';
+    } else {
+        img.style.display = 'none';
+    }
+
+    name.textContent = (student.full_name || 'Anonymous').toUpperCase();
+    role.textContent = student.department || '—';
+
+    tbody.innerHTML = '';
+    
+    // Iterate over all database columns for this person
+    const excludeKeys = ['avatar_url', 'id', 'yearbook_access']; // Fields to hide from table
+    for (const [key, value] of Object.entries(student)) {
+        if (excludeKeys.includes(key)) continue;
+        
+        let displayVal = value;
+        if (displayVal === null || displayVal === '') displayVal = '—';
+        else if (typeof displayVal === 'object') displayVal = JSON.stringify(displayVal);
+        else if (typeof displayVal === 'boolean') displayVal = displayVal ? 'Yes' : 'No';
+
+        const formattedKey = key.replace(/_/g, ' ');
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<th>${formattedKey}</th><td>${displayVal}</td>`;
+        tbody.appendChild(tr);
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden'; // Lock background scroll
+}
+
+function closeProfileModal(e) {
+    if (e && e.target.classList.contains('modal-content')) return;
+    document.getElementById('profileModal').classList.remove('active');
+    document.body.style.overflow = ''; // Release scroll lock
 }
 
 // ── Card Rendering ───────────────────────────────────────────────────────────
-const FRAME_ROTS  = [-2,   2,  -1.5,  2.5,  -3,   1.5,  -2.5,  3  ];
-const SHADOW_ROTS = [ 3,  -3,   2.5, -3.5,   4,  -2.5,   3.5, -4  ];
-const TAPE_ROTS   = [-4,   3,  -2,    4,   -3,    2,    -4,    3  ];
+const FRAME_ROTS  = [-2, 2, -1.5, 2.5, -3, 1.5, -2.5, 3];
+const SHADOW_ROTS = [ 3,-3,  2.5,-3.5,  4,-2.5,  3.5,-4];
+const TAPE_ROTS   = [-4, 3, -2,   4,  -3, 2,   -4,   3];
 const DECOS       = ['☆', '♡', '⚡', '◇', '✦', '☆', '♡', '⚡'];
 
 function renderCard(student, idx) {
@@ -519,6 +477,9 @@ function renderCard(student, idx) {
     const isArchived = student.yearbook_access === false || student.yearbook_access === 'false';
     
     entry.className = `student-entry ${idx % 2 === 0 ? 'entry-r' : 'entry-l'} ${isArchived ? 'entry-archived' : ''}`;
+    
+    // Add click event listener to open the profile modal
+    entry.onclick = () => openProfileModal(student);
 
     const fr = FRAME_ROTS [idx % FRAME_ROTS.length];
     const sr = SHADOW_ROTS[idx % SHADOW_ROTS.length];
@@ -526,42 +487,38 @@ function renderCard(student, idx) {
     const isDOS = student.is_dos === true || student.is_dos === 'true';
 
     const bannerHTML = isArchived 
-        ? `<div class="archive-banner">
-            ⚠️ PROFILE ARCHIVED & UNPUBLISHED: Please contact DOS or complete your payment to publish your profile.
-           </div>`
-        : '';
+        ? `<div class="archive-banner">⚠️ PROFILE ARCHIVED & UNPUBLISHED: Please contact DOS or complete your payment.</div>` : '';
 
     const photoHTML = student.avatar_url
         ? `<img class="student-photo" src="${student.avatar_url}" alt="${student.full_name || ''}" loading="lazy">`
         : `<div class="photo-empty">👤</div>`;
 
     const crownHTML = isDOS ? `<div class="info-crown">♛</div>` : `<div class="info-crown" style="visibility:hidden;">♛</div>`;
-    
-    // Corrected Query: Display eternal_statement inside the quote text block
     const statement = student.eternal_statement || '...';
     const quoteHTML = `<div class="info-quote">"${statement}"</div><div class="info-quote-line"></div>`;
 
     const pid = student.matric_number || '';
     const handleHTML = pid ? `<div class="info-handle">${pid}</div>` : `<div class="info-handle">@${student.username || '—'}</div>`;
     const decoSide = idx % 2 === 0 ? 'right:14px' : 'left:14px';
+    const verifiedBadge = (student.is_verified === true || student.is_verified === 'true') ? `<span class="verified-badge" title="Verified Member">✓</span>` : '';
 
-    // Verified Badge
-    const isVerified = student.is_verified === true || student.is_verified === 'true';
-    const verifiedBadge = isVerified ? `<span class="verified-badge" title="Verified Member">✓</span>` : '';
-
-    // Parsed JSON Socials
     let socialsHTML = '';
     if (student.socials) {
         try {
             const parsed = typeof student.socials === 'string' ? JSON.parse(student.socials) : student.socials;
-            const items = Object.entries(parsed).map(([platform, handle]) => 
-                `<span class="social-chip">${platform}: ${handle}</span>`
-            ).join('');
+            const items = Object.entries(parsed).map(([platform, handle]) => `<span class="social-chip">${platform}: ${handle}</span>`).join('');
             socialsHTML = `<div class="social-chip-group">${items}</div>`;
-        } catch(e) { 
-            socialsHTML = `<div class="social-chip-group"><span class="social-chip">${student.socials}</span></div>`; 
-        }
+        } catch(e) { socialsHTML = `<div class="social-chip-group"><span class="social-chip">${student.socials}</span></div>`; }
     }
+
+    // New Fields Integration (Skills, Hobbies, Project) using truncating CSS classes
+    const extraFieldsHTML = `
+        <div class="card-meta-box">
+            <div class="truncate-line"><strong>Skill:</strong> ${student.Skills_of_student || '—'}</div>
+            <div class="truncate-line"><strong>Hobbies:</strong> ${student.hobbies || '—'}</div>
+            <div class="truncate-line"><strong>Current Job / Project:</strong> ${student.current_project || '—'}</div>
+        </div>
+    `;
 
     entry.innerHTML = `
         ${bannerHTML}
@@ -578,6 +535,7 @@ function renderCard(student, idx) {
             <div class="info-name">${(student.full_name || 'Anonymous').toUpperCase()}${verifiedBadge}</div>
             <div class="info-role">${student.department || '—'}</div>
             ${socialsHTML}
+            ${extraFieldsHTML}
             ${quoteHTML}
             ${handleHTML}
         </div>
@@ -586,69 +544,44 @@ function renderCard(student, idx) {
     return entry;
 }
 
-// ── Load Yearbook ─────────────────────────────────────────────────────────────
 async function loadYearbook(dept, year) {
     try {
         const sessionRaw = localStorage.getItem('znodeStudentProfile');
         let currentUsername = "";
-        if (sessionRaw) {
-            try { currentUsername = JSON.parse(sessionRaw).username || ""; } 
-            catch(e) {}
-        }
+        if (sessionRaw) { try { currentUsername = JSON.parse(sessionRaw).username || ""; } catch(e) {} }
 
-        let query = _db.from('students').select('*');
-
+        let query = _db.from('students').select('*'); // Select '*' automatically brings in the newly added table columns
         if (dept) query = query.ilike('department', `%${dept}%`);
         if (year) query = query.eq('graduation_year', parseInt(year));
-
-        // Correct OR — filter by access OR it's the current user's own profile
-        if (currentUsername) {
-            query = query.or(`yearbook_access.eq.true,username.eq.${currentUsername}`);
-        } else {
-            query = query.eq('yearbook_access', true);
-        }
+        
+        if (currentUsername) query = query.or(`yearbook_access.eq.true,username.eq.${currentUsername}`);
+        else query = query.eq('yearbook_access', true);
 
         const { data: students, error } = await query
             .order('is_dos', { ascending: false })
             .order('full_name', { ascending: true });
 
         if (error) throw error;
-
-        // Sort archived to bottom
         return (students || []).sort((a, b) => {
             const aA = a.yearbook_access === false || a.yearbook_access === 'false';
             const bA = b.yearbook_access === false || b.yearbook_access === 'false';
             return aA === bA ? 0 : aA ? 1 : -1;
         });
-
-    } catch(e) {
-        console.error("Yearbook query error:", e);
-        return [];
-    }
+    } catch(e) { console.error("Yearbook query error:", e); return []; }
 }
 
-// ── Bootstrap ─────────────────────────────────────────────────────────────────
 async function bootstrap() {
     const session = initSession();
     if (!session) return;
-
     const { dept, year } = getParams();
 
     document.getElementById('classbanner').textContent = year ? `CLASS OF ${year}` : 'CLASS OF —';
     document.getElementById('deptLabel').textContent   = dept ? `Department of ${dept}` : 'Department of —';
 
-    document.getElementById('pageTitle').textContent  = dept ? `${dept} — Class of ${year}.` : 'Yearbook Directory.';
-    document.getElementById('queryLabel').textContent = 'YEARBOOK // STUDENT DIRECTORY';
-    document.getElementById('deptTag').textContent    = `DEPT: ${dept || 'ALL'}`;
-    document.getElementById('yearTag').textContent    = `CLASS OF ${year || 'ALL'}`;
-
     const students = await loadYearbook(dept, year);
     document.getElementById('loadingState').style.display = 'none';
 
-    if (!students.length) {
-        document.getElementById('emptyState').style.display = 'block';
-        return;
-    }
+    if (!students.length) { document.getElementById('emptyState').style.display = 'block'; return; }
 
     const grid = document.getElementById('studentGrid');
     grid.innerHTML = ''; 
@@ -656,7 +589,6 @@ async function bootstrap() {
     
     grid.style.display = ''; 
     grid.classList.add('student-grid-active');
-
     document.getElementById('scrollCta').style.display = 'block';
 }
 
