@@ -633,9 +633,11 @@ function renderCard(student, idx) {
 // ── Load Yearbook ─────────────────────────────────────────────────────────────
 // FIXED QUERY — uses graduation_year column, not created_at date range
 // ── Load Yearbook ─────────────────────────────────────────────────────────────
+// ── Load Yearbook ─────────────────────────────────────────────────────────────
+// FIXED QUERY — filters by access, but keeps a loophole for the current user's self-view
 async function loadYearbook(dept, year) {
     try {
-        // 1. Safely parse the logged-in user session INSIDE the function
+        // 1. Safely extract the logged-in username from localStorage inside the function scope
         const sessionRaw = localStorage.getItem('znodeStudentProfile');
         let currentUsername = "";
         
@@ -648,7 +650,6 @@ async function loadYearbook(dept, year) {
             }
         }
 
-        // 2. Initialize the Supabase query
         let query = _db.from('students').select('*');
 
         if (dept) {
@@ -658,11 +659,10 @@ async function loadYearbook(dept, year) {
             query = query.eq('graduation_year', parseInt(year));
         }
 
-        // 3. Apply the conditional OR filter
-        // Show if access is granted OR if the profile belongs to the current logged-in user
+        // Global Filter: Show only paid accounts (yearbook_access true) 
+        // OR show the user's own profile even if it's unpaid/archived
         query = query.or(`yearbook_access.eq.true,username.eq.${currentUsername}`);
 
-        // 4. Order and execute
         const { data: students, error } = await query
             .order('is_dos', { ascending: false })
             .order('full_name', { ascending: true });
@@ -672,7 +672,7 @@ async function loadYearbook(dept, year) {
 
     } catch(e) {
         console.error("Yearbook query error:", e);
-        return []; // Valid return statement since it's within the catch block of a function
+        return [];
     }
 }
 
@@ -709,6 +709,7 @@ async function bootstrap() {
     document.getElementById('countBar').style.display = 'flex';
 
     const grid = document.getElementById('studentGrid');
+    grid.innerHTML = ''; // Clear out any old elements before appending
     students.forEach((s, i) => grid.appendChild(renderCard(s, i)));
     grid.style.display    = 'flex';
     grid.style.flexDirection = 'column';
