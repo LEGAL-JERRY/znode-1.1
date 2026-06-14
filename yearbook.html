@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="monochrome-dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -275,10 +275,20 @@
         .entry-l .photo-col { order: 3; }
         .entry-l .info-col  { order: 2; }
 
+        /* Numbering display */
+        .student-number {
+            position: absolute; top: 16px;
+            font-family: 'Bebas Neue', sans-serif; font-size: 64px;
+            color: var(--paper-dark); opacity: 0.2; line-height: 1; z-index: 0;
+            user-select: none;
+        }
+        .entry-r .student-number { left: 16px; }
+        .entry-l .student-number { right: 16px; }
+
         /* ══════════════════════════════
            PHOTO FRAME
         ══════════════════════════════ */
-        .photo-col { position: relative; min-width: 128px; width: 128px; flex-shrink: 0; margin-top: 8px; }
+        .photo-col { position: relative; min-width: 160px; width: 160px; flex-shrink: 0; margin-top: 8px; z-index: 2; }
         .frame-bg { position: absolute; inset: 0; background: var(--navy); z-index: 0; }
         .frame-fg { position: relative; z-index: 1; background: #fff; padding: 7px 7px 24px; box-shadow: 3px 4px 14px rgba(0,0,0,0.18); }
         .frame-tape { position: absolute; top: -10px; left: 50%; width: 46px; height: 17px; background: var(--tape); z-index: 4; }
@@ -288,10 +298,23 @@
         /* ══════════════════════════════
            STUDENT INFO & IMPROVED QUOTES
         ══════════════════════════════ */
-        .info-col { flex: 1; min-width: 0; display: flex; flex-direction: column; padding-top: 14px; }
+        .info-col { flex: 1; min-width: 0; display: flex; flex-direction: column; padding-top: 14px; z-index: 2; }
         .info-crown { font-size: 16px; color: var(--gold); line-height: 1; margin-bottom: 4px; }
-        .info-name { font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 0.95; letter-spacing: 1px; color: var(--navy); word-break: break-word; }
+        
+        .info-name { 
+            display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+            font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 0.95; letter-spacing: 1px; color: var(--navy); word-break: break-word; 
+        }
+        
+        .verified-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px; background: var(--gold); color: var(--paper);
+            border-radius: 50%; font-size: 12px; vertical-align: middle;
+            font-family: 'Inter', sans-serif; flex-shrink: 0;
+        }
+
         .info-role { font-size: 12px; font-weight: 700; color: var(--gold); margin: 5px 0 9px; }
+        .info-socials { font-size: 10px; font-weight: 600; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; }
         
         .info-quote {
             font-family: 'Caveat', cursive;
@@ -319,7 +342,8 @@
             .cover-dept-main       { font-size: 32px; }
             .cover-class-banner    { font-size: 11px; letter-spacing: 3px; padding: 6px 16px; }
             .info-name             { font-size: 27px; }
-            .photo-col             { min-width: 108px; width: 108px; }
+            .photo-col             { min-width: 130px; width: 130px; }
+            .student-number        { font-size: 48px; }
         }
 
         /* Desktop View Enhancements */
@@ -353,7 +377,7 @@
         .entry-archived { filter: grayscale(100%); opacity: 0.55; }
         .archive-banner {
             width: 100%; order: 1; background: var(--gold); color: #fff; font-size: 11px; font-weight: 700;
-            padding: 8px 12px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; line-height: 1.4;
+            padding: 8px 12px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; line-height: 1.4; z-index: 3;
         }
     </style>
 </head>
@@ -368,8 +392,8 @@
     </button>
     
     <div class="palette-dock">
-        <div class="palette-node active-node" data-title="Paper Default" style="background: #f0ebe0;" onclick="changeTheme('default', this)"></div>
-        <div class="palette-node" data-title="Monochrome Dark" style="background: #000000;" onclick="changeTheme('monochrome-dark', this)"></div>
+        <div class="palette-node" data-title="Paper Default" style="background: #f0ebe0;" onclick="changeTheme('default', this)"></div>
+        <div class="palette-node active-node" data-title="Monochrome Dark" style="background: #000000;" onclick="changeTheme('monochrome-dark', this)"></div>
         <div class="palette-node" data-title="Deep Space" style="background: #05050a;" onclick="changeTheme('deep-space', this)"></div>
         <div class="palette-node" data-title="Slate Gray" style="background: #2d3033;" onclick="changeTheme('slate-gray', this)"></div>
         <div class="palette-node" data-title="Minimal Light" style="background: #ffffff;" onclick="changeTheme('minimal-light', this)"></div>
@@ -450,7 +474,8 @@ function initSession() {
     try {
         const s = JSON.parse(raw);
         
-        const savedTheme = localStorage.getItem('znode_sys_theme') || s.theme || 'default';
+        // Default to monochrome-dark if no theme is saved
+        const savedTheme = localStorage.getItem('znode_sys_theme') || s.theme || 'monochrome-dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
         
         const targetNode = document.querySelector(`.palette-node[data-title*="${savedTheme.split('-')[0]}"]`) || document.querySelector('.palette-node');
@@ -514,8 +539,20 @@ function renderCard(student, idx) {
     const handleHTML = pid ? `<div class="info-handle">${pid}</div>` : `<div class="info-handle">@${student.username || '—'}</div>`;
     const decoSide = idx % 2 === 0 ? 'right:14px' : 'left:14px';
 
+    // Verification Logic
+    const isVerified = student.is_verified === true || student.is_verified === 'true';
+    const verifiedBadge = isVerified ? `<span class="verified-badge" title="Verified">✓</span>` : '';
+
+    // Socials Logic
+    const socialsHTML = student.socials ? `<div class="info-socials">${student.socials}</div>` : '';
+
+    // Department Numbering Logic
+    const onboardingNumber = String(idx + 1).padStart(3, '0');
+    const numberingHTML = `<div class="student-number">#${onboardingNumber}</div>`;
+
     entry.innerHTML = `
         ${bannerHTML}
+        ${numberingHTML}
         <div class="photo-col">
             <div class="frame-bg" style="transform:rotate(${sr}deg);"></div>
             <div class="frame-fg" style="transform:rotate(${fr}deg);">
@@ -525,8 +562,14 @@ function renderCard(student, idx) {
         </div>
         <div class="info-col">
             ${crownHTML}
-            <div class="info-name">${(student.full_name || 'Anonymous').toUpperCase()}</div>
-            <div class="info-role">${student.department || '—'}</div>
+            <div class="info-name">
+                ${(student.full_name || 'Anonymous').toUpperCase()}
+                ${verifiedBadge}
+            </div>
+            <div class="info-role">
+                ${student.department || '—'}
+                ${socialsHTML}
+            </div>
             ${quoteHTML}
             ${handleHTML}
         </div>
