@@ -18,6 +18,7 @@
             --text-muted: #6b5e4a;
             --text-faint: #a89880;
             --ease:       cubic-bezier(0.16, 1, 0.3, 1);
+            --hero-mask:  rgba(240, 235, 224, 0.85);
         }
 
         [data-theme='monochrome-dark'] {
@@ -30,6 +31,7 @@
             --text-main:  #ffffff;
             --text-muted: #888888;
             --text-faint: #444444;
+            --hero-mask:  rgba(0, 0, 0, 0.85);
         }
 
         [data-theme='deep-space'] {
@@ -42,6 +44,7 @@
             --text-main:  #ffffff;
             --text-muted: #94a3b8;
             --text-faint: #3b4252;
+            --hero-mask:  rgba(5, 5, 10, 0.88);
         }
 
         [data-theme='slate-gray'] {
@@ -54,6 +57,7 @@
             --text-main:  #e3e2e6;
             --text-muted: #8e9196;
             --text-faint: #43474c;
+            --hero-mask:  rgba(26, 28, 30, 0.85);
         }
 
         [data-theme='minimal-light'] {
@@ -66,6 +70,7 @@
             --text-main:  #000000;
             --text-muted: #555555;
             --text-faint: #999999;
+            --hero-mask:  rgba(255, 255, 255, 0.85);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -106,11 +111,8 @@
             font-size: 20px; letter-spacing: 4px; color: var(--navy);
         }
 
-        /* Creative Node-Based Palette Selector */
         .palette-dock {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: flex; align-items: center; gap: 10px;
             background: var(--paper-mid);
             padding: 6px 12px;
             border-radius: 20px;
@@ -119,125 +121,122 @@
         }
 
         .palette-node {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            cursor: pointer;
-            position: relative;
-            border: 1px solid rgba(0,0,0,0.1);
+            width: 14px; height: 14px; border-radius: 50%; cursor: pointer;
+            position: relative; border: 1px solid rgba(0,0,0,0.1);
             transition: transform 0.2s var(--ease);
         }
-        .palette-node:hover {
-            transform: scale(1.3);
-        }
-        .palette-node.active-node {
-            box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--navy);
-        }
+        .palette-node:hover { transform: scale(1.3); }
+        .palette-node.active-node { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--navy); }
 
-        /* Minimal clean text tooltips */
         .palette-node::after {
             content: attr(data-title);
-            position: absolute;
-            top: 22px;
-            left: 50%;
+            position: absolute; top: 22px; left: 50%;
             transform: translateX(-50%) scale(0.8);
-            background: var(--paper-dark);
-            color: var(--text-main);
-            font-size: 8px;
-            font-weight: 800;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            padding: 3px 6px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.2s var(--ease);
+            background: var(--paper-dark); color: var(--text-main);
+            font-size: 8px; font-weight: 800; letter-spacing: 0.05em;
+            text-transform: uppercase; padding: 3px 6px; white-space: nowrap;
+            opacity: 0; pointer-events: none; transition: all 0.2s var(--ease);
             z-index: 100;
         }
-        .palette-node:hover::after {
-            opacity: 1;
-            transform: translateX(-50%) scale(1);
-        }
+        .palette-node:hover::after { opacity: 1; transform: translateX(-50%) scale(1); }
 
-        .user-chip {
-            display: flex; align-items: center; gap: 8px;
-        }
-
+        .user-chip { display: flex; align-items: center; gap: 8px; }
         .user-avatar {
             width: 28px; height: 28px; overflow: hidden;
-            border: 2px solid var(--navy);
-            background: var(--paper-mid);
+            border: 2px solid var(--navy); background: var(--paper-mid);
             display: flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: 900; color: var(--navy);
-            flex-shrink: 0;
+            font-size: 11px; font-weight: 900; color: var(--navy); flex-shrink: 0;
         }
         .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-        #navUsername {
-            font-size: 11px; font-weight: 700; color: var(--text-muted);
-            display: none;
-        }
+        #navUsername { font-size: 11px; font-weight: 700; color: var(--text-muted); display: none; }
         @media (min-width: 420px) { #navUsername { display: block; } }
 
         /* ══════════════════════════════
            MAIN CONTENT
         ══════════════════════════════ */
-        .page-content {
-            max-width: 480px; margin: 0 auto;
-        }
+        .page-content { max-width: 480px; margin: 0 auto; }
 
         /* ══════════════════════════════
-           COVER HEADER
+           INTEGRATED BACKGROUND HERO HEADER
         ══════════════════════════════ */
         .cover-header {
+            position: relative;
             text-align: center;
-            padding: 24px 20px 16px;
+            padding: 44px 20px 24px;
+            background-image: url('WhatsApp Image 2026-06-11 at 8.58.01 PM (1).jpeg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-bottom: 1px solid var(--paper-dark);
+            z-index: 1;
+        }
+
+        /* Overlay color mask system tied directly into theme engine */
+        .cover-header::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: var(--hero-mask);
+            mix-blend-mode: normal;
+            z-index: -1;
+            transition: background 0.4s var(--ease);
         }
 
         .cover-top-deco {
             display: flex; justify-content: space-between;
-            font-size: 15px; color: var(--navy); opacity: 0.3;
-            margin-bottom: 6px;
-            font-family: 'Caveat', cursive;
+            font-size: 15px; color: var(--navy); opacity: 0.4;
+            margin-bottom: 8px; font-family: 'Caveat', cursive;
         }
 
-        .cover-znode {
+        .cover-dept-main {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 72px; letter-spacing: 8px; line-height: 1;
+            font-size: 42px;
+            letter-spacing: 1.5px;
+            line-height: 1.05;
             color: var(--navy);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            word-break: break-word;
         }
 
-        .znode-bolt {
+        .cover-collaboration {
             font-family: 'Inter', sans-serif;
-            font-size: 30px; font-weight: 900; letter-spacing: 0;
-            color: var(--gold); vertical-align: super; line-height: 0;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--text-muted);
+            margin-bottom: 18px;
         }
 
-        .cover-ephoto {
-            font-family: 'Caveat', cursive;
-            font-size: 22px; color: var(--gold); font-weight: 600;
-            letter-spacing: 0.02em; margin-top: 1px;
+        .cover-znode-badge {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 15px; letter-spacing: 2px;
+            color: var(--gold); background: var(--paper-mid);
+            padding: 2px 8px; border-radius: 4px;
+            border: 1px solid var(--paper-dark);
         }
 
         .cover-class-banner {
             display: inline-block;
             background: var(--navy); color: var(--paper);
             font-family: 'Inter', sans-serif;
-            font-size: 14px; font-weight: 900;
-            letter-spacing: 6px; text-transform: uppercase;
-            padding: 9px 32px;
-            margin: 14px 0 7px;
+            font-size: 13px; font-weight: 900;
+            letter-spacing: 5px; text-transform: uppercase;
+            padding: 8px 24px;
+            margin: 12px 0 6px;
         }
 
-        .cover-dept {
+        .cover-ephoto {
             font-family: 'Caveat', cursive;
-            font-size: 18px; color: var(--text-muted);
+            font-size: 18px; color: var(--gold); font-weight: 600;
+            letter-spacing: 0.05em;
         }
 
         /* Stats row */
         .stats-row {
             display: flex; align-items: stretch; justify-content: center;
-            margin: 14px 0 0;
+            margin: 18px 0 0;
             border-top: 1px dashed var(--paper-dark);
             border-bottom: 1px dashed var(--paper-dark);
             padding: 8px 0;
@@ -245,22 +244,13 @@
 
         .stat {
             display: flex; align-items: center; gap: 6px;
-            padding: 4px 10px;
-            border-right: 1px solid var(--paper-dark);
+            padding: 4px 10px; border-right: 1px solid var(--paper-dark);
         }
         .stat:last-child { border-right: none; }
-
         .stat-ico { font-size: 13px; line-height: 1; }
-
         .stat-vals { display: flex; flex-direction: column; }
-        .stat-n {
-            font-size: 13px; font-weight: 800; color: var(--navy); line-height: 1.1;
-        }
-        .stat-lbl {
-            font-size: 8px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.1em;
-            color: var(--text-faint);
-        }
+        .stat-n { font-size: 13px; font-weight: 800; color: var(--navy); line-height: 1.1; }
+        .stat-lbl { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); }
 
         /* ══════════════════════════════
            HIDDEN FUNCTIONAL HEADER
@@ -271,61 +261,33 @@
            STATE PANELS
         ══════════════════════════════ */
         .state-panel {
-            border: 2px dashed var(--paper-dark);
-            padding: 52px 24px; text-align: center;
-            margin: 20px 18px;
+            border: 2px dashed var(--paper-dark); padding: 52px 24px; text-align: center; margin: 20px 18px;
         }
-
-        .eyebrow {
-            font-size: 10px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.18em;
-            color: var(--text-muted); margin-bottom: 10px;
-        }
-
-        .state-panel h3 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 28px; color: var(--navy); margin-bottom: 6px;
-        }
-
-        .state-panel p {
-            font-family: 'Caveat', cursive;
-            font-size: 17px; color: var(--text-muted); line-height: 1.5;
-        }
+        .eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: var(--text-muted); margin-bottom: 10px; }
+        .state-panel h3 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--navy); margin-bottom: 6px; }
+        .state-panel p { font-family: 'Caveat', cursive; font-size: 17px; color: var(--text-muted); line-height: 1.5; }
 
         /* ══════════════════════════════
            COUNT BAR
         ══════════════════════════════ */
-        .count-bar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 9px 18px;
-            background: var(--navy);
-        }
-
+        .count-bar { display: flex; align-items: center; justify-content: space-between; padding: 9px 18px; background: var(--navy); }
         .count-bar .eyebrow { color: var(--paper-dark); }
         #studentCount { color: var(--paper) !important; }
 
         /* ══════════════════════════════
            STUDENT LIST
         ══════════════════════════════ */
-        #studentGrid {
-            flex-direction: column;
-            background: var(--paper);
-        }
+        #studentGrid { flex-direction: column; background: var(--paper); }
 
         /* ══════════════════════════════
            STUDENT ENTRY
         ══════════════════════════════ */
         .student-entry {
-            display: flex; 
-            align-items: flex-start; 
-            gap: 16px;
-            padding: 36px 18px 28px;
-            position: relative;
-            border-bottom: 1px solid var(--paper-mid);
-            flex-wrap: wrap; /* Fix layout: allows full width banners to safely stack above items */
+            display: flex; align-items: flex-start; gap: 16px;
+            padding: 36px 18px 28px; position: relative;
+            border-bottom: 1px solid var(--paper-mid); flex-wrap: wrap;
         }
 
-        /* Alternating photo left / right */
         .entry-r .photo-col { order: 2; }
         .entry-r .info-col  { order: 3; }
         .entry-l .photo-col { order: 3; }
@@ -334,144 +296,57 @@
         /* ══════════════════════════════
            PHOTO FRAME
         ══════════════════════════════ */
-        .photo-col {
-            position: relative;
-            min-width: 128px; width: 128px;
-            flex-shrink: 0;
-            margin-top: 8px;
-        }
-
-        .frame-bg {
-            position: absolute; inset: 0;
-            background: var(--navy);
-            z-index: 0;
-        }
-
-        .frame-fg {
-            position: relative; z-index: 1;
-            background: #fff;
-            padding: 7px 7px 24px;
-            box-shadow: 3px 4px 14px rgba(0,0,0,0.18);
-        }
-
-        .frame-tape {
-            position: absolute;
-            top: -10px; left: 50%;
-            width: 46px; height: 17px;
-            background: var(--tape);
-            z-index: 4;
-        }
-
-        .student-photo {
-            width: 100%;
-            aspect-ratio: 3 / 4;
-            object-fit: cover;
-            display: block;
-        }
-
-        .photo-empty {
-            width: 100%; aspect-ratio: 3 / 4;
-            background: var(--paper-mid);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 32px;
-        }
+        .photo-col { position: relative; min-width: 128px; width: 128px; flex-shrink: 0; margin-top: 8px; }
+        .frame-bg { position: absolute; inset: 0; background: var(--navy); z-index: 0; }
+        .frame-fg { position: relative; z-index: 1; background: #fff; padding: 7px 7px 24px; box-shadow: 3px 4px 14px rgba(0,0,0,0.18); }
+        .frame-tape { position: absolute; top: -10px; left: 50%; width: 46px; height: 17px; background: var(--tape); z-index: 4; }
+        .student-photo { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; display: block; }
+        .photo-empty { width: 100%; aspect-ratio: 3 / 4; background: var(--paper-mid); display: flex; align-items: center; justify-content: center; font-size: 32px; }
 
         /* ══════════════════════════════
-           STUDENT INFO
+           STUDENT INFO & IMPROVED QUOTES
         ══════════════════════════════ */
-        .info-col {
-            flex: 1; min-width: 0;
-            display: flex; flex-direction: column;
-            padding-top: 14px;
-        }
-
-        .info-crown {
-            font-size: 16px; color: var(--gold);
-            line-height: 1; margin-bottom: 4px;
-        }
-
-        .info-name {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 32px; line-height: 0.95; letter-spacing: 1px;
-            color: var(--navy);
-            word-break: break-word;
-        }
-
-        .info-role {
-            font-size: 12px; font-weight: 700;
-            color: var(--gold);
-            margin: 5px 0 9px;
-        }
-
+        .info-col { flex: 1; min-width: 0; display: flex; flex-direction: column; padding-top: 14px; }
+        .info-crown { font-size: 16px; color: var(--gold); line-height: 1; margin-bottom: 4px; }
+        .info-name { font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 0.95; letter-spacing: 1px; color: var(--navy); word-break: break-word; }
+        .info-role { font-size: 12px; font-weight: 700; color: var(--gold); margin: 5px 0 9px; }
+        
+        /* High-visibility updates for handwritten quotes */
         .info-quote {
             font-family: 'Caveat', cursive;
-            font-size: 15px; line-height: 1.4;
+            font-size: 19px; 
+            font-weight: 700;
+            line-height: 1.25;
             color: var(--text-main);
+            margin: 4px 0;
+            letter-spacing: 0.02em;
         }
-
-        .info-quote-line {
-            width: 32px; height: 2px;
-            background: var(--gold);
-            margin-top: 8px;
-            transform: rotate(-1deg);
-        }
-
-        .info-handle {
-            font-size: 9px; font-weight: 700;
-            color: var(--text-faint); margin-top: 10px;
-            text-transform: uppercase; letter-spacing: 0.08em;
-        }
-
-        .entry-deco {
-            position: absolute;
-            bottom: 14px;
-            font-size: 14px; color: var(--navy);
-            opacity: 0.28; user-select: none; line-height: 1;
-        }
+        .info-quote-line { width: 44px; height: 2px; background: var(--gold); margin-top: 6px; transform: rotate(-1deg); }
+        .info-handle { font-size: 9px; font-weight: 700; color: var(--text-faint); margin-top: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
+        .entry-deco { position: absolute; bottom: 14px; font-size: 14px; color: var(--navy); opacity: 0.28; user-select: none; line-height: 1; }
 
         /* ══════════════════════════════
            SCROLL CTA
         ══════════════════════════════ */
-        .scroll-cta {
-            text-align: center;
-            padding: 26px 20px;
-            font-family: 'Caveat', cursive;
-            font-size: 15px; color: var(--text-muted);
-            border-top: 1px dashed var(--paper-dark);
-        }
-        .scroll-cta .cta-arrow {
-            display: block; font-size: 22px; margin-top: 4px;
-        }
+        .scroll-cta { text-align: center; padding: 26px 20px; font-family: 'Caveat', cursive; font-size: 15px; color: var(--text-muted); border-top: 1px dashed var(--paper-dark); }
+        .scroll-cta .cta-arrow { display: block; font-size: 22px; margin-top: 4px; }
 
         /* ══════════════════════════════
            RESPONSIVE
         ══════════════════════════════ */
         @media (max-width: 375px) {
-            .cover-znode           { font-size: 56px; }
-            .cover-class-banner    { font-size: 12px; letter-spacing: 4px; padding: 8px 20px; }
+            .cover-dept-main       { font-size: 32px; }
+            .cover-class-banner    { font-size: 11px; letter-spacing: 3px; padding: 6px 16px; }
             .info-name             { font-size: 27px; }
             .photo-col             { min-width: 108px; width: 108px; }
             .stat                  { padding: 4px 7px; }
             .stat-ico              { display: none; }
         }
 
-        .entry-archived {
-            filter: grayscale(100%);
-            opacity: 0.55;
-        }
-        
+        .entry-archived { filter: grayscale(100%); opacity: 0.55; }
         .archive-banner {
-            width: 100%; /* Force full width top-block */
-            order: 1;    /* Enforce banner is always first inside the flex layout */
-            background: var(--gold);
-            color: #fff;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 8px 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 16px;
-            line-height: 1.4;
+            width: 100%; order: 1; background: var(--gold); color: #fff; font-size: 11px; font-weight: 700;
+            padding: 8px 12px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; line-height: 1.4;
         }
     </style>
 </head>
@@ -507,12 +382,15 @@
             <span>⊞</span><span>✦</span><span>⊞</span>
         </div>
 
-        <div class="cover-znode">Z-NODE<span class="znode-bolt">↗</span></div>
-        <div class="cover-ephoto">— E-Photo Album —</div>
+        <div class="cover-dept-main" id="deptLabel">DEPARTMENT OF —</div>
+        
+        <div class="cover-collaboration">
+            In collaboration with <span class="cover-znode-badge">Z-NODE</span>
+        </div>
 
         <div class="cover-class-banner" id="classbanner">CLASS OF —</div>
         <br>
-        <div class="cover-dept" id="deptLabel">Department of —</div>
+        <div class="cover-ephoto">— E-Photo Album —</div>
 
         <div class="stats-row">
             <div class="stat">
@@ -592,7 +470,6 @@ function changeTheme(themeName, element) {
     document.documentElement.setAttribute('data-theme', themeName);
     localStorage.setItem('znode_sys_theme', themeName);
     
-    // Manage UI active selection ring states
     if(element) {
         document.querySelectorAll('.palette-node').forEach(node => node.classList.remove('active-node'));
         element.classList.add('active-node');
@@ -609,7 +486,6 @@ function initSession() {
         const savedTheme = localStorage.getItem('znode_sys_theme') || s.theme || 'default';
         document.documentElement.setAttribute('data-theme', savedTheme);
         
-        // Match active indicator on boot execution
         const targetNode = document.querySelector(`.palette-node[data-title*="${savedTheme.split('-')[0]}"]`) || document.querySelector('.palette-node');
         if(targetNode) {
             document.querySelectorAll('.palette-node').forEach(node => node.classList.remove('active-node'));
@@ -644,7 +520,6 @@ const DECOS       = ['☆', '♡', '⚡', '◇', '✦', '☆', '♡', '⚡'];
 
 function renderCard(student, idx) {
     const entry = document.createElement('div');
-    
     const isArchived = student.yearbook_access === false || student.yearbook_access === 'false';
     
     entry.className = `student-entry ${idx % 2 === 0 ? 'entry-r' : 'entry-l'} ${isArchived ? 'entry-archived' : ''}`;
@@ -664,20 +539,12 @@ function renderCard(student, idx) {
         ? `<img class="student-photo" src="${student.avatar_url}" alt="${student.full_name || ''}" loading="lazy">`
         : `<div class="photo-empty">👤</div>`;
 
-    const crownHTML = isDOS
-        ? `<div class="info-crown">♛</div>`
-        : `<div class="info-crown" style="visibility:hidden;">♛</div>`;
-
-    const quote   = student.quote || student.bio || '';
-    const quoteHTML = quote
-        ? `<div class="info-quote">"${quote}"</div><div class="info-quote-line"></div>`
-        : '';
+    const crownHTML = isDOS ? `<div class="info-crown">♛</div>` : `<div class="info-crown" style="visibility:hidden;">♛</div>`;
+    const quote = student.quote || student.bio || '';
+    const quoteHTML = quote ? `<div class="info-quote">"${quote}"</div><div class="info-quote-line"></div>` : '';
 
     const pid = student.eternal_statement || student.matric_number || '';
-    const handleHTML = pid
-        ? `<div class="info-handle">${pid}</div>`
-        : `<div class="info-handle">@${student.username || '—'}</div>`;
-
+    const handleHTML = pid ? `<div class="info-handle">${pid}</div>` : `<div class="info-handle">@${student.username || '—'}</div>`;
     const decoSide = idx % 2 === 0 ? 'right:14px' : 'left:14px';
 
     entry.innerHTML = `
@@ -718,12 +585,8 @@ async function loadYearbook(dept, year) {
 
         let query = _db.from('students').select('*');
 
-        if (dept) {
-            query = query.ilike('department', `%${dept}%`);
-        }
-        if (year) {
-            query = query.eq('graduation_year', parseInt(year));
-        }
+        if (dept) { query = query.ilike('department', `%${dept}%`); }
+        if (year) { query = query.eq('graduation_year', parseInt(year)); }
 
         query = query.or(`yearbook_access.eq.true,username.eq.${currentUsername}`);
 
@@ -741,9 +604,7 @@ async function loadYearbook(dept, year) {
                 return aArchived ? 1 : -1;
             });
         }
-
         return students || [];
-
     } catch(e) {
         console.error("Yearbook query error:", e);
         return [];
@@ -767,7 +628,6 @@ async function bootstrap() {
 
     const students = await loadYearbook(dept, year);
     document.getElementById('loadingState').style.display = 'none';
-
     document.getElementById('statStudents').textContent = String(students.length);
 
     if (!students.length) {
@@ -775,14 +635,13 @@ async function bootstrap() {
         return;
     }
 
-    document.getElementById('studentCount').textContent =
-        `${students.length} node${students.length !== 1 ? 's' : ''} found`;
+    document.getElementById('studentCount').textContent = `${students.length} node${students.length !== 1 ? 's' : ''} found`;
     document.getElementById('countBar').style.display = 'flex';
 
     const grid = document.getElementById('studentGrid');
     grid.innerHTML = ''; 
     students.forEach((s, i) => grid.appendChild(renderCard(s, i)));
-    grid.style.display    = 'flex';
+    grid.style.display = 'flex';
     grid.style.flexDirection = 'column';
 
     document.getElementById('scrollCta').style.display = 'block';
