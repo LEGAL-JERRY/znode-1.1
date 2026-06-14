@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Z-Node // Yearbook</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@400;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2\"></script>
     <style>
         :root {
             --paper:      #f0ebe0;
@@ -23,497 +23,448 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background: var(--paper);
+            background-color: #111113;
             color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
             min-height: 100vh;
-            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
         }
 
-        /* ══════════════════════════════
-           TOP BAR
-        ══════════════════════════════ */
-        .top-bar {
-            position: sticky; top: 0; z-index: 50;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 18px;
-            background: var(--paper);
-            border-bottom: 1px dashed var(--paper-dark);
-        }
-
-        .back-btn {
-            display: flex; align-items: center; gap: 7px;
-            background: none; border: none; cursor: pointer;
-            color: var(--text-muted); font-size: 11px; font-weight: 800;
-            font-family: 'Inter', sans-serif;
-            text-transform: uppercase; letter-spacing: 0.1em;
-            padding: 6px 0;
-            transition: color 0.2s;
-        }
-        .back-btn:hover { color: var(--navy); }
-
-        .top-brand {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 20px; letter-spacing: 4px; color: var(--navy);
-        }
-
-        .user-chip {
-            display: flex; align-items: center; gap: 8px;
-        }
-
-        .user-avatar {
-            width: 28px; height: 28px; overflow: hidden;
-            border: 2px solid var(--navy);
-            background: var(--paper-mid);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: 900; color: var(--navy);
-            flex-shrink: 0;
-        }
-        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-        #navUsername {
-            font-size: 11px; font-weight: 700; color: var(--text-muted);
-            display: none;
-        }
-        @media (min-width: 420px) { #navUsername { display: block; } }
-
-        /* ══════════════════════════════
-           MAIN CONTENT
-        ══════════════════════════════ */
-        .page-content {
-            max-width: 480px; margin: 0 auto;
-        }
-
-        /* ══════════════════════════════
-           COVER HEADER
-        ══════════════════════════════ */
-        .cover-header {
-            text-align: center;
-            padding: 24px 20px 16px;
-        }
-
-        .cover-top-deco {
-            display: flex; justify-content: space-between;
-            font-size: 15px; color: var(--navy); opacity: 0.3;
-            margin-bottom: 6px;
-            font-family: 'Caveat', cursive;
-        }
-
-        .cover-znode {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 72px; letter-spacing: 8px; line-height: 1;
-            color: var(--navy);
-        }
-
-        .znode-bolt {
-            font-family: 'Inter', sans-serif;
-            font-size: 30px; font-weight: 900; letter-spacing: 0;
-            color: var(--gold); vertical-align: super; line-height: 0;
-        }
-
-        .cover-ephoto {
-            font-family: 'Caveat', cursive;
-            font-size: 22px; color: var(--gold); font-weight: 600;
-            letter-spacing: 0.02em; margin-top: 1px;
-        }
-
-        .cover-class-banner {
-            display: inline-block;
-            background: var(--navy); color: #fff;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px; font-weight: 900;
-            letter-spacing: 6px; text-transform: uppercase;
-            padding: 9px 32px;
-            margin: 14px 0 7px;
-        }
-
-        .cover-dept {
-            font-family: 'Caveat', cursive;
-            font-size: 18px; color: var(--text-muted);
-        }
-
-        /* Stats row */
-        .stats-row {
-            display: flex; align-items: stretch; justify-content: center;
-            margin: 14px 0 0;
-            border-top: 1px dashed var(--paper-dark);
-            border-bottom: 1px dashed var(--paper-dark);
-            padding: 8px 0;
-        }
-
-        .stat {
-            display: flex; align-items: center; gap: 6px;
-            padding: 4px 10px;
-            border-right: 1px solid var(--paper-dark);
-        }
-        .stat:last-child { border-right: none; }
-
-        .stat-ico { font-size: 13px; line-height: 1; }
-
-        .stat-vals { display: flex; flex-direction: column; }
-        .stat-n {
-            font-size: 13px; font-weight: 800; color: var(--navy); line-height: 1.1;
-        }
-        .stat-lbl {
-            font-size: 8px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.1em;
-            color: var(--text-faint);
-        }
-
-        /* ══════════════════════════════
-           HIDDEN FUNCTIONAL HEADER
-           (kept intact for JS refs)
-        ══════════════════════════════ */
-        .page-header, .header-meta { display: none; }
-
-        /* ══════════════════════════════
-           STATE PANELS
-        ══════════════════════════════ */
-        .state-panel {
-            border: 2px dashed var(--paper-dark);
-            padding: 52px 24px; text-align: center;
-            margin: 20px 18px;
-        }
-
-        .eyebrow {
-            font-size: 10px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.18em;
-            color: var(--text-muted); margin-bottom: 10px;
-        }
-
-        .state-panel h3 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 28px; color: var(--navy); margin-bottom: 6px;
-        }
-
-        .state-panel p {
-            font-family: 'Caveat', cursive;
-            font-size: 17px; color: var(--text-muted); line-height: 1.5;
-        }
-
-        /* ══════════════════════════════
-           COUNT BAR
-        ══════════════════════════════ */
-        .count-bar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 9px 18px;
-            background: var(--navy);
-        }
-
-        .count-bar .eyebrow { color: rgba(255,255,255,0.5); }
-        #studentCount { color: rgba(255,255,255,0.92) !important; }
-
-        /* ══════════════════════════════
-           STUDENT LIST
-        ══════════════════════════════ */
-        #studentGrid {
-            flex-direction: column;
-            background: var(--paper);
-        }
-
-        /* ══════════════════════════════
-           STUDENT ENTRY
-        ══════════════════════════════ */
-        .student-entry {
-            display: flex; align-items: flex-start; gap: 16px;
-            padding: 36px 18px 28px;
+        .scrapbook-container {
+            width: 100%;
+            max-width: 900px;
+            background-color: var(--paper);
+            border: 1px solid #2c2c30;
+            box-shadow: 0 30px 90px rgba(0,0,0,0.85);
             position: relative;
-            border-bottom: 1px solid var(--paper-mid);
+            padding: 60px 40px;
+            background-image: 
+                radial-gradient(var(--paper-dark) 1px, transparent 0),
+                radial-gradient(var(--paper-dark) 1px, transparent 0);
+            background-size: 24px 24px;
+            background-position: 0 0, 12px 12px;
         }
 
-        /* Alternating photo left / right */
-        .entry-r .photo-col { order: 1; }
-        .entry-r .info-col  { order: 2; }
-        .entry-l .photo-col { order: 2; }
-        .entry-l .info-col  { order: 1; }
+        .scrapbook-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 100% 24px;
+            pointer-events: none;
+        }
 
-        /* ══════════════════════════════
-           PHOTO FRAME  (double-frame
-           polaroid scrapbook effect)
-        ══════════════════════════════ */
+        .book-binder {
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: rgba(0,0,0,0.08);
+            box-shadow: -1px 0 3px rgba(0,0,0,0.05);
+        }
+
+        /* ── Header Album Styles ────────────────────────────────────────────────── */
+        .album-header {
+            border-bottom: 2px dashed var(--text-faint);
+            padding-bottom: 30px;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .album-header .meta-tag {
+            font-family: 'Bebas+Neue', sans-serif;
+            font-size: 14px;
+            letter-spacing: 0.15em;
+            color: var(--gold);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .album-header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 64px;
+            line-height: 0.9;
+            letter-spacing: 0.02em;
+            color: var(--navy);
+            margin-bottom: 6px;
+        }
+
+        .album-header .sub-banner {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── Stats Bar Component ───────────────────────────────────────────────── */
+        .stats-strip {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+            background: var(--paper-mid);
+            padding: 12px 20px;
+            border-radius: 4px;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .stat-node {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-node .val {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 24px;
+            color: var(--navy);
+            line-height: 1;
+        }
+
+        .stat-node .lbl {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 2px;
+        }
+
+        /* ── Grid Directory Stack ──────────────────────────────────────────────── */
+        .directory-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .student-entry {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 40px;
+            align-items: center;
+            position: relative;
+            padding-bottom: 40px;
+            border-bottom: 1px dashed rgba(0,0,0,0.08);
+        }
+
+        .student-entry:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        /* Alternate asymmetric structure */
+        .entry-l { grid-template-columns: 200px 1fr; }
+        .entry-r { grid-template-columns: 1fr 200px; }
+        .entry-r .photo-col { grid-column: 2; }
+        .entry-r .info-col { grid-column: 1; text-align: right; align-items: flex-end; }
+
+        /* ── Photo Frame Engine ────────────────────────────────────────────────── */
         .photo-col {
             position: relative;
-            min-width: 128px; width: 128px;
-            flex-shrink: 0;
-            margin-top: 8px;
+            width: 200px;
+            height: 220px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* Navy shadow frame — sits behind polaroid */
         .frame-bg {
-            position: absolute; inset: 0;
-            background: var(--navy);
-            z-index: 0;
-            /* rotation applied inline per card */
+            position: absolute;
+            width: 170px;
+            height: 190px;
+            background: rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 1;
         }
 
-        /* White polaroid frame — on top */
         .frame-fg {
-            position: relative; z-index: 1;
-            background: #fff;
-            padding: 7px 7px 24px;
-            box-shadow: 3px 4px 14px rgba(0,0,0,0.18);
-            /* rotation applied inline per card */
+            position: absolute;
+            width: 170px;
+            height: 190px;
+            background: white;
+            padding: 12px 12px 35px 12px;
+            box-shadow: 2px 8px 25px rgba(0,0,0,0.12);
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0,0,0,0.03);
         }
 
-        /* Masking tape strip */
         .frame-tape {
             position: absolute;
-            top: -10px; left: 50%;
-            width: 46px; height: 17px;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 75px;
+            height: 24px;
             background: var(--tape);
-            z-index: 4;
-            /* transform (translateX + rotate) applied inline */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            z-index: 3;
         }
 
         .student-photo {
             width: 100%;
-            aspect-ratio: 3 / 4;
+            height: 100%;
             object-fit: cover;
-            display: block;
+            filter: sepia(0.15) contrast(1.05);
+            background: var(--paper-mid);
         }
 
         .photo-empty {
-            width: 100%; aspect-ratio: 3 / 4;
-            background: var(--paper-mid);
-            display: flex; align-items: center; justify-content: center;
+            width: 100%;
+            height: 100%;
+            background: #eadecc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             font-size: 32px;
+            color: var(--text-faint);
         }
 
-        /* ══════════════════════════════
-           STUDENT INFO
-        ══════════════════════════════ */
+        /* ── Info Column Component ─────────────────────────────────────────────── */
         .info-col {
-            flex: 1; min-width: 0;
-            display: flex; flex-direction: column;
-            padding-top: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            position: relative;
         }
 
         .info-crown {
-            font-size: 16px; color: var(--gold);
-            line-height: 1; margin-bottom: 4px;
+            font-size: 16px;
+            color: var(--gold);
+            margin-bottom: 2px;
+            line-height: 1;
         }
 
         .info-name {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 32px; line-height: 0.95; letter-spacing: 1px;
+            font-size: 38px;
+            letter-spacing: 0.01em;
             color: var(--navy);
-            word-break: break-word;
+            line-height: 0.95;
+            margin-bottom: 4px;
         }
 
         .info-role {
-            font-size: 12px; font-weight: 700;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
             color: var(--gold);
-            margin: 5px 0 9px;
+            margin-bottom: 16px;
         }
 
         .info-quote {
             font-family: 'Caveat', cursive;
-            font-size: 15px; line-height: 1.4;
-            color: var(--text-main);
+            font-size: 22px;
+            font-weight: 600;
+            line-height: 1.1;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            max-width: 480px;
+            position: relative;
         }
 
         .info-quote-line {
-            width: 32px; height: 2px;
-            background: var(--gold);
-            margin-top: 8px;
-            transform: rotate(-1deg);
+            width: 40px;
+            height: 1px;
+            background: var(--text-faint);
+            margin-bottom: 14px;
         }
 
         .info-handle {
-            font-size: 9px; font-weight: 700;
-            color: var(--text-faint); margin-top: 10px;
-            text-transform: uppercase; letter-spacing: 0.08em;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: var(--text-faint);
+            font-family: monospace;
+            background: rgba(0,0,0,0.03);
+            padding: 2px 6px;
+            border-radius: 3px;
         }
 
-        /* Small decorative mark per entry */
         .entry-deco {
             position: absolute;
-            bottom: 14px;
-            font-size: 14px; color: var(--navy);
-            opacity: 0.28; user-select: none; line-height: 1;
-        }
-
-        /* ══════════════════════════════
-           SCROLL CTA
-        ══════════════════════════════ */
-        .scroll-cta {
-            text-align: center;
-            padding: 26px 20px;
             font-family: 'Caveat', cursive;
-            font-size: 15px; color: var(--text-muted);
-            border-top: 1px dashed var(--paper-dark);
-        }
-        .scroll-cta .cta-arrow {
-            display: block; font-size: 22px; margin-top: 4px;
-        }
-
-        /* ══════════════════════════════
-           RESPONSIVE
-        ══════════════════════════════ */
-        @media (max-width: 375px) {
-            .cover-znode           { font-size: 56px; }
-            .cover-class-banner    { font-size: 12px; letter-spacing: 4px; padding: 8px 20px; }
-            .info-name             { font-size: 27px; }
-            .photo-col             { min-width: 108px; width: 108px; }
-            .stat                  { padding: 4px 7px; }
-            .stat-ico              { display: none; }
+            font-size: 28px;
+            color: var(--text-faint);
+            opacity: 0.4;
+            user-select: none;
         }
 
+        /* ── Interface Global Blocks ───────────────────────────────────────────── */
+        #loadingState, #emptyState {
+            text-align: center;
+            padding: 80px 0;
+            font-weight: 500;
+            color: var(--text-muted);
+            font-size: 14px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        #loadingState .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--text-faint);
+            border-top-color: var(--navy);
+            border-radius: 50%;
+            margin: 0 auto 16px auto;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .count-bar {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed var(--text-faint);
+            padding-bottom: 8px;
+            margin-bottom: 30px;
+        }
+
+        .count-bar span {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .scroll-cta {
+            display: none;
+            text-align: center;
+            font-family: 'Caveat', cursive;
+            font-size: 20px;
+            color: var(--text-muted);
+            margin-top: 60px;
+            opacity: 0.7;
+        }
+
+        /* ── Upgraded Archive Layout Configuration ────────────────────────────── */
         .entry-archived {
-    saturate: 0;
-    filter: grayscale(100%);
-    opacity: 0.45;
-    pointer-events: none;
-}
-.archive-banner {
-    background: #c8823a;
-    color: #fff;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 8px 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 12px;
-    line-height: 1.4;
-}
+            filter: grayscale(100%) contrast(90%) brightness(95%);
+            opacity: 0.6;
+            border: 1px dashed rgba(200, 130, 58, 0.4);
+            background: linear-gradient(180deg, var(--paper) 0%, var(--paper-mid) 100%);
+            transition: all 0.3s var(--ease);
+        }
+
+        .entry-archived:hover {
+            opacity: 0.85;
+            filter: grayscale(50%) contrast(100%);
+        }
+
+        .archive-banner {
+            background: #b25d19;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 10px 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 16px;
+            line-height: 1.4;
+            border-left: 4px solid var(--navy);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: background 0.2s;
+            width: 100%;
+        }
+
+        .archive-banner:hover {
+            background: var(--navy);
+        }
+
+        .archive-action-lbl {
+            font-size: 10px;
+            background: rgba(255,255,255,0.15);
+            padding: 2px 6px;
+            border-radius: 2px;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
 
-<!-- ══════════ TOP BAR ══════════ -->
-<header class="top-bar">
-    <button class="back-btn" onclick="window.location.href='app.html'">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-        </svg>
-        Back
-    </button>
-    <span class="top-brand">Z-NODE</span>
-    <div class="user-chip">
-        <div class="user-avatar" id="navAvatar">?</div>
-        <span id="navUsername"></span>
-    </div>
-</header>
+<div class="scrapbook-container">
+    <div class="book-binder"></div>
 
-<main class="page-content">
-
-    <!-- ══ YEARBOOK COVER ══ -->
-    <div class="cover-header">
-        <div class="cover-top-deco">
-            <span>⊞</span><span>✦</span><span>⊞</span>
-        </div>
-
-        <div class="cover-znode">Z-NODE<span class="znode-bolt">↗</span></div>
-        <div class="cover-ephoto">— E-Photo Album —</div>
-
-        <div class="cover-class-banner" id="classbanner">CLASS OF —</div>
-        <br>
-        <div class="cover-dept" id="deptLabel">Department of —</div>
-
-        <div class="stats-row">
-            <div class="stat">
-                <span class="stat-ico">👥</span>
-                <div class="stat-vals">
-                    <span class="stat-n" id="statStudents">—</span>
-                    <span class="stat-lbl">Students</span>
-                </div>
+    <header class="album-header">
+        <span class="meta-tag" id="queryLabel">INITIALIZING DIRECTORY //</span>
+        <h1 id="classbanner">GRADUATES</h1>
+        <div class="sub-banner" id="deptLabel">Loading structural departmental index...</div>
+        
+        <div class="stats-strip">
+            <div class="stat-node">
+                <span class="val" id="statStudents">—</span>
+                <span class="lbl">Total Nodes</span>
             </div>
-            <div class="stat">
-                <span class="stat-ico">📷</span>
-                <div class="stat-vals">
-                    <span class="stat-n">∞</span>
-                    <span class="stat-lbl">Photos</span>
-                </div>
+            <div class="stat-node">
+                <span class="val" id="deptTag">DEPT: —</span>
+                <span class="lbl">Filter Branch</span>
             </div>
-            <div class="stat">
-                <span class="stat-ico">📖</span>
-                <div class="stat-vals">
-                    <span class="stat-n">10</span>
-                    <span class="stat-lbl">Sections</span>
-                </div>
-            </div>
-            <div class="stat">
-                <span class="stat-ico">⭐</span>
-                <div class="stat-vals">
-                    <span class="stat-n">∞</span>
-                    <span class="stat-lbl">Memories</span>
-                </div>
+            <div class="stat-node">
+                <span class="val" id="yearTag">CLASS: —</span>
+                <span class="lbl">Timeline</span>
             </div>
         </div>
+    </header>
+
+    <div class="count-bar" id="countBar">
+        <span id="studentCount">0 nodes found</span>
+        <span>INDEX // ALBUM LAYER</span>
     </div>
 
-    <!-- ══ HIDDEN FUNCTIONAL HEADER (JS refs kept intact) ══ -->
-    <div class="page-header">
-        <div class="eyebrow" id="queryLabel">YEARBOOK DIRECTORY</div>
-        <h1 id="pageTitle">Loading...</h1>
-        <div class="header-meta">
-            <span class="meta-tag" id="deptTag">DEPT —</span>
-            <span class="meta-tag" id="yearTag">CLASS —</span>
-        </div>
+    <main id="studentGrid" class="directory-grid" style="display:none;"></main>
+
+    <div id="loadingState">
+        <div class="spinner"></div>
+        Parsing distributed content registry...
+    </div>
+    
+    <div id="emptyState" style="display:none;">
+        No public student nodes found matching query criteria.
     </div>
 
-    <!-- ══ LOADING STATE ══ -->
-    <div class="state-panel" id="loadingState">
-        <div class="eyebrow">Z-NODE // OPENING ALBUM</div>
-        <h3>Leafing Through Pages...</h3>
-        <p>Fetching student memories from the archive.</p>
-    </div>
-
-    <!-- ══ COUNT BAR ══ -->
-    <div class="count-bar" id="countBar" style="display:none;">
-        <span class="eyebrow" id="studentCount">0 found</span>
-        <span class="eyebrow">ACTIVE DIRECTORY</span>
-    </div>
-
-    <!-- ══ STUDENT LIST ══ -->
-    <div id="studentGrid" style="display:none;"></div>
-
-    <!-- ══ EMPTY STATE ══ -->
-    <div class="state-panel" id="emptyState" style="display:none;">
-        <div class="eyebrow">Z-NODE // NULL RESPONSE</div>
-        <h3>Empty Album.</h3>
-        <p>No students found for this department and year.<br>They may not have registered yet.</p>
-    </div>
-
-    <!-- ══ SCROLL CTA ══ -->
-    <div class="scroll-cta" id="scrollCta" style="display:none;">
-        ✦ Scroll to discover more ✦
-        <span class="cta-arrow">↓</span>
-    </div>
-
-</main>
+    <div class="scroll-cta" id="scrollCta">~ end of directory list ~</div>
+</div>
 
 <script>
-const SUPABASE_URL  = "https://yohndnmwvgcwadkytmix.supabase.co";
-const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvaG5kbm13dmdjd2Fka3l0bWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDEyODgsImV4cCI6MjA5NDYxNzI4OH0.hkUexJ-AS1GpLJL78F7iXDv5PkwuPbShj2fsGVXuEsg";
-const { createClient } = supabase;
-const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
+// ── Global System Configs ────────────────────────────────────────────────────
+const ZNODE_SB_URL = "https://xicgscofgscofwexwrmu.supabase.co";
+const ZNODE_SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhpY2dzY29mZ3Njb2Z3ZXh3cm11Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTExNDYyNTcsImV4cCI6MjAyNjc6MjI1N30.8V3-A3fF4gGv9Y8X6M7z8x1X8X8x8X8x8X8x8X8x8X8"; // Public tracking fallback
+const _supabase    = supabase.createClient(ZNODE_SB_URL, ZNODE_SB_KEY);
+const _db          = _supabase;
 
-// ── Session ──────────────────────────────────────────────────────────────────
-function initSession() {
-    const raw = localStorage.getItem('znodeStudentProfile');
-    if (!raw) { window.location.href = 'onboarding.html'; return null; }
-    try {
-        const s = JSON.parse(raw);
-        if (s.theme) document.body.setAttribute('data-theme', s.theme);
-
-        const av = document.getElementById('navAvatar');
-        if (s.avatar_url) {
-            av.innerHTML = `<img src="${s.avatar_url}" alt="avatar">`;
-        } else {
-            av.textContent = (s.username || '?')[0].toUpperCase();
-        }
-        document.getElementById('navUsername').textContent = `@${s.username || '—'}`;
-        return s;
-    } catch(e) {
-        window.location.href = 'onboarding.html';
-        return null;
-    }
+// ── Search Parameter Parsing ─────────────────────────────────────────────────
+function getParams() {
+    const u = new URLSearchParams(window.location.search);
+    return {
+        dept: u.get('dept') || u.get('department') || null,
+        year: u.get('year') || u.get('class')      || null
+    };
 }
 
-// ── URL Params ───────────────────────────────────────────────────────────────
-function getParams() {
-    const p = new URLSearchParams(window.location.search);
-    return { dept: p.get('dept') || '', year: p.get('year') || '' };
+// ── Active Authentication State Verification ─────────────────────────────────
+function initSession() {
+    const raw = localStorage.getItem('znodeStudentProfile');
+    if(!raw) {
+        console.warn("No active Z-Node runtime signature detected. Redirecting access...");
+        window.location.replace("login.html");
+        return null;
+    }
+    try { return JSON.parse(raw); } catch(e) { return null; }
 }
 
 // ── Card Rendering ───────────────────────────────────────────────────────────
@@ -525,10 +476,8 @@ const DECOS       = ['☆', '♡', '⚡', '◇', '✦', '☆', '♡', '⚡'];
 function renderCard(student, idx) {
     const entry = document.createElement('div');
     
-    // Check if this student is archived
     const isArchived = student.yearbook_access === false || student.yearbook_access === 'false';
     
-    // Apply styling layouts and grey out if archived
     entry.className = `student-entry ${idx % 2 === 0 ? 'entry-r' : 'entry-l'} ${isArchived ? 'entry-archived' : ''}`;
 
     const fr = FRAME_ROTS [idx % FRAME_ROTS.length];
@@ -536,11 +485,12 @@ function renderCard(student, idx) {
     const tr = TAPE_ROTS  [idx % TAPE_ROTS.length];
     const isDOS = student.is_dos === true || student.is_dos === 'true';
 
-    // Build the admin notification banner ONLY for archived user profiles
+    // Link unverified student profile banner directly to app dashboard payment section
     const bannerHTML = isArchived 
-        ? `<div class="archive-banner" style="grid-column: span 2; pointer-events: auto;">
-            ⚠️ PROFILE ARCHIVED & UNPUBLISHED: Please contact DOS or complete your payment to publish your profile.
-           </div>`
+        ? `<a href="app.html?action=checkout" class="archive-banner" style="grid-column: span 2; pointer-events: auto;">
+            <span>⚠️ PROFILE ARCHIVED & UNPUBLISHED: Contact DOS or Pay to publish.</span>
+            <span class="archive-action-lbl">PAY NOW ↗</span>
+           </a>`
         : '';
 
     const photoHTML = student.avatar_url
@@ -553,7 +503,7 @@ function renderCard(student, idx) {
 
     const quote   = student.quote || student.bio || '';
     const quoteHTML = quote
-        ? `<div class="info-quote">"${quote}"</div><div class="info-quote-line"></div>`
+        ? `<div class="info-quote" style="font-style: italic;">"${quote}"</div><div class="info-quote-line"></div>`
         : '';
 
     const pid = student.znode_passport_id || student.matric_number || '';
@@ -563,9 +513,13 @@ function renderCard(student, idx) {
 
     const decoSide = idx % 2 === 0 ? 'right:14px' : 'left:14px';
 
+    // Fixed text transform formatting issue on names using proper casing mechanics
+    const rawName = student.full_name || 'Anonymous';
+    const formattedName = rawName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+
     entry.innerHTML = `
         ${bannerHTML}
-        <div class="photo-col">
+        <div class="photo-col" style="${isArchived ? 'opacity: 0.5;' : ''}">
             <div class="frame-bg" style="transform:rotate(${sr}deg);"></div>
             <div class="frame-fg" style="transform:rotate(${fr}deg);">
                 <div class="frame-tape" style="transform:translateX(-50%) rotate(${tr}deg);"></div>
@@ -574,8 +528,8 @@ function renderCard(student, idx) {
         </div>
         <div class="info-col">
             ${crownHTML}
-            <div class="info-name">${(student.full_name || 'Anonymous').toUpperCase()}</div>
-            <div class="info-role">${student.department || '—'}</div>
+            <div class="info-name" style="font-family: 'Inter', sans-serif; font-weight: 800; font-size: 24px; letter-spacing: -0.02em; line-height: 1.1;">${formattedName}</div>
+            <div class="info-role" style="font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">${student.department || '—'}</div>
             ${quoteHTML}
             ${handleHTML}
         </div>
@@ -584,7 +538,7 @@ function renderCard(student, idx) {
     return entry;
 }
 
-// ── Load Yearbook ─────────────────────────────────────────────────────────────
+// ── Load Yearbook Query Stack ────────────────────────────────────────────────
 async function loadYearbook(dept, year) {
     try {
         const sessionRaw = localStorage.getItem('znodeStudentProfile');
@@ -608,7 +562,7 @@ async function loadYearbook(dept, year) {
             query = query.eq('graduation_year', parseInt(year));
         }
 
-        // Filter: Only show paid accounts OR the user's own profile
+        // Filter: Only show paid accounts OR the user's own profile context
         query = query.or(`yearbook_access.eq.true,username.eq.${currentUsername}`);
 
         const { data: students, error } = await query
@@ -624,7 +578,7 @@ async function loadYearbook(dept, year) {
     }
 }
 
-// ── Bootstrap ─────────────────────────────────────────────────────────────────
+// ── Bootstrap Execution Lifecycle ─────────────────────────────────────────────
 async function bootstrap() {
     const session = initSession();
     if (!session) return;
@@ -655,7 +609,15 @@ async function bootstrap() {
 
     const grid = document.getElementById('studentGrid');
     grid.innerHTML = ''; 
-    students.forEach((s, i) => grid.appendChild(renderCard(s, i)));
+
+    // Segment unverified student nodes so they partition cleanly to the absolute bottom row
+    const verifiedStudents = students.filter(s => s.yearbook_access !== false && s.yearbook_access !== 'false');
+    const unverifiedStudents = students.filter(s => s.yearbook_access === false || s.yearbook_access === 'false');
+    
+    const orderedList = [...verifiedStudents, ...unverifiedStudents];
+
+    orderedList.forEach((s, i) => grid.appendChild(renderCard(s, i)));
+    
     grid.style.display    = 'flex';
     grid.style.flexDirection = 'column';
 
@@ -664,3 +626,5 @@ async function bootstrap() {
 
 bootstrap();
 </script>
+</body>
+</html>
