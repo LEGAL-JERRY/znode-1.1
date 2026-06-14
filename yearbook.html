@@ -357,6 +357,24 @@
             .stat                  { padding: 4px 7px; }
             .stat-ico              { display: none; }
         }
+
+        .entry-archived {
+    saturate: 0;
+    filter: grayscale(100%);
+    opacity: 0.45;
+    pointer-events: none;
+}
+.archive-banner {
+    background: #c8823a;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 8px 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
     </style>
 </head>
 <body>
@@ -507,7 +525,65 @@ const DECOS       = ['☆', '♡', '⚡', '◇', '✦', '☆', '♡', '⚡'];
 
 function renderCard(student, idx) {
     const entry = document.createElement('div');
-    entry.className = `student-entry ${idx % 2 === 0 ? 'entry-r' : 'entry-l'}`;
+    
+    // Check if this student is archived
+    const isArchived = student.yearbook_access === false || student.yearbook_access === 'false';
+    
+    // Apply styling layouts and grey out if archived
+    entry.className = `student-entry ${idx % 2 === 0 ? 'entry-r' : 'entry-l'} ${isArchived ? 'entry-archived' : ''}`;
+
+    const fr = FRAME_ROTS [idx % FRAME_ROTS.length];
+    const sr = SHADOW_ROTS[idx % SHADOW_ROTS.length];
+    const tr = TAPE_ROTS  [idx % TAPE_ROTS.length];
+    const isDOS = student.is_dos === true || student.is_dos === 'true';
+
+    // Build the admin notification banner ONLY for the archived current user
+    const bannerHTML = isArchived 
+        ? `<div class="archive-banner" style="grid-column: span 2; pointer-events: auto;">
+            ⚠️ PROFILE ARCHIVED & UNPUBLISHED: Please contact DOS or complete your payment to publish your profile.
+           </div>`
+        : '';
+
+    const photoHTML = student.avatar_url
+        ? `<img class="student-photo" src="${student.avatar_url}" alt="${student.full_name || ''}" loading="lazy">`
+        : `<div class="photo-empty">👤</div>`;
+
+    const crownHTML = isDOS
+        ? `<div class="info-crown">♛</div>`
+        : `<div class="info-crown" style="visibility:hidden;">♛</div>`;
+
+    const quote   = student.quote || student.bio || '';
+    const quoteHTML = quote
+        ? `<div class="info-quote">"${quote}"</div><div class="info-quote-line"></div>`
+        : '';
+
+    const pid = student.znode_passport_id || student.matric_number || '';
+    const handleHTML = pid
+        ? `<div class="info-handle">${pid}</div>`
+        : `<div class="info-handle">@${student.username || '—'}</div>`;
+
+    const decoSide = idx % 2 === 0 ? 'right:14px' : 'left:14px';
+
+    entry.innerHTML = `
+        ${bannerHTML}
+        <div class="photo-col">
+            <div class="frame-bg" style="transform:rotate(${sr}deg);"></div>
+            <div class="frame-fg" style="transform:rotate(${fr}deg);">
+                <div class="frame-tape" style="transform:translateX(-50%) rotate(${tr}deg);"></div>
+                ${photoHTML}
+            </div>
+        </div>
+        <div class="info-col">
+            ${crownHTML}
+            <div class="info-name">${(student.full_name || 'Anonymous').toUpperCase()}</div>
+            <div class="info-role">${student.department || '—'}</div>
+            ${quoteHTML}
+            ${handleHTML}
+        </div>
+        <span class="entry-deco" style="bottom:14px;${decoSide};">${DECOS[idx % DECOS.length]}</span>
+    `;
+    return entry;
+}
 
     const fr = FRAME_ROTS [idx % FRAME_ROTS.length];
     const sr = SHADOW_ROTS[idx % SHADOW_ROTS.length];
@@ -557,15 +633,24 @@ function renderCard(student, idx) {
 // ── Load Yearbook ─────────────────────────────────────────────────────────────
 // FIXED QUERY — uses graduation_year column, not created_at date range
 async function loadYearbook(dept, year) {
-    try {
-        let query = _db.from('students').select('*');
+    try {const sessionRaw = localStorage.getItem('znodeStudentProfile');
+let currentUsername = "";
+if (sessionRaw) {
+    try { currentUsername = JSON.parse(sessionRaw).username || ""; } catch(e){}
+}
 
-        if (dept) {
-            query = query.ilike('department', `%${dept}%`);
-        }
-        if (year) {
-            query = query.eq('graduation_year', parseInt(year));
-        }
+let query = _db.from('students').select('*');
+
+if (dept) {
+    query = query.ilike('department', `%${dept}%`);
+}
+if (year) {
+    query = query.eq('graduation_year', parseInt(year));
+}
+
+// Global Filter: Show only paid accounts (yearbook_access true) 
+// OR show the user's own profile even if it's unpaid/archived
+query = query.or(`yearbook_access.eq.true,username.eq.${currentUsername}`);
 
         const { data: students, error } = await query
             .order('is_dos', { ascending: false })
