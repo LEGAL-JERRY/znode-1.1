@@ -578,6 +578,7 @@ function toggleDOSVoucherPanel() {
 }
 
 // ── PATCH 5c: PAYSTACK PAYMENT ──
+// ── FIXED PAYSTACK PAYMENT INITIALIZATION ──
 function initiatePaystackPayment() {
     // Use stored email or prompt once
     const email = studentSessionData.email || prompt('Enter your email address for payment receipt:');
@@ -595,9 +596,12 @@ function initiatePaystackPayment() {
             passport_id: studentSessionData.passport_id,
             full_name:   studentSessionData.full_name
         },
-        callback: async function(response) {
+        callback: function(response) {
+            // ✅ CORRECT: Standard function passing control cleanly back to Paystack
             showToast('Payment confirmed. Updating your node...');
-            await markStudentAsVerified();
+            
+            // Trigger your database updates independently without breaking Paystack's runtime checks
+            markStudentAsVerified(); 
         },
         onClose: function() {
             showToast('Payment window closed.');
@@ -605,7 +609,6 @@ function initiatePaystackPayment() {
     });
     handler.openIframe();
 }
-
 // ── PATCH 5d: MARK VERIFIED IN DB + SESSION ──
 async function markStudentAsVerified() {
     try {
