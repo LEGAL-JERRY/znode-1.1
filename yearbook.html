@@ -632,26 +632,37 @@ function renderCard(student, idx) {
 
 // ── Load Yearbook ─────────────────────────────────────────────────────────────
 // FIXED QUERY — uses graduation_year column, not created_at date range
+// ── Load Yearbook ─────────────────────────────────────────────────────────────
 async function loadYearbook(dept, year) {
-    try {const sessionRaw = localStorage.getItem('znodeStudentProfile');
-let currentUsername = "";
-if (sessionRaw) {
-    try { currentUsername = JSON.parse(sessionRaw).username || ""; } catch(e){}
-}
+    try {
+        // 1. Safely parse the logged-in user session INSIDE the function
+        const sessionRaw = localStorage.getItem('znodeStudentProfile');
+        let currentUsername = "";
+        
+        if (sessionRaw) {
+            try { 
+                const parsed = JSON.parse(sessionRaw);
+                currentUsername = parsed.username || ""; 
+            } catch(e) {
+                console.error("Session parse error:", e);
+            }
+        }
 
-let query = _db.from('students').select('*');
+        // 2. Initialize the Supabase query
+        let query = _db.from('students').select('*');
 
-if (dept) {
-    query = query.ilike('department', `%${dept}%`);
-}
-if (year) {
-    query = query.eq('graduation_year', parseInt(year));
-}
+        if (dept) {
+            query = query.ilike('department', `%${dept}%`);
+        }
+        if (year) {
+            query = query.eq('graduation_year', parseInt(year));
+        }
 
-// Global Filter: Show only paid accounts (yearbook_access true) 
-// OR show the user's own profile even if it's unpaid/archived
-query = query.or(`yearbook_access.eq.true,username.eq.${currentUsername}`);
+        // 3. Apply the conditional OR filter
+        // Show if access is granted OR if the profile belongs to the current logged-in user
+        query = query.or(`yearbook_access.eq.true,username.eq.${currentUsername}`);
 
+        // 4. Order and execute
         const { data: students, error } = await query
             .order('is_dos', { ascending: false })
             .order('full_name', { ascending: true });
@@ -661,7 +672,7 @@ query = query.or(`yearbook_access.eq.true,username.eq.${currentUsername}`);
 
     } catch(e) {
         console.error("Yearbook query error:", e);
-        return [];
+        return []; // Valid return statement since it's within the catch block of a function
     }
 }
 
