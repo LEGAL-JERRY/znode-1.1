@@ -3,421 +3,699 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Z-Node // Core Dashboard</title>
+    <title>Z-Node</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- PATCH 1: Paystack inline SDK -->
     <script src="https://js.paystack.co/v1/inline.js"></script>
     <style>
         :root {
             --bg-base: #000000;
-            --bg-surface: #0a0a0a;
-            --border-light: #222222;
-            --border-strong: #333333;
-            --text-main: #ffffff;
-            --text-muted: #666666;
-            --accent: #ffffff;
-            --accent-text: #000000;
-            --radius-panel: 0px;
-            --radius-btn: 0px;
-            --radius-input: 0px;
+            --bg-surface: #0d0d0d;
+            --bg-lift: #161616;
+            --border-subtle: #1e1e1e;
+            --border-strong: #2e2e2e;
+            --border-accent: #404040;
+            --text-main: #f0f0f0;
+            --text-muted: #666;
+            --text-hint: #3a3a3a;
+            --accent: #f0f0f0;
+            --accent-inv: #000;
+            --green: #22c55e;
+            --red: #ef4444;
+            --gold: #c8823a;
             --ease: cubic-bezier(0.16, 1, 0.3, 1);
             --bottom-nav-h: 64px;
-            --mobile-top-h: 60px;
+            --top-h: 60px;
         }
 
         [data-theme="light"] {
-            --bg-base: #ffffff;
-            --bg-surface: #f4f4f4;
-            --border-light: #e5e5e5;
-            --border-strong: #cccccc;
-            --text-main: #000000;
-            --text-muted: #888888;
-            --accent: #000000;
-            --accent-text: #ffffff;
+            --bg-base: #fafafa;
+            --bg-surface: #f2f2f2;
+            --bg-lift: #ffffff;
+            --border-subtle: #e8e8e8;
+            --border-strong: #d0d0d0;
+            --border-accent: #b0b0b0;
+            --text-main: #0a0a0a;
+            --text-muted: #888;
+            --text-hint: #ccc;
+            --accent: #0a0a0a;
+            --accent-inv: #fff;
         }
 
-        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; font-family:'Inter', sans-serif; border-radius: 0 !important; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
+        *:not(input):not(textarea):not(select) { border-radius: 0 !important; }
 
         body {
-            width:100vw; height:100vh; overflow:hidden;
-            background-color:var(--bg-base); color:var(--text-main);
-            display:grid; grid-template-columns:280px 1fr;
-            transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
+            width: 100vw; height: 100vh; overflow: hidden;
+            background: var(--bg-base); color: var(--text-main);
+            display: grid; grid-template-columns: 260px 1fr;
+            transition: background 0.3s var(--ease), color 0.3s var(--ease);
         }
 
-        h1, h2, h3, .brand-logo-text { font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; }
-        .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 800; color: var(--text-muted); }
-
-        .stealth-grid { position:fixed; inset:0; background-image:linear-gradient(var(--border-strong) 1px,transparent 1px),linear-gradient(90deg,var(--border-strong) 1px,transparent 1px); background-size:60px 60px; mask-image:radial-gradient(circle at 50% 50%, black 20%, transparent 80%); -webkit-mask-image:radial-gradient(circle at 50% 50%, black 20%, transparent 80%); pointer-events:none; z-index:0; opacity: 0.15; }
+        /* Grid texture */
+        .grid-bg {
+            position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.06;
+            background-image: linear-gradient(var(--border-strong) 1px, transparent 1px),
+                              linear-gradient(90deg, var(--border-strong) 1px, transparent 1px);
+            background-size: 48px 48px;
+        }
 
         /* ── SIDEBAR ── */
-        .desktop-sidebar { background:var(--bg-base); border-right:1px solid var(--border-strong); padding:32px 24px; display:flex; flex-direction:column; z-index:10; overflow-y:auto; }
-        .brand-logo-cluster { display:flex; align-items:center; gap:12px; margin-bottom:48px; padding-left:12px; }
-        .brand-logo-text { font-size:22px; color:var(--text-main); }
-        .nav-menu { display:flex; flex-direction:column; gap:8px; flex-grow:1; }
-        .nav-item { display:flex; align-items:center; gap:16px; padding:16px 20px; color:var(--text-muted); font-weight:700; font-size:14px; cursor:pointer; transition:all 0.2s var(--ease); border:1px solid transparent; }
-        .nav-item svg { width:20px; height:20px; transition:stroke 0.2s var(--ease); flex-shrink:0; }
-        .nav-item:hover { color:var(--text-main); background:var(--bg-surface); border-color: var(--border-strong); }
-        .nav-item.active-nav { background:var(--text-main); color:var(--bg-base); border-color: var(--text-main); }
-
-        .sidebar-user-widget { display:flex; align-items:center; gap:14px; padding:16px; background:var(--bg-surface); border:1px solid var(--border-strong); margin-bottom: 12px; }
-        .sidebar-avatar { width:40px; height:40px; border:1px solid var(--border-strong); background:var(--bg-base); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; color:var(--text-main); flex-shrink:0; overflow:hidden; }
-        .sidebar-avatar img { width:100%; height:100%; object-fit:cover; filter: grayscale(100%); }
-        .user-widget-info h4 { font-size:14px; margin-bottom:4px; font-weight: 800; }
-
-        .sign-out-btn { width:100%; padding:14px; border:1px solid var(--border-strong); background:transparent; color:var(--text-muted); font-weight: 700; font-size:13px; cursor:pointer; transition:all 0.2s; }
-        .sign-out-btn:hover { border-color:var(--text-main); color: var(--text-main); background: var(--bg-surface); }
-
-        /* ── MAIN LAYOUT ── */
-        .desktop-main-content { position:relative; height:100vh; overflow-y:auto; z-index: 5; }
-
-        .view-container { display: none; width: 100%; padding: 64px 80px; }
-        .view-container.active-view { display: block; animation: viewIn 0.3s var(--ease) forwards; }
-
-        @keyframes viewIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
+        .sidebar {
+            background: var(--bg-base); border-right: 1px solid var(--border-subtle);
+            padding: 28px 20px; display: flex; flex-direction: column; z-index: 10; overflow-y: auto;
         }
 
-        .view-header { margin-bottom:32px; border-bottom: 1px solid var(--text-main); padding-bottom: 20px; }
-        .view-header h1 { font-size: 32px; }
+        .brand { font-size: 18px; font-weight: 900; letter-spacing: -0.04em; color: var(--text-main); margin-bottom: 40px; padding-left: 8px; }
+        .brand span { color: var(--text-muted); font-weight: 400; }
 
-        .content-card { background: var(--bg-surface); border: 1px solid var(--border-strong); padding: 32px; }
+        .nav-list { display: flex; flex-direction: column; gap: 2px; flex: 1; }
 
-        .greeting-title { font-size: 28px; font-weight: 900; text-transform: lowercase; letter-spacing: -0.04em; }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 14px; color: var(--text-muted); font-weight: 600; font-size: 13px;
+            cursor: pointer; transition: all 0.18s var(--ease); border: 1px solid transparent;
+            user-select: none;
+        }
+        .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; stroke: currentColor; }
+        .nav-item:hover { color: var(--text-main); background: var(--bg-surface); }
+        .nav-item.active { background: var(--text-main); color: var(--accent-inv); border-color: var(--text-main); }
 
-        .profile-hero-frame { display: grid; grid-template-columns: 340px 1fr; gap: 48px; align-items: start; }
-        .profile-main-image-card { background: var(--bg-surface); border: 1px solid var(--border-strong); padding: 16px; }
-        .profile-main-image-card img { width: 100%; height: 420px; object-fit: cover; filter: grayscale(100%); transition: filter 0.3s; }
-        .profile-main-image-card img:hover { filter: grayscale(0%); }
-         .profile-main-image-car.locked:hover { filter: grayscale(100%); opacity: 0.5; pointer-events: none; }
-        .profile-image-fallback { width: 100%; height: 420px; background: var(--border-light); display: flex; align-items: center; justify-content: center; font-size: 64px; }
+        .sidebar-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-subtle); }
 
-        .hierarchy-list { display: flex; flex-direction: column; gap: 20px; margin-top: 8px; }
-        .hierarchy-node { border-bottom: 1px solid var(--border-light); padding-bottom: 16px; }
-        .hierarchy-node:last-child { border-bottom: none; }
-        .hierarchy-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 800; color: var(--text-muted); margin-bottom: 6px; }
-        .hierarchy-value { font-size: 24px; font-weight: 700; color: var(--text-main); letter-spacing: -0.02em; }
-        .hierarchy-value.subtext { font-size: 18px; font-weight: 600; color: var(--text-muted); }
+        .user-chip {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px; background: var(--bg-surface); border: 1px solid var(--border-subtle); margin-bottom: 10px;
+        }
+        .u-avatar {
+            width: 36px; height: 36px; background: var(--bg-lift); border: 1px solid var(--border-strong);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 13px; flex-shrink: 0; overflow: hidden;
+        }
+        .u-avatar img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); }
+        .u-name { font-size: 13px; font-weight: 700; color: var(--text-main); }
+        .u-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
 
-        .custom-fields-wrapper { margin-top: 32px; padding-top: 24px; border-top: 1px dashed var(--border-strong); }
-        .field-injection-panel { display: flex; gap: 12px; margin-top: 16px; }
+        .sign-out {
+            width: 100%; padding: 10px; background: transparent; border: 1px solid var(--border-subtle);
+            color: var(--text-muted); font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.18s;
+            text-transform: uppercase; letter-spacing: 0.08em;
+        }
+        .sign-out:hover { color: var(--red); border-color: var(--red); }
 
-        input, select, textarea { width: 100%; background: var(--bg-surface); border: 1px solid var(--border-strong); color: var(--text-main); padding: 14px 20px; font-size: 14px; font-weight: 600; transition: border-color 0.2s var(--ease); }
-        select { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23666666%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 16px; padding-right: 40px; }
-        input:focus, select:focus { border-color: var(--text-main); outline: none; background: var(--bg-base); }
-        .form-group { margin-bottom: 20px; }
+        /* ── MAIN ── */
+        .main { position: relative; height: 100vh; overflow-y: auto; z-index: 5; scroll-behavior: smooth; }
 
-        .action-btn { padding: 14px 28px; border: 1px solid var(--text-main); background: var(--text-main); color: var(--bg-base); font-size: 13px; font-weight: 800; cursor: pointer; transition: all 0.2s var(--ease); white-space: nowrap; text-transform: uppercase; letter-spacing: 0.05em; }
-        .action-btn:hover { background: transparent; color: var(--text-main); }
-        .action-btn.secondary { background: transparent; color: var(--text-main); }
-        .action-btn.secondary:hover { background: var(--text-main); color: var(--bg-base); }
+        .view { display: none; padding: 52px 64px; max-width: 900px; animation: fadeUp 0.25s var(--ease); }
+        .view.active { display: block; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── PAGE HEADERS ── */
+        .page-top { margin-bottom: 36px; }
+        .page-greeting { font-size: 30px; font-weight: 900; letter-spacing: -0.04em; line-height: 1.1; }
+        .page-subtitle { font-size: 14px; color: var(--text-muted); margin-top: 6px; font-weight: 500; }
+
+        /* ── DIVIDER ── */
+        .divider { height: 1px; background: var(--border-subtle); margin: 32px 0; }
+        .divider-label { display: flex; align-items: center; gap: 14px; margin: 28px 0; }
+        .divider-label span { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-muted); white-space: nowrap; }
+        .divider-label::before, .divider-label::after { content: ''; flex: 1; height: 1px; background: var(--border-subtle); }
+
+        /* ── PROFILE LAYOUT ── */
+        .profile-grid { display: grid; grid-template-columns: 280px 1fr; gap: 40px; align-items: start; }
+
+        .photo-frame {
+            background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 12px;
+            position: relative;
+        }
+        .photo-frame img, .photo-placeholder {
+            width: 100%; aspect-ratio: 3/4; object-fit: cover;
+            filter: grayscale(100%); display: block;
+            transition: filter 0.3s;
+        }
+        .photo-frame:hover img { filter: grayscale(0%); }
+        .photo-placeholder { background: var(--bg-lift); display: flex; align-items: center; justify-content: center; font-size: 52px; }
+        .photo-caption { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 10px; text-align: center; }
+
+        /* ── FIELD ROWS ── */
+        .field-list { display: flex; flex-direction: column; gap: 0; }
+        .field-row { padding: 14px 0; border-bottom: 1px solid var(--border-subtle); }
+        .field-row:first-child { padding-top: 0; }
+        .field-row:last-child { border-bottom: none; }
+        .field-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 4px; }
+        .field-value { font-size: 18px; font-weight: 700; color: var(--text-main); letter-spacing: -0.02em; line-height: 1.2; word-break: break-word; }
+        .field-value.mono { font-family: 'Space Mono', monospace; font-size: 13px; letter-spacing: 0.04em; }
+        .field-value.muted { font-size: 15px; color: var(--text-muted); }
+        .field-value.empty { color: var(--text-hint); font-style: italic; font-size: 14px; font-weight: 500; }
+
+        /* Tag list for skills/hobbies */
+        .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+        .tag {
+            padding: 4px 10px; background: var(--bg-lift); border: 1px solid var(--border-strong);
+            font-size: 12px; font-weight: 600; color: var(--text-muted);
+        }
+        .tag.editable-tag { cursor: pointer; }
+        .tag.editable-tag:hover { border-color: var(--text-main); color: var(--text-main); }
+
+        /* Socials row */
+        .social-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+        .social-link {
+            display: flex; align-items: center; gap: 6px;
+            padding: 6px 12px; background: var(--bg-lift); border: 1px solid var(--border-strong);
+            font-size: 12px; font-weight: 700; color: var(--text-muted); text-decoration: none;
+            transition: all 0.15s;
+        }
+        .social-link:hover { color: var(--text-main); border-color: var(--text-main); }
+
+        /* Verified badge */
+        .verified-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 10px; background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            font-size: 11px; font-weight: 800; color: var(--green);
+            text-transform: uppercase; letter-spacing: 0.1em;
+        }
+        .verified-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; display: inline-block; }
+
+        /* Custom attributes (injected) */
+        .custom-attr {
+            padding: 14px 0 14px 14px;
+            border-bottom: 1px solid var(--border-subtle);
+            border-left: 2px solid var(--border-accent);
+            margin-bottom: 1px;
+        }
+        .custom-attr-header { display: flex; justify-content: space-between; align-items: center; }
+        .del-btn { font-size: 10px; font-weight: 800; color: var(--red); cursor: pointer; border: 1px solid currentColor; padding: 2px 6px; opacity: 0.7; }
+        .del-btn:hover { opacity: 1; }
+
+        /* Inject panel */
+        .inject-panel { background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 20px; margin-top: 28px; }
+        .inject-panel h4 { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-muted); margin-bottom: 14px; }
+        .inject-row { display: flex; gap: 10px; }
+
+        /* ── FORMS ── */
+        .form-group { margin-bottom: 18px; }
+        .form-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-muted); display: block; margin-bottom: 8px; }
+        input, select, textarea {
+            width: 100%; background: var(--bg-surface); border: 1px solid var(--border-strong);
+            color: var(--text-main); padding: 12px 16px; font-size: 14px; font-weight: 600;
+            font-family: 'Inter', sans-serif; transition: border-color 0.18s;
+            outline: none;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--text-main); background: var(--bg-lift); }
+        textarea { resize: vertical; min-height: 80px; }
+        input::placeholder, textarea::placeholder { color: var(--text-muted); font-weight: 400; }
+
+        select {
+            appearance: none; cursor: pointer;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px;
+        }
+
+        /* ── BUTTONS ── */
+        .btn {
+            padding: 12px 24px; border: 1px solid var(--text-main); background: var(--text-main);
+            color: var(--accent-inv); font-size: 12px; font-weight: 800; cursor: pointer;
+            transition: all 0.18s var(--ease); text-transform: uppercase; letter-spacing: 0.08em;
+            white-space: nowrap; font-family: 'Inter', sans-serif;
+        }
+        .btn:hover { background: transparent; color: var(--text-main); }
+        .btn.ghost { background: transparent; color: var(--text-main); }
+        .btn.ghost:hover { background: var(--text-main); color: var(--accent-inv); }
+        .btn.danger { border-color: var(--red); color: var(--red); background: transparent; }
+        .btn.danger:hover { background: var(--red); color: #fff; }
+        .btn.sm { padding: 8px 14px; font-size: 11px; }
+
+        /* ── STATUS PANEL ── */
+        .status-panel {
+            padding: 20px 24px; border: 1px solid var(--border-subtle);
+            background: var(--bg-surface); margin-bottom: 24px;
+        }
+        .status-panel.warning { border-color: rgba(239, 68, 68, 0.3); }
+        .status-panel.success { border-color: rgba(34, 197, 94, 0.3); }
+        .status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .status-dot.red { background: var(--red); }
+        .status-dot.green { background: var(--green); box-shadow: 0 0 0 3px rgba(34,197,94,0.15); }
+        .status-title { font-size: 14px; font-weight: 800; }
+        .status-body { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; }
+
+        /* ── YEARBOOK FORM ── */
+        .query-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 28px; max-width: 480px; }
+        .query-card h3 { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+        .query-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; }
+
+        /* DOS Voucher */
+        #dosVoucherPanel { transition: all 0.2s var(--ease); }
+        #voucherFeedback { font-size: 12px; font-weight: 700; min-height: 16px; margin-top: 8px; }
 
         /* ── SETTINGS ── */
-        .settings-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; }
+        .settings-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .settings-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 24px; }
+        .settings-card h3 { font-size: 14px; font-weight: 800; margin-bottom: 6px; }
+        .settings-card > p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
 
-        /* ── YEARBOOK QUERY FORM ── */
-        .yearbook-dept-input {
-            width: 100%; background: var(--bg-surface); border: 1px solid var(--border-strong);
-            color: var(--text-main); padding: 14px 20px; font-size: 14px; font-weight: 600;
+        .avatar-preview {
+            width: 72px; height: 72px; border: 1px solid var(--border-strong); overflow: hidden;
+            display: flex; align-items: center; justify-content: center; font-size: 24px;
+            background: var(--bg-lift); margin-bottom: 14px;
         }
-        .yearbook-dept-input::placeholder { color: var(--text-muted); opacity: 0.6; }
-        .yearbook-dept-input:focus { border-color: var(--text-main); outline: none; background: var(--bg-base); }
+        .avatar-preview img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); }
 
-        /* ── PATCH: Yearbook gate status dot ── */
-        .status-dot {
-            width: 8px; height: 8px; flex-shrink: 0;
-            display: inline-block;
+        /* ── TOAST ── */
+        .toast-root { position: fixed; bottom: 28px; right: 28px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast {
+            padding: 14px 20px; font-size: 13px; font-weight: 700;
+            background: var(--bg-surface); border: 1px solid var(--border-strong); color: var(--text-main);
+            animation: toastIn 0.25s var(--ease);
         }
-        .status-dot.red  { background: #ff4444; }
-        .status-dot.green { background: #00ff88; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
 
-        /* ── PATCH: DOS voucher panel transition ── */
-        #dosVoucherPanel { transition: all 0.2s var(--ease); }
+        /* ── MOBILE TOP BAR ── */
+        .mobile-top { display: none; }
+        .mobile-nav { display: none; }
 
-        /* ── PATCH: Avatar preview in settings ── */
-        .settings-avatar-preview {
-            width: 80px; height: 80px; border: 1px solid var(--border-strong);
-            overflow: hidden; margin-bottom: 16px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 28px; background: var(--border-light);
+        /* ── STATUS ROW (flex buttons) ── */
+        .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        /* ── SECTION HEADINGS ── */
+        .section-eyebrow {
+            font-size: 10px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.18em; color: var(--text-muted); margin-bottom: 16px;
         }
-        .settings-avatar-preview img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); }
 
-        /* Toast */
-        .toast-container { position:fixed; bottom:32px; right:32px; z-index:9999; display:flex; flex-direction:column; gap:12px; }
-        .toast { padding:16px 24px; font-size:13px; font-weight:700; background: var(--bg-surface); border: 1px solid var(--text-main); color: var(--text-main); animation:toastIn 0.3s var(--ease); box-shadow: 8px 8px 0px rgba(255,255,255,0.1); }
-        [data-theme="light"] .toast { box-shadow: 8px 8px 0px rgba(0,0,0,0.1); }
-        @keyframes toastIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+        /* inline two-col grid */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-        .mobile-top-bar { display:none; }
-        .mobile-bottom-nav { display:none; }
+        /* ── PROFILE EXTENDED fields (post-onboarding editable) ── */
+        .extended-section { margin-top: 32px; }
+        .extended-section .field-row { position: relative; }
+        .edit-inline-btn {
+            position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+            font-size: 10px; font-weight: 800; color: var(--text-muted); border: 1px solid var(--border-subtle);
+            background: transparent; padding: 3px 8px; cursor: pointer; opacity: 0;
+            transition: opacity 0.15s;
+        }
+        .field-row:hover .edit-inline-btn { opacity: 1; }
+        .edit-inline-btn:hover { color: var(--text-main); border-color: var(--text-main); }
+
+        /* Inline edit overlay */
+        .inline-edit-form { display: none; padding: 12px 0 4px; }
+        .inline-edit-form.open { display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+        .inline-edit-form input, .inline-edit-form textarea { font-size: 13px; }
 
         /* ── MOBILE ── */
         @media (max-width: 767px) {
-            body { display:flex; flex-direction:column; grid-template-columns:unset; }
-            .desktop-sidebar { display:none; }
+            body { display: flex; flex-direction: column; grid-template-columns: unset; overflow: hidden; }
+            .sidebar { display: none; }
 
-            .mobile-top-bar { position: fixed; top: 0; left: 0; right: 0; display:flex; align-items:center; justify-content:space-between; padding:0 20px; height:var(--mobile-top-h); background:var(--bg-base); border-bottom:1px solid var(--border-strong); z-index:50; }
+            .mobile-top {
+                display: flex; align-items: center; justify-content: space-between;
+                padding: 0 18px; height: var(--top-h); position: fixed; top: 0; left: 0; right: 0;
+                background: var(--bg-base); border-bottom: 1px solid var(--border-subtle); z-index: 50;
+            }
+            .mobile-brand { font-size: 16px; font-weight: 900; letter-spacing: -0.04em; }
+            .mob-avatar { width: 32px; height: 32px; background: var(--bg-lift); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; overflow: hidden; }
+            .mob-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-            .desktop-main-content { flex:1; overflow-y:auto; padding-top: var(--mobile-top-h); padding-bottom:calc(var(--bottom-nav-h) + env(safe-area-inset-bottom)); }
-            .view-container { padding: 24px 20px; }
-            .view-header { margin-bottom: 16px; padding-bottom: 12px; }
+            .main { flex: 1; overflow-y: auto; padding-top: var(--top-h); padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom)); }
+            .view { padding: 24px 18px; }
 
-            .view-header h1 { font-size: 24px; }
-            .greeting-title { font-size: 22px; }
+            .profile-grid { grid-template-columns: 1fr; gap: 24px; }
+            .photo-frame img, .photo-placeholder { aspect-ratio: 4/3; }
+            .page-greeting { font-size: 24px; }
+            .settings-cols { grid-template-columns: 1fr; }
+            .two-col { grid-template-columns: 1fr; }
+            .inject-row { flex-direction: column; }
+            .btn-row { flex-direction: column; }
 
-            .profile-hero-frame { grid-template-columns: 1fr; gap: 24px; }
-            .profile-main-image-card img, .profile-image-fallback { height: 260px; }
-            .hierarchy-list { gap: 16px; }
-            .hierarchy-value { font-size: 20px; }
-
-            .content-card { padding: 16px; }
-            .form-group { margin-bottom: 16px; }
-            .settings-grid { gap: 16px !important; grid-template-columns: 1fr !important; }
-
-            .mobile-bottom-nav { display:flex; align-items:center; justify-content:space-around; height:calc(var(--bottom-nav-h) + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); background:var(--bg-base); border-top:1px solid var(--border-strong); position:fixed; bottom:0; left:0; right:0; z-index:50; }
-            .mob-nav-btn { display:flex; flex-direction:column; align-items:center; justify-content: center; gap:6px; border:none; background:transparent; color:var(--text-muted); font-size:10px; font-weight:800; cursor:pointer; flex:1; height: 100%; border-top: 1.5px solid transparent; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em; }
-            .mob-nav-btn.active-nav { color:var(--text-main); border-top-color: var(--text-main); background: var(--bg-surface); }
-            .mob-nav-btn svg { width:20px; height:20px; }
-
-            .field-injection-panel { flex-direction: column; }
-
-            /* Mobile: yearbook gate button stack */
-            #yearbookPayGate .content-card > div[style*="flex"] { flex-direction: column; }
+            .mobile-nav {
+                display: flex; align-items: center; justify-content: space-around;
+                height: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom));
+                padding-bottom: env(safe-area-inset-bottom);
+                background: var(--bg-base); border-top: 1px solid var(--border-subtle);
+                position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+            }
+            .mob-btn {
+                display: flex; flex-direction: column; align-items: center; gap: 5px;
+                border: none; background: transparent; color: var(--text-muted);
+                font-size: 10px; font-weight: 800; cursor: pointer; flex: 1; height: 100%;
+                border-top: 2px solid transparent; transition: all 0.18s; text-transform: uppercase; letter-spacing: 0.04em;
+            }
+            .mob-btn.active { color: var(--text-main); border-top-color: var(--text-main); background: var(--bg-surface); }
+            .mob-btn svg { width: 18px; height: 18px; }
         }
     </style>
-    <script src="https://js.paystack.co/v1/inline.js"></script>
 </head>
 <body data-theme="dark">
 
-<div class="stealth-grid"></div>
-<div class="toast-container" id="toastContainer"></div>
+<div class="grid-bg"></div>
+<div class="toast-root" id="toastRoot"></div>
 
-<header class="mobile-top-bar">
-    <span class="brand-logo-text">Z-NODE</span>
-    <div class="sidebar-avatar" id="mobileAvatarNode">?</div>
+<!-- Mobile top bar -->
+<header class="mobile-top">
+    <span class="mobile-brand">Z-NODE</span>
+    <div class="mob-avatar" id="mobAvatar">?</div>
 </header>
 
-<!-- Mobile Bottom Nav — 3 tabs -->
-<nav class="mobile-bottom-nav">
-    <button class="mob-nav-btn active-nav" data-target="view-profile" onclick="switchView('view-profile')">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span>Profile</span>
+<!-- Mobile bottom nav -->
+<nav class="mobile-nav">
+    <button class="mob-btn active" data-view="view-profile" onclick="switchView('view-profile', this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
     </button>
-    <button class="mob-nav-btn" data-target="view-yearbook" onclick="switchView('view-yearbook')">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V3.5A2.5 2.5 0 0 1 6.5 1H20v21H6.5a2.5 2.5 0 0 1-2.5-2.5z"/></svg>
-        <span>Yearbook</span>
+    <button class="mob-btn" data-view="view-yearbook" onclick="switchView('view-yearbook', this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V3.5A2.5 2.5 0 0 1 6.5 1H20v21H6.5a2.5 2.5 0 0 1-2.5-2.5z"/></svg>
+        Yearbook
     </button>
-    <button class="mob-nav-btn" data-target="view-settings" onclick="switchView('view-settings')">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        <span>Settings</span>
+    <button class="mob-btn" data-view="view-settings" onclick="switchView('view-settings', this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
     </button>
 </nav>
 
-<!-- Desktop Sidebar — 3 items -->
-<aside class="desktop-sidebar">
-    <div class="brand-logo-cluster">
-        <span class="brand-logo-text">Z-NODE</span>
-    </div>
-
-    <nav class="nav-menu">
-        <div class="nav-item active-nav" data-target="view-profile" onclick="switchView('view-profile')">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            1. Profile
+<!-- Desktop Sidebar -->
+<aside class="sidebar">
+    <div class="brand">Z-NODE <span>// dashboard</span></div>
+    <nav class="nav-list">
+        <div class="nav-item active" data-view="view-profile" onclick="switchView('view-profile', this)">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            My Profile
         </div>
-        <div class="nav-item" data-target="view-yearbook" onclick="switchView('view-yearbook')">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V3.5A2.5 2.5 0 0 1 6.5 1H20v21H6.5a2.5 2.5 0 0 1-2.5-2.5z"/></svg>
-            2. Dept Yearbook
+        <div class="nav-item" data-view="view-yearbook" onclick="switchView('view-yearbook', this)">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V3.5A2.5 2.5 0 0 1 6.5 1H20v21H6.5a2.5 2.5 0 0 1-2.5-2.5z"/></svg>
+            Yearbook
         </div>
-        <div class="nav-item" data-target="view-settings" onclick="switchView('view-settings')">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            3. Settings
+        <div class="nav-item" data-view="view-settings" onclick="switchView('view-settings', this)">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Settings
         </div>
     </nav>
 
-    <div class="sidebar-user-widget">
-        <div class="sidebar-avatar" id="sidebarAvatar">?</div>
-        <div class="user-widget-info">
-            <h4 id="sidebarName">Initializing Node...</h4>
-            <div class="eyebrow">NODE STATUS</div>
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            <div class="u-avatar" id="sidebarAvatar">?</div>
+            <div>
+                <div class="u-name" id="sidebarName">Loading...</div>
+                <div class="u-sub" id="sidebarDept">—</div>
+            </div>
         </div>
+        <button class="sign-out" onclick="signOut()">Sign out</button>
     </div>
-    <button class="sign-out-btn" onclick="signOut()">Disconnect Session</button>
 </aside>
 
-<main class="desktop-main-content">
+<!-- MAIN CONTENT -->
+<main class="main">
 
-    <!-- ══ VIEW 1: PROFILE ══ -->
-    <section class="view-container active-view" id="view-profile">
-        <div class="view-header">
-            <h1 id="greetingText" class="greeting-title">hey [username]</h1>
+    <!-- ══ PROFILE ══ -->
+    <section class="view active" id="view-profile">
+        <div class="page-top">
+            <div class="page-greeting" id="greetingText">hey —</div>
+            <div class="page-subtitle">here's your Z-Node profile as it stands right now.</div>
         </div>
 
-        <div class="profile-hero-frame">
-            <div class="profile-main-image-card" id="profileImageWrap">
-                <div class="profile-image-fallback">👤</div>
+        <div class="profile-grid">
+            <!-- Photo -->
+            <div>
+                <div class="photo-frame" id="photoFrame">
+                    <div class="photo-placeholder">👤</div>
+                </div>
+                <div class="photo-caption" id="photoCaptionText">—</div>
+
+                <!-- Yearbook status under photo -->
+                <div style="margin-top: 12px;" id="photoVerifiedArea"></div>
             </div>
 
-            <div class="profile-details-card">
-                <div class="hierarchy-list" id="profileHierarchyTarget">
-                    <div class="hierarchy-node">
-                        <div class="hierarchy-label">1. Full Name</div>
-                        <div class="hierarchy-value" id="nodeFullName">—</div>
+            <!-- Core fields -->
+            <div>
+                <div class="field-list" id="coreFields">
+                    <div class="field-row">
+                        <div class="field-label">Full name</div>
+                        <div class="field-value" id="fFullName">—</div>
                     </div>
-                    <div class="hierarchy-node">
-                        <div class="hierarchy-label">2. Matric Number</div>
-                        <div class="hierarchy-value" id="nodeMatricNo">—</div>
+                    <div class="field-row">
+                        <div class="field-label">Matric number</div>
+                        <div class="field-value mono" id="fMatric">—</div>
                     </div>
-                    <div class="hierarchy-node">
-                        <div class="hierarchy-label">3. Z-Node Passport ID</div>
-                        <div class="hierarchy-value" id="nodePassportId" style="font-family:'Space Mono', monospace; font-size:16px;">—</div>
+                    <div class="field-row">
+                        <div class="field-label">Passport ID</div>
+                        <div class="field-value mono" id="fPassport">—</div>
                     </div>
-                    <div class="hierarchy-node">
-                        <div class="hierarchy-label">4. University</div>
-                        <div class="hierarchy-value" id="nodeUniversity">—</div>
+                    <div class="field-row">
+                        <div class="field-label">University</div>
+                        <div class="field-value" id="fUniversity">—</div>
                     </div>
-                    <div class="hierarchy-node">
-                        <div class="hierarchy-label">5. Academic Unit</div>
-                        <div class="hierarchy-value subtext" id="nodeDeptFaculty">—</div>
+                    <div class="field-row">
+                        <div class="field-label">Department / Faculty</div>
+                        <div class="field-value muted" id="fDeptFaculty">—</div>
                     </div>
-
-                    <div id="dynamicFieldsTarget"></div>
+                    <div class="field-row">
+                        <div class="field-label">Graduation year</div>
+                        <div class="field-value" id="fGradYear">—</div>
+                    </div>
                 </div>
 
-                <div class="custom-fields-wrapper">
-                    <h4 class="eyebrow" style="margin-bottom: 12px;">Extend Profile Architecture</h4>
-                    <div class="field-injection-panel">
-                        <input type="text" id="newFieldLabel" placeholder="e.g. GitHub, Portfolio">
-                        <input type="text" id="newFieldValue" placeholder="Value / Target link">
-                        <button class="action-btn" onclick="injectCustomProfileAttribute()">Add</button>
+                <!-- Extended profile fields — post-onboarding -->
+                <div class="extended-section">
+                    <div class="divider-label"><span>About you</span></div>
+
+                    <div class="field-list">
+                        <!-- Eternal statement -->
+                        <div class="field-row" style="position:relative;">
+                            <div class="field-label">Eternal statement</div>
+                            <div class="field-value" id="fEternal" style="font-style:italic; font-size:16px;">"—"</div>
+                            <button class="edit-inline-btn" onclick="openInlineEdit('eternal')">Edit</button>
+                            <div class="inline-edit-form" id="edit-eternal">
+                                <textarea id="inp-eternal" placeholder="Something you want people to remember you by..." rows="2" style="flex:1;"></textarea>
+                                <button class="btn sm" onclick="saveInlineField('eternal', 'eternal_statement')">Save</button>
+                            </div>
+                        </div>
+
+                        <!-- Skills -->
+                        <div class="field-row" style="position:relative;">
+                            <div class="field-label">Skills</div>
+                            <div id="fSkills"><span class="field-value empty">Not added yet — tap Edit to add yours.</span></div>
+                            <button class="edit-inline-btn" onclick="openInlineEdit('skills')">Edit</button>
+                            <div class="inline-edit-form" id="edit-skills">
+                                <input type="text" id="inp-skills" placeholder="e.g. Public Speaking, Excel, Critical Thinking" style="flex:1;">
+                                <button class="btn sm" onclick="saveInlineField('skills', 'skills_of_student')">Save</button>
+                            </div>
+                        </div>
+
+                        <!-- Hobbies -->
+                        <div class="field-row" style="position:relative;">
+                            <div class="field-label">Hobbies</div>
+                            <div id="fHobbies"><span class="field-value empty">What do you do when you're not studying?</span></div>
+                            <button class="edit-inline-btn" onclick="openInlineEdit('hobbies')">Edit</button>
+                            <div class="inline-edit-form" id="edit-hobbies">
+                                <input type="text" id="inp-hobbies" placeholder="e.g. Reading, Football, Music" style="flex:1;">
+                                <button class="btn sm" onclick="saveInlineField('hobbies', 'hobbies')">Save</button>
+                            </div>
+                        </div>
+
+                        <!-- Current project -->
+                        <div class="field-row" style="position:relative;">
+                            <div class="field-label">Current project</div>
+                            <div class="field-value" id="fCurrentProject"><span class="field-value empty">Anything you're working on — a business, research, a side hustle.</span></div>
+                            <button class="edit-inline-btn" onclick="openInlineEdit('project')">Edit</button>
+                            <div class="inline-edit-form" id="edit-project">
+                                <input type="text" id="inp-project" placeholder="e.g. Final year research on monetary policy in Nigeria" style="flex:1;">
+                                <button class="btn sm" onclick="saveInlineField('project', 'current_project')">Save</button>
+                            </div>
+                        </div>
+
+                        <!-- Socials -->
+                        <div class="field-row" style="position:relative;">
+                            <div class="field-label">Social links</div>
+                            <div id="fSocials"><span class="field-value empty">No links added yet.</span></div>
+                            <button class="edit-inline-btn" onclick="openInlineEdit('socials')">Edit</button>
+                            <div class="inline-edit-form" id="edit-socials" style="flex-direction:column; gap:8px;">
+                                <div class="two-col">
+                                    <input type="text" id="inp-ig" placeholder="Instagram handle">
+                                    <input type="text" id="inp-tw" placeholder="Twitter / X handle">
+                                    <input type="text" id="inp-li" placeholder="LinkedIn URL">
+                                    <input type="text" id="inp-gh" placeholder="GitHub username">
+                                </div>
+                                <button class="btn sm" onclick="saveSocials()" style="align-self:flex-start;">Save socials</button>
+                            </div>
+                        </div>
+
+                        <!-- Known for -->
+                        <div class="field-row" style="position:relative;">
+                            <div class="field-label">Known for</div>
+                            <div class="field-value" id="fKnownFor"><span class="field-value empty">What's the one thing people say about you?</span></div>
+                            <button class="edit-inline-btn" onclick="openInlineEdit('knownfor')">Edit</button>
+                            <div class="inline-edit-form" id="edit-knownfor">
+                                <input type="text" id="inp-knownfor" placeholder="e.g. Always showing up early and overprepared" style="flex:1;">
+                                <button class="btn sm" onclick="saveInlineField('knownfor', 'known_for')">Save</button>
+                            </div>
+                        </div>
+
+                        <!-- Aspirations -->
+                        <div class="field-row" style="position:relative;">
+                            <div class="field-label">Aspirations</div>
+                            <div class="field-value" id="fAspirations"><span class="field-value empty">Where are you headed?</span></div>
+                            <button class="edit-inline-btn" onclick="openInlineEdit('aspirations')">Edit</button>
+                            <div class="inline-edit-form" id="edit-aspirations">
+                                <textarea id="inp-aspirations" placeholder="e.g. To become a central bank economist by 30." rows="2" style="flex:1;"></textarea>
+                                <button class="btn sm" onclick="saveInlineField('aspirations', 'aspirations')">Save</button>
+                            </div>
+                        </div>
+
+                        <!-- Quote / Bio -->
+                        <div class="field-row" style="position:relative;">
+                            <div class="field-label">Yearbook quote</div>
+                            <div class="field-value" id="fQuote" style="font-style:italic;"><span class="field-value empty">The line they'll put under your name.</span></div>
+                            <button class="edit-inline-btn" onclick="openInlineEdit('quote')">Edit</button>
+                            <div class="inline-edit-form" id="edit-quote">
+                                <input type="text" id="inp-quote" placeholder="Something short and memorable." style="flex:1;">
+                                <button class="btn sm" onclick="saveInlineField('quote', 'quote')">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom attributes -->
+                <div class="extended-section">
+                    <div class="divider-label"><span>Extra fields</span></div>
+                    <div id="customAttrsTarget"></div>
+
+                    <div class="inject-panel">
+                        <h4>Add a custom field</h4>
+                        <div class="inject-row">
+                            <input type="text" id="newFieldLabel" placeholder="Label (e.g. Portfolio, GitHub)">
+                            <input type="text" id="newFieldValue" placeholder="Value or link">
+                            <button class="btn ghost sm" onclick="injectCustomAttr()">Add</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ══ VIEW 2: YEARBOOK ══ (PATCH 3: Payment gate added) -->
-    <section class="view-container" id="view-yearbook">
-        <div class="view-header">
-            <h1>Yearbook Directory.</h1>
+    <!-- ══ YEARBOOK ══ -->
+    <section class="view" id="view-yearbook">
+        <div class="page-top">
+            <div class="page-greeting">Yearbook.</div>
+            <div class="page-subtitle">Browse your department's graduating class or get your own entry published.</div>
         </div>
 
-        <!-- Gate: shown when NOT verified -->
-        <div id="yearbookPayGate" style="display:none; margin-bottom:32px;">
-            <div class="content-card">
-                <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
-                    <span class="status-dot red"></span>
-                    <h3>You are not in the Yearbook yet</h3>
+        <!-- Gate — not verified -->
+        <div id="yearbookPayGate" style="display:none;">
+            <div class="status-panel warning">
+                <div class="status-row">
+                    <div class="status-dot red"></div>
+                    <div class="status-title">Your profile isn't in the yearbook yet.</div>
                 </div>
-                <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px; line-height:1.6;">
-                    You can browse the directory and edit your profile freely. When you are ready to have your entry published, complete verification below.
-                </p>
-                <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                    <button class="action-btn" onclick="initiatePaystackPayment()">Pay via Paystack</button>
-                    <button class="action-btn secondary" onclick="toggleDOSVoucherPanel()">Pay via DOS Voucher</button>
+                <div class="status-body">
+                    You can browse the directory freely. When you're ready to go live — complete verification below.
                 </div>
-
-                <!-- DOS Voucher input — hidden until toggled -->
-                <div id="dosVoucherPanel" style="display:none; margin-top:24px; padding-top:24px; border-top:1px solid var(--border-strong);">
-                    <label class="eyebrow" style="display:block; margin-bottom:10px;">Enter DOS Voucher Code</label>
-                    <div style="display:flex; gap:12px;">
-                        <input type="text" id="voucherCodeInput" placeholder="e.g. DOS-XXXX-XXXX" style="flex:1; text-transform:uppercase;">
-                        <button class="action-btn" onclick="redeemVoucherCode()">Redeem</button>
+                <div class="btn-row">
+                    <button class="btn" onclick="initiatePaystackPayment()">Pay with Paystack</button>
+                    <button class="btn ghost" onclick="toggleDOSVoucherPanel()">Redeem DOS voucher</button>
+                </div>
+                <div id="dosVoucherPanel" style="display:none; margin-top:20px; padding-top:20px; border-top: 1px solid var(--border-subtle);">
+                    <label class="form-label">Voucher code</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="voucherCodeInput" placeholder="e.g. DOS-XXXX-XXXX" style="text-transform:uppercase; flex:1;">
+                        <button class="btn sm" onclick="redeemVoucherCode()">Redeem</button>
                     </div>
-                    <p id="voucherFeedback" style="font-size:12px; margin-top:10px; font-weight:700; min-height:16px;"></p>
+                    <p id="voucherFeedback"></p>
                 </div>
             </div>
         </div>
 
-        <!-- Badge: shown when verified -->
+        <!-- Badge — verified -->
         <div id="yearbookVerifiedBadge" style="display:none; margin-bottom:24px;">
-            <div class="content-card" style="display:flex; align-items:center; gap:12px;">
+            <div class="status-panel success" style="display:flex; align-items:center; gap:12px; padding: 14px 20px;">
                 <span class="status-dot green"></span>
-                <span style="font-weight:800; font-size:13px; text-transform:uppercase; letter-spacing:0.05em;">Yearbook Verified — Your entry is live in the directory.</span>
+                <span style="font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em;">You're in the yearbook — your entry is live.</span>
             </div>
         </div>
 
-        <!-- Query form — always visible -->
-        <div class="content-card" style="max-width: 500px;">
-            <h3 style="margin-bottom:8px;">Access Student Database</h3>
-            <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px;">Enter department name and graduating year to query the network.</p>
-
-            <form onsubmit="accessYearbook(event)" style="display:flex; flex-direction:column; gap:0;">
+        <!-- Query form -->
+        <div class="query-card">
+            <h3>Browse student directory</h3>
+            <p>Pick a department and year to pull up their class page.</p>
+            <form onsubmit="accessYearbook(event)">
                 <div class="form-group">
-                    <label class="eyebrow" style="display:block; margin-bottom:8px;">Academic Department</label>
-                    <input type="text" class="yearbook-dept-input" id="directoryDept" placeholder="e.g. Economics, Computer Science..." required>
+                    <label class="form-label">Department</label>
+                    <input type="text" id="directoryDept" placeholder="e.g. Economics, Computer Science..." required>
                 </div>
-
                 <div class="form-group">
-                    <label class="eyebrow" style="display:block; margin-bottom:8px;">Graduating Class (Year)</label>
-                    <input type="number" class="yearbook-dept-input" id="directoryYear" placeholder="e.g. 2025, 2026..." min="2020" max="2035" required>
+                    <label class="form-label">Graduating year</label>
+                    <input type="number" id="directoryYear" placeholder="e.g. 2025, 2026..." min="2020" max="2035" required>
                 </div>
-
-                <button type="submit" class="action-btn" style="margin-top: 8px;">Initialize Connection</button>
+                <button type="submit" class="btn" style="width:100%; margin-top:4px;">Open directory →</button>
             </form>
         </div>
     </section>
 
-    <!-- ══ VIEW 3: SETTINGS ══ -->
-    <section class="view-container" id="view-settings">
-        <div class="view-header">
-            <h1>System Settings.</h1>
+    <!-- ══ SETTINGS ══ -->
+    <section class="view" id="view-settings">
+        <div class="page-top">
+            <div class="page-greeting">Settings.</div>
+            <div class="page-subtitle">Update your core details, photo, and preferences.</div>
         </div>
-        <div class="settings-grid">
-            <div class="content-card">
-                <h3 style="margin-bottom:20px;">Identity Base Modifications</h3>
 
-                <div style="display:flex; flex-direction:column;">
+        <div class="settings-cols">
+            <!-- Identity card -->
+            <div class="settings-card" style="grid-column: 1 / -1;">
+                <h3>Core identity</h3>
+                <p>Changes here update your profile display. They don't affect your verification status.</p>
+                <div class="two-col">
                     <div class="form-group">
-                        <label class="eyebrow" style="display:block; margin-bottom:8px;">Full Name</label>
+                        <label class="form-label">Full name</label>
                         <input type="text" id="editFullName">
                     </div>
                     <div class="form-group">
-                        <label class="eyebrow" style="display:block; margin-bottom:8px;">Matric Number</label>
+                        <label class="form-label">Matric number</label>
                         <input type="text" id="editMatricNo">
                     </div>
                     <div class="form-group">
-                        <label class="eyebrow" style="display:block; margin-bottom:8px;">University Name</label>
+                        <label class="form-label">University</label>
                         <input type="text" id="editUniversity">
                     </div>
-                    <div class="form-group" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                        <div>
-                            <label class="eyebrow" style="display:block; margin-bottom:8px;">Department</label>
-                            <input type="text" id="editDept">
-                        </div>
-                        <div>
-                            <label class="eyebrow" style="display:block; margin-bottom:8px;">Faculty</label>
-                            <input type="text" id="editFaculty">
-                        </div>
+                    <div class="form-group">
+                        <label class="form-label">Department</label>
+                        <input type="text" id="editDept">
                     </div>
-                    <button class="action-btn" onclick="commitProfileEdits()" style="margin-top:4px;">Sync State</button>
+                    <div class="form-group">
+                        <label class="form-label">Faculty</label>
+                        <input type="text" id="editFaculty">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Graduation year</label>
+                        <input type="number" id="editGradYear" min="2020" max="2035">
+                    </div>
                 </div>
+                <button class="btn" onclick="commitProfileEdits()">Save changes</button>
             </div>
 
-            <div style="display:flex; flex-direction:column; gap:16px;">
+            <!-- Avatar -->
+            <div class="settings-card">
+                <h3>Profile photo</h3>
+                <p>Upload a new photo. It shows up on your yearbook card and everywhere on Z-Node.</p>
+                <div class="avatar-preview" id="settingsAvatar">👤</div>
+                <div class="form-group">
+                    <input type="file" id="avatarFileInput" accept="image/*" style="font-size:12px; padding:8px 12px;">
+                </div>
+                <button class="btn" onclick="uploadNewAvatar()">Upload photo</button>
+                <p id="avatarUploadStatus" style="font-size:12px; font-weight:700; margin-top:10px; min-height:16px;"></p>
+            </div>
 
-                <!-- PATCH 4: Avatar upload card -->
-                <div class="content-card">
-                    <h3 style="margin-bottom:12px;">Update Identity Image</h3>
-                    <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Upload a new profile photo. Updates across your entire node.</p>
-                    <div class="settings-avatar-preview" id="settingsAvatarPreview">👤</div>
-                    <input type="file" id="avatarFileInput" accept="image/*" style="margin-bottom:16px; font-size:12px; padding:10px 14px;">
-                    <button class="action-btn" onclick="uploadNewAvatar()">Upload Image</button>
-                    <p id="avatarUploadStatus" style="font-size:12px; margin-top:10px; font-weight:700; min-height:16px;"></p>
-                </div>
+            <!-- Theme -->
+            <div class="settings-card">
+                <h3>Appearance</h3>
+                <p>Switch between dark and light mode.</p>
+                <button class="btn ghost" onclick="toggleTheme()">Toggle dark / light</button>
+            </div>
 
-                <div class="content-card">
-                    <h3 style="margin-bottom:12px;">Visual Interface Config</h3>
-                    <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Toggle system lighting state environments instantly.</p>
-                    <button class="action-btn secondary" onclick="toggleThemeSystem()">Invert Paradigm</button>
-                </div>
-                <div class="content-card">
-                    <h3 style="margin-bottom:12px;">Data Diagnostics</h3>
-                    <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Clear runtime buffers and system caches to reset state vectors.</p>
-                    <button class="action-btn secondary" style="border-color:#ff4444; color:#ff4444;" onclick="resetTestingEnvironment()">Flush Memory</button>
-                </div>
+            <!-- Danger zone -->
+            <div class="settings-card">
+                <h3>Danger zone</h3>
+                <p>Clear all local session data and start fresh. This won't delete your account.</p>
+                <button class="btn danger" onclick="resetSession()">Clear session data</button>
             </div>
         </div>
     </section>
@@ -430,370 +708,418 @@ const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const { createClient } = supabase;
 const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// PATCH 5a: Paystack config — change YEARBOOK_PRICE_KOBO to set your price (kobo = NGN × 100)
-const PAYSTACK_PUBLIC_KEY  = 'pk_test_dccd17d3dc8769dbe258fe66f7c1cec8658d96d9';
-const YEARBOOK_PRICE_KOBO  = 500000; // ← ₦5,000. Change as needed.
+const PAYSTACK_KEY   = 'pk_test_dccd17d3dc8769dbe258fe66f7c1cec8658d96d9';
+const PRICE_KOBO     = 500000;
 
-// PATCH 2: Added yearbook_verified and email to session object
-let studentSessionData = {
-    student_id: "",
-    username: "",
-    full_name: "",
-    matric_no: "",
-    passport_id: "",
-    university: "",
-    department: "",
-    faculty: "",
-    avatar_url: "",
-    email: "",
-    yearbook_verified: false,
+let S = {
+    id: '', username: '', full_name: '', matric_no: '', passport_id: '',
+    university: '', department: '', faculty: '', graduation_year: '',
+    avatar_url: '', email: '', yearbook_verified: false,
+    eternal_statement: '', skills_of_student: '', hobbies: '',
+    current_project: '', known_for: '', aspirations: '', quote: '',
+    socials: null,
     custom_attributes: []
 };
 
-// ── NAVIGATION ──
-function switchView(targetId) {
-    document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
-    const el = document.getElementById(targetId);
-    if (el) { el.classList.add('active-view'); document.querySelector('.desktop-main-content').scrollTop = 0; }
-    document.querySelectorAll('.nav-item, .mob-nav-btn').forEach(node => {
-        node.classList.toggle('active-nav', node.getAttribute('data-target') === targetId);
+// ── NAV ──
+function switchView(id, el) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(id)?.classList.add('active');
+    document.querySelector('.main').scrollTop = 0;
+    document.querySelectorAll('.nav-item, .mob-btn').forEach(n => {
+        n.classList.toggle('active', n.dataset.view === id);
     });
 }
 
 // ── RENDER ──
-function syncViewRenderState() {
-    document.getElementById('greetingText').textContent = `hey ${studentSessionData.username}`;
+function render() {
+    // greeting
+    const hour = new Date().getHours();
+    const greet = hour < 12 ? 'good morning' : hour < 17 ? 'good afternoon' : 'good evening';
+    document.getElementById('greetingText').textContent = `${greet}, ${S.username || 'there'}.`;
 
-    const avatarContainer = document.getElementById('profileImageWrap');
-    if (studentSessionData.avatar_url) {
-        avatarContainer.innerHTML = `<img src="${studentSessionData.avatar_url}" alt="${studentSessionData.full_name}">`;
-        document.getElementById('sidebarAvatar').innerHTML = `<img src="${studentSessionData.avatar_url}" alt="avatar">`;
-        document.getElementById('mobileAvatarNode').innerHTML = `<img src="${studentSessionData.avatar_url}" alt="avatar" style="width:100%;height:100%;object-fit:cover;">`;
-        // PATCH: update settings avatar preview
-        document.getElementById('settingsAvatarPreview').innerHTML = `<img src="${studentSessionData.avatar_url}" alt="avatar">`;
+    // photo
+    const frame = document.getElementById('photoFrame');
+    if (S.avatar_url) {
+        frame.innerHTML = `<img src="${S.avatar_url}" alt="${S.full_name}">`;
     } else {
-        avatarContainer.innerHTML = `<div class="profile-image-fallback">👤</div>`;
-        const initial = (studentSessionData.username || '?').charAt(0).toUpperCase();
-        document.getElementById('sidebarAvatar').textContent = initial;
-        document.getElementById('mobileAvatarNode').textContent = initial;
-        document.getElementById('settingsAvatarPreview').textContent = '👤';
+        frame.innerHTML = `<div class="photo-placeholder">👤</div>`;
     }
+    document.getElementById('photoCaptionText').textContent = S.full_name ? S.full_name.toUpperCase() : '—';
 
-    document.getElementById('nodeFullName').textContent   = studentSessionData.full_name  || '—';
-    document.getElementById('nodeMatricNo').textContent   = studentSessionData.matric_no  || '—';
-    document.getElementById('nodePassportId').textContent = studentSessionData.passport_id || '—';
-    document.getElementById('nodeUniversity').textContent = studentSessionData.university  || '—';
-    document.getElementById('nodeDeptFaculty').textContent = `${studentSessionData.department || '—'} // ${studentSessionData.faculty || '—'}`;
-
-    document.getElementById('sidebarName').textContent = studentSessionData.full_name || studentSessionData.username;
-
-    // Custom attributes
-    const injectionTarget = document.getElementById('dynamicFieldsTarget');
-    injectionTarget.innerHTML = '';
-    (studentSessionData.custom_attributes || []).forEach((attr, idx) => {
-        const block = document.createElement('div');
-        block.className = 'hierarchy-node';
-        block.style.borderLeft = '1.5px solid var(--text-main)';
-        block.style.paddingLeft = '14px';
-        block.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div class="hierarchy-label">${attr.label}</div>
-                <span style="font-size:10px; color:#ff4444; cursor:pointer; font-weight:800; border: 1px solid #ff4444; padding: 2px 6px;" onclick="removeAttributeNode(${idx})">DEL</span>
-            </div>
-            <div class="hierarchy-value" style="font-size:20px;">${attr.value}</div>
-        `;
-        injectionTarget.appendChild(block);
+    // sidebar
+    const initials = (S.full_name || S.username || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    ['sidebarAvatar', 'mobAvatar'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = S.avatar_url ? `<img src="${S.avatar_url}" alt="avatar">` : initials;
     });
+    document.getElementById('sidebarName').textContent = S.full_name || S.username || '—';
+    document.getElementById('sidebarDept').textContent = S.department || '—';
 
-    // Settings fields
-    document.getElementById('editFullName').value  = studentSessionData.full_name;
-    document.getElementById('editMatricNo').value  = studentSessionData.matric_no;
-    document.getElementById('editUniversity').value = studentSessionData.university;
-    document.getElementById('editDept').value      = studentSessionData.department;
-    document.getElementById('editFaculty').value   = studentSessionData.faculty;
+    // settings avatar
+    const sa = document.getElementById('settingsAvatar');
+    sa.innerHTML = S.avatar_url ? `<img src="${S.avatar_url}" alt="avatar">` : '👤';
 
-    // PATCH: update yearbook gate UI
-    updateYearbookGateUI();
-}
+    // core fields
+    document.getElementById('fFullName').textContent    = S.full_name     || '—';
+    document.getElementById('fMatric').textContent      = S.matric_no     || '—';
+    document.getElementById('fPassport').textContent    = S.passport_id   || '—';
+    document.getElementById('fUniversity').textContent  = S.university     || '—';
+    document.getElementById('fDeptFaculty').textContent = [S.department, S.faculty].filter(Boolean).join(' / ') || '—';
+    document.getElementById('fGradYear').textContent    = S.graduation_year || '—';
 
-function injectCustomProfileAttribute() {
-    const labelInput = document.getElementById('newFieldLabel');
-    const valueInput = document.getElementById('newFieldValue');
-    if (!labelInput.value.trim() || !valueInput.value.trim()) {
-        showToast('Both label and value are required.'); return;
+    // extended fields
+    const et = document.getElementById('fEternal');
+    et.innerHTML = S.eternal_statement
+        ? `"${S.eternal_statement}"`
+        : `<span class="field-value empty">Nothing yet — what do you want to be remembered for?</span>`;
+
+    renderTags('fSkills', S.skills_of_student, 'Not added yet — tap Edit to add yours.');
+    renderTags('fHobbies', S.hobbies, 'What do you do when you\'re not studying?');
+
+    const cp = document.getElementById('fCurrentProject');
+    cp.innerHTML = S.current_project || `<span class="field-value empty">Anything you're working on — a business, research, a side hustle.</span>`;
+
+    const kf = document.getElementById('fKnownFor');
+    kf.innerHTML = S.known_for || `<span class="field-value empty">What's the one thing people say about you?</span>`;
+
+    const asp = document.getElementById('fAspirations');
+    asp.innerHTML = S.aspirations || `<span class="field-value empty">Where are you headed after graduation?</span>`;
+
+    const qt = document.getElementById('fQuote');
+    qt.innerHTML = S.quote
+        ? `"${S.quote}"`
+        : `<span class="field-value empty">The line they'll put under your name.</span>`;
+
+    // socials
+    renderSocials();
+
+    // verified badge under photo
+    const pva = document.getElementById('photoVerifiedArea');
+    pva.innerHTML = S.yearbook_verified
+        ? `<div class="verified-badge"><span class="verified-dot"></span> Yearbook verified</div>`
+        : '';
+
+    // yearbook gate
+    const gate  = document.getElementById('yearbookPayGate');
+    const badge = document.getElementById('yearbookVerifiedBadge');
+    if (gate && badge) {
+        gate.style.display  = S.yearbook_verified ? 'none' : 'block';
+        badge.style.display = S.yearbook_verified ? 'block' : 'none';
     }
-    if (!studentSessionData.custom_attributes) studentSessionData.custom_attributes = [];
-    studentSessionData.custom_attributes.push({ label: labelInput.value.trim(), value: valueInput.value.trim() });
-    saveLocalState(); syncViewRenderState();
-    labelInput.value = ''; valueInput.value = '';
-    showToast('Custom attribute added.');
+
+    // settings fields
+    document.getElementById('editFullName').value    = S.full_name || '';
+    document.getElementById('editMatricNo').value    = S.matric_no || '';
+    document.getElementById('editUniversity').value  = S.university || '';
+    document.getElementById('editDept').value        = S.department || '';
+    document.getElementById('editFaculty').value     = S.faculty || '';
+    document.getElementById('editGradYear').value    = S.graduation_year || '';
+
+    // custom attrs
+    renderCustomAttrs();
 }
 
-function removeAttributeNode(index) {
-    studentSessionData.custom_attributes.splice(index, 1);
-    saveLocalState(); syncViewRenderState();
-    showToast('Attribute removed.');
+function renderTags(elId, raw, emptyMsg) {
+    const el = document.getElementById(elId);
+    if (!raw || !raw.trim()) {
+        el.innerHTML = `<span class="field-value empty">${emptyMsg}</span>`;
+        return;
+    }
+    const tags = raw.split(',').map(t => t.trim()).filter(Boolean);
+    el.innerHTML = `<div class="tag-list">${tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>`;
 }
 
+function renderSocials() {
+    const el = document.getElementById('fSocials');
+    let parsed = null;
+    try { parsed = typeof S.socials === 'string' ? JSON.parse(S.socials) : S.socials; } catch(e) {}
+
+    if (!parsed || !Object.keys(parsed).some(k => parsed[k])) {
+        el.innerHTML = `<span class="field-value empty">No links added yet.</span>`;
+        return;
+    }
+
+    const icons = { instagram: '📸', twitter: '🐦', linkedin: '💼', github: '💻' };
+    const links = Object.entries(parsed)
+        .filter(([, v]) => v)
+        .map(([k, v]) => {
+            const urls = {
+                instagram: `https://instagram.com/${v.replace('@','')}`,
+                twitter:   `https://x.com/${v.replace('@','')}`,
+                linkedin:  v.startsWith('http') ? v : `https://linkedin.com/in/${v}`,
+                github:    `https://github.com/${v}`
+            };
+            return `<a class="social-link" href="${urls[k] || '#'}" target="_blank">${icons[k] || '🔗'} ${v}</a>`;
+        }).join('');
+
+    el.innerHTML = `<div class="social-links">${links}</div>`;
+
+    // Populate edit inputs
+    if (parsed.instagram) document.getElementById('inp-ig').value = parsed.instagram;
+    if (parsed.twitter)   document.getElementById('inp-tw').value = parsed.twitter;
+    if (parsed.linkedin)  document.getElementById('inp-li').value = parsed.linkedin;
+    if (parsed.github)    document.getElementById('inp-gh').value = parsed.github;
+}
+
+function renderCustomAttrs() {
+    const target = document.getElementById('customAttrsTarget');
+    target.innerHTML = '';
+    (S.custom_attributes || []).forEach((attr, i) => {
+        const d = document.createElement('div');
+        d.className = 'custom-attr field-row';
+        d.innerHTML = `
+            <div class="custom-attr-header">
+                <div class="field-label">${attr.label}</div>
+                <button class="del-btn" onclick="removeCustomAttr(${i})">Remove</button>
+            </div>
+            <div class="field-value" style="font-size:16px;">${attr.value}</div>
+        `;
+        target.appendChild(d);
+    });
+}
+
+// ── INLINE EDIT ──
+function openInlineEdit(key) {
+    const form = document.getElementById(`edit-${key}`);
+    const isOpen = form.classList.contains('open');
+    // Close all others
+    document.querySelectorAll('.inline-edit-form.open').forEach(f => f.classList.remove('open'));
+    if (!isOpen) {
+        form.classList.add('open');
+        // Pre-fill
+        const map = {
+            eternal: ['inp-eternal', S.eternal_statement],
+            skills:  ['inp-skills',  S.skills_of_student],
+            hobbies: ['inp-hobbies', S.hobbies],
+            project: ['inp-project', S.current_project],
+            knownfor:['inp-knownfor',S.known_for],
+            aspirations: ['inp-aspirations', S.aspirations],
+            quote:   ['inp-quote',   S.quote],
+        };
+        if (map[key]) {
+            const inp = document.getElementById(map[key][0]);
+            if (inp) inp.value = map[key][1] || '';
+        }
+    }
+}
+
+async function saveInlineField(key, dbCol) {
+    const map = {
+        eternal: 'inp-eternal', skills: 'inp-skills', hobbies: 'inp-hobbies',
+        project: 'inp-project', knownfor: 'inp-knownfor', aspirations: 'inp-aspirations', quote: 'inp-quote'
+    };
+    const inp = document.getElementById(map[key]);
+    if (!inp) return;
+    const val = inp.value.trim();
+
+    // map key to S property
+    const sProp = {
+        eternal: 'eternal_statement', skills: 'skills_of_student', hobbies: 'hobbies',
+        project: 'current_project', knownfor: 'known_for', aspirations: 'aspirations', quote: 'quote'
+    };
+
+    try {
+        const { error } = await _db.from('students').update({ [dbCol]: val }).eq('znode_passport_id', S.passport_id);
+        if (error) throw error;
+        S[sProp[key]] = val;
+        saveLocal();
+        document.getElementById(`edit-${key}`)?.classList.remove('open');
+        render();
+        showToast(`${key.charAt(0).toUpperCase() + key.slice(1)} saved.`);
+    } catch(e) {
+        console.error(e);
+        showToast('Save failed — check your connection.');
+    }
+}
+
+async function saveSocials() {
+    const obj = {
+        instagram: document.getElementById('inp-ig').value.trim(),
+        twitter:   document.getElementById('inp-tw').value.trim(),
+        linkedin:  document.getElementById('inp-li').value.trim(),
+        github:    document.getElementById('inp-gh').value.trim(),
+    };
+    try {
+        const { error } = await _db.from('students').update({ socials: JSON.stringify(obj) }).eq('znode_passport_id', S.passport_id);
+        if (error) throw error;
+        S.socials = obj;
+        saveLocal();
+        document.getElementById('edit-socials')?.classList.remove('open');
+        render();
+        showToast('Social links saved.');
+    } catch(e) {
+        console.error(e);
+        showToast('Save failed.');
+    }
+}
+
+// ── CUSTOM ATTRS ──
+function injectCustomAttr() {
+    const lbl = document.getElementById('newFieldLabel').value.trim();
+    const val = document.getElementById('newFieldValue').value.trim();
+    if (!lbl || !val) { showToast('Both fields are required.'); return; }
+    S.custom_attributes = S.custom_attributes || [];
+    S.custom_attributes.push({ label: lbl, value: val });
+    saveLocal(); render();
+    document.getElementById('newFieldLabel').value = '';
+    document.getElementById('newFieldValue').value = '';
+    showToast('Field added.');
+}
+
+function removeCustomAttr(i) {
+    S.custom_attributes.splice(i, 1);
+    saveLocal(); render();
+    showToast('Field removed.');
+}
+
+// ── SETTINGS ──
 function commitProfileEdits() {
-    studentSessionData.full_name  = document.getElementById('editFullName').value;
-    studentSessionData.matric_no  = document.getElementById('editMatricNo').value;
-    studentSessionData.university = document.getElementById('editUniversity').value;
-    studentSessionData.department = document.getElementById('editDept').value;
-    studentSessionData.faculty    = document.getElementById('editFaculty').value;
-    saveLocalState(); syncViewRenderState();
-    showToast('Profile synced.');
+    S.full_name      = document.getElementById('editFullName').value;
+    S.matric_no      = document.getElementById('editMatricNo').value;
+    S.university     = document.getElementById('editUniversity').value;
+    S.department     = document.getElementById('editDept').value;
+    S.faculty        = document.getElementById('editFaculty').value;
+    S.graduation_year = document.getElementById('editGradYear').value;
+    saveLocal(); render();
+    showToast('Profile updated.');
 }
 
 // ── YEARBOOK ──
-function accessYearbook(event) {
-    event.preventDefault();
+function accessYearbook(e) {
+    e.preventDefault();
     const dept = document.getElementById('directoryDept').value.trim();
     const year = document.getElementById('directoryYear').value.trim();
     if (dept && year) {
-        showToast(`Querying ${dept} — Class of ${year}...`);
-        setTimeout(() => {
-            window.location.href = `yearbook.html?dept=${encodeURIComponent(dept)}&year=${encodeURIComponent(year)}`;
-        }, 600);
-    }
-}
-
-// ── PATCH 5b: YEARBOOK GATE UI ──
-function updateYearbookGateUI() {
-    const gate   = document.getElementById('yearbookPayGate');
-    const badge  = document.getElementById('yearbookVerifiedBadge');
-    if (!gate || !badge) return;
-    if (studentSessionData.yearbook_verified) {
-        gate.style.display  = 'none';
-        badge.style.display = 'block';
-    } else {
-        gate.style.display  = 'block';
-        badge.style.display = 'none';
+        showToast(`Opening ${dept} — ${year}...`);
+        setTimeout(() => { window.location.href = `yearbook.html?dept=${encodeURIComponent(dept)}&year=${encodeURIComponent(year)}`; }, 500);
     }
 }
 
 function toggleDOSVoucherPanel() {
-    const panel = document.getElementById('dosVoucherPanel');
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    const p = document.getElementById('dosVoucherPanel');
+    p.style.display = p.style.display === 'none' ? 'block' : 'none';
 }
 
-// ── PATCH 5c: PAYSTACK PAYMENT ──
-// ── FIXED PAYSTACK PAYMENT INITIALIZATION ──
+// ── PAYSTACK ──
 function initiatePaystackPayment() {
-    // Use stored email or prompt once
-    const email = studentSessionData.email || prompt('Enter your email address for payment receipt:');
-    if (!email || !email.includes('@')) {
-        showToast('A valid email address is required.'); return;
-    }
-
+    const email = S.email || prompt('Enter your email for the payment receipt:');
+    if (!email || !email.includes('@')) { showToast('Valid email required.'); return; }
     const handler = PaystackPop.setup({
-        key:      PAYSTACK_PUBLIC_KEY,
-        email:    email,
-        amount:   YEARBOOK_PRICE_KOBO,
-        currency: 'NGN',
-        ref:      `ZN-${studentSessionData.passport_id}-${Date.now()}`,
-        metadata: {
-            passport_id: studentSessionData.passport_id,
-            full_name:   studentSessionData.full_name
-        },
-        callback: function(response) {
-            // ✅ CORRECT: Standard function passing control cleanly back to Paystack
-            showToast('Payment confirmed. Updating your node...');
-            
-            // Trigger your database updates independently without breaking Paystack's runtime checks
-            markStudentAsVerified(); 
-        },
-        onClose: function() {
-            showToast('Payment window closed.');
-        }
+        key: PAYSTACK_KEY, email, amount: PRICE_KOBO, currency: 'NGN',
+        ref: `ZN-${S.passport_id}-${Date.now()}`,
+        metadata: { passport_id: S.passport_id, full_name: S.full_name },
+        callback: () => { showToast('Payment confirmed. Publishing your profile...'); markVerified(); },
+        onClose: () => showToast('Payment window closed.')
     });
     handler.openIframe();
 }
-// ── PATCH 5d: MARK VERIFIED IN DB + SESSION ──
-async function markStudentAsVerified() {
-    try {
-        const { error } = await _db
-            .from('students')
-            .update({ yearbook_verified: true, yearbook_access: true, yearbook_activated_at: new Date().toISOString() })
-            .eq('znode_passport_id', studentSessionData.passport_id);
 
+async function markVerified() {
+    try {
+        const { error } = await _db.from('students').update({
+            yearbook_verified: true, yearbook_access: true, yearbook_activated_at: new Date().toISOString()
+        }).eq('znode_passport_id', S.passport_id);
         if (error) throw error;
-
-        studentSessionData.yearbook_verified = true;
-        saveLocalState();
-        updateYearbookGateUI();
-        showToast('Yearbook verification complete. Your entry is now live.');
-    } catch (err) {
-        console.error('Verification write failed:', err);
-        showToast('Verification error — contact support with your payment reference.');
-    }
-}
-
-// ── PATCH 5e: DOS VOUCHER REDEMPTION ──
-async function redeemVoucherCode() {
-    const code     = document.getElementById('voucherCodeInput').value.trim().toUpperCase();
-    const feedback = document.getElementById('voucherFeedback');
-
-    if (!code) { feedback.style.color = '#ff4444'; feedback.textContent = 'Please enter a voucher code.'; return; }
-
-    feedback.style.color = 'var(--text-muted)';
-    feedback.textContent = 'Verifying code...';
-
-    try {
-       const { data, error } = await _db
-            .from('znode_vouchers')
-            .select('*')
-            .eq('code', code)
-            .eq('is_used', false)
-            .single();
-
-        if (error || !data) {
-            feedback.style.color = '#ff4444';
-            feedback.textContent = 'Invalid or already used voucher code.';
-            return;
-        }
-
-        // Mark voucher consumed
-        await _db
-            .from('znode_vouchers')
-            .update({
-                is_used:  true,
-                status:   'used',
-                used_by:  studentSessionData.student_id,
-                used_at:  new Date().toISOString()
-            })
-            .eq('id', data.id);
-
-        feedback.textContent = '';
-        document.getElementById('voucherCodeInput').value = '';
-        await markStudentAsVerified();
-
-    } catch (err) {
-        console.error('Voucher error:', err);
-        feedback.style.color = '#ff4444';
-        feedback.textContent = 'Error redeeming voucher. Please try again.';
-    }
-}
-
-// ── PATCH 5f: AVATAR UPLOAD ──
-async function uploadNewAvatar() {
-    const fileInput = document.getElementById('avatarFileInput');
-    const status    = document.getElementById('avatarUploadStatus');
-
-    if (!fileInput.files || fileInput.files.length === 0) {
-        status.style.color = '#ff4444';
-        status.textContent = 'Please select an image file first.';
-        return;
-    }
-
-    const file = fileInput.files[0];
-    const ext  = file.name.split('.').pop().toLowerCase();
-    const path = `${studentSessionData.passport_id}/avatar.${ext}`;
-
-    status.style.color = 'var(--text-muted)';
-    status.textContent = 'Uploading...';
-
-    try {
-        const { error: uploadError } = await _db.storage
-            .from('student-avatars')
-            .upload(path, file, { upsert: true });
-
-        if (uploadError) throw uploadError;
-
-        const { data: urlData } = _db.storage
-            .from('student-avatars')
-            .getPublicUrl(path);
-
-        const publicUrl = urlData.publicUrl;
-
-        // Write back to students table
-        await _db
-            .from('students')
-            .update({ avatar_url: publicUrl })
-            .eq('znode_passport_id', studentSessionData.passport_id);
-
-        // Sync local caches
-        studentSessionData.avatar_url = publicUrl;
-        const authRaw = localStorage.getItem('znodeStudentProfile');
-        if (authRaw) {
-            try {
-                const stored = JSON.parse(authRaw);
-                stored.avatar_url = publicUrl;
-                localStorage.setItem('znodeStudentProfile', JSON.stringify(stored));
-            } catch(e) {}
-        }
-
-        saveLocalState();
-        syncViewRenderState();
-        status.style.color = '#00ff88';
-        status.textContent = 'Image updated successfully.';
-        showToast('Avatar updated.');
-
-    } catch (err) {
-        console.error('Avatar upload failed:', err);
-        status.style.color = '#ff4444';
-        status.textContent = 'Upload failed. Check bucket permissions in Supabase.';
-    }
-}
-
-// ── PATCH 5g: FETCH LIVE YEARBOOK STATUS FROM SUPABASE ──
-async function fetchYearbookStatus() {
-    if (!studentSessionData.passport_id) return;
-    try {
-        const { data, error } = await _db
-            .from('students')
-            .select('yearbook_verified')
-            .eq('znode_passport_id', studentSessionData.passport_id)
-            .single();
-
-        if (!error && data) {
-            studentSessionData.yearbook_verified = data.yearbook_verified || false;
-            saveLocalState();
-            updateYearbookGateUI();
-        }
+        S.yearbook_verified = true;
+        saveLocal(); render();
+        showToast('You\'re in the yearbook!');
     } catch(e) {
-        console.warn('Could not fetch yearbook status:', e);
+        console.error(e);
+        showToast('Verification error — contact support.');
     }
+}
+
+async function redeemVoucherCode() {
+    const code = document.getElementById('voucherCodeInput').value.trim().toUpperCase();
+    const fb   = document.getElementById('voucherFeedback');
+    if (!code) { fb.style.color = 'var(--red)'; fb.textContent = 'Enter a voucher code first.'; return; }
+    fb.style.color = 'var(--text-muted)'; fb.textContent = 'Checking...';
+    try {
+        const { data, error } = await _db.from('znode_vouchers').select('*').eq('code', code).eq('is_used', false).single();
+        if (error || !data) { fb.style.color = 'var(--red)'; fb.textContent = 'Invalid or already used.'; return; }
+        await _db.from('znode_vouchers').update({ is_used: true, status: 'used', used_by: S.id, used_at: new Date().toISOString() }).eq('id', data.id);
+        fb.textContent = '';
+        document.getElementById('voucherCodeInput').value = '';
+        await markVerified();
+    } catch(e) {
+        fb.style.color = 'var(--red)'; fb.textContent = 'Something went wrong. Try again.';
+    }
+}
+
+// ── AVATAR ──
+async function uploadNewAvatar() {
+    const fi  = document.getElementById('avatarFileInput');
+    const sts = document.getElementById('avatarUploadStatus');
+    if (!fi.files?.length) { sts.style.color = 'var(--red)'; sts.textContent = 'Pick a photo first.'; return; }
+    const file = fi.files[0];
+    const ext  = file.name.split('.').pop().toLowerCase();
+    const path = `${S.passport_id}/avatar.${ext}`;
+    sts.style.color = 'var(--text-muted)'; sts.textContent = 'Uploading...';
+    try {
+        const { error: upErr } = await _db.storage.from('student-avatars').upload(path, file, { upsert: true });
+        if (upErr) throw upErr;
+        const { data: urlData } = _db.storage.from('student-avatars').getPublicUrl(path);
+        const url = urlData.publicUrl;
+        await _db.from('students').update({ avatar_url: url }).eq('znode_passport_id', S.passport_id);
+        S.avatar_url = url;
+        // Sync auth store
+        try {
+            const raw = localStorage.getItem('znodeStudentProfile');
+            if (raw) { const p = JSON.parse(raw); p.avatar_url = url; localStorage.setItem('znodeStudentProfile', JSON.stringify(p)); }
+        } catch(e) {}
+        saveLocal(); render();
+        sts.style.color = 'var(--green)'; sts.textContent = 'Photo updated.';
+        showToast('Profile photo updated.');
+    } catch(e) {
+        console.error(e); sts.style.color = 'var(--red)'; sts.textContent = 'Upload failed. Check bucket permissions.';
+    }
+}
+
+// ── YEARBOOK STATUS ──
+async function fetchYearbookStatus() {
+    if (!S.passport_id) return;
+    try {
+        const { data, error } = await _db.from('students').select('yearbook_verified').eq('znode_passport_id', S.passport_id).single();
+        if (!error && data) { S.yearbook_verified = data.yearbook_verified || false; saveLocal(); render(); }
+    } catch(e) {}
 }
 
 // ── HELPERS ──
-function saveLocalState() {
-    localStorage.setItem('znode_test_session', JSON.stringify(studentSessionData));
+function saveLocal() { localStorage.setItem('znode_session', JSON.stringify(S)); }
+
+function toggleTheme() {
+    const cur = document.body.getAttribute('data-theme');
+    document.body.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
 }
 
-function showToast(msg) {
-    const root = document.getElementById('toastContainer');
-    const chip = document.createElement('div');
-    chip.className = 'toast';
-    chip.textContent = msg;
-    root.appendChild(chip);
-    setTimeout(() => chip.remove(), 3000);
-}
-
-function toggleThemeSystem() {
-    const ctx = document.body.getAttribute('data-theme');
-    document.body.setAttribute('data-theme', ctx === 'dark' ? 'light' : 'dark');
-    showToast('Theme toggled.');
-}
-
-function resetTestingEnvironment() {
+function resetSession() {
+    if (!confirm('Clear session and go back to onboarding?')) return;
     localStorage.removeItem('znodeStudentProfile');
-    localStorage.removeItem('znode_test_session');
+    localStorage.removeItem('znode_session');
     window.location.href = 'onboarding.html';
 }
 
 function signOut() {
-    if (confirm("Terminate session?")) {
-        localStorage.removeItem('znodeStudentProfile');
-        localStorage.removeItem('znode_test_session');
-        window.location.href = 'onboarding.html';
-    }
+    if (!confirm('Sign out?')) return;
+    localStorage.removeItem('znodeStudentProfile');
+    localStorage.removeItem('znode_session');
+    window.location.href = 'onboarding.html';
 }
 
-// ── BOOTSTRAP (PATCH 6: reads email, fetches live yearbook status) ──
+function showToast(msg) {
+    const root = document.getElementById('toastRoot');
+    const t = document.createElement('div');
+    t.className = 'toast'; t.textContent = msg;
+    root.appendChild(t);
+    setTimeout(() => t.remove(), 3200);
+}
+
+// ── BOOTSTRAP ──
 function bootstrap() {
     const authRaw  = localStorage.getItem('znodeStudentProfile');
-    const cacheRaw = localStorage.getItem('znode_test_session');
+    const cacheRaw = localStorage.getItem('znode_session');
 
     if (!authRaw && !cacheRaw) { window.location.href = 'onboarding.html'; return; }
 
@@ -801,39 +1127,41 @@ function bootstrap() {
         try {
             const db = JSON.parse(authRaw);
             if (db.theme) document.body.setAttribute('data-theme', db.theme);
-
-            studentSessionData.username    = db.username           || '';
-            studentSessionData.full_name   = db.full_name          || '';
-            studentSessionData.matric_no   = db.matric_number      || '';
-            studentSessionData.passport_id = db.znode_passport_id  || '';
-            studentSessionData.university  = db.institution        || '';
-            studentSessionData.department  = db.department         || '';
-            studentSessionData.faculty     = db.faculty            || '';
-            studentSessionData.avatar_url  = db.avatar_url         || '';
-            studentSessionData.email       = db.email              || '';
-            studentSessionData.student_id  = db.id                 || '';
-
-            if (cacheRaw) {
-                try {
-                    const cached = JSON.parse(cacheRaw);
-                    if (Array.isArray(cached.custom_attributes)) {
-                        studentSessionData.custom_attributes = cached.custom_attributes;
-                    }
-                    // Restore cached verified state as optimistic default
-                    if (typeof cached.yearbook_verified === 'boolean') {
-                        studentSessionData.yearbook_verified = cached.yearbook_verified;
-                    }
-                } catch(e) {}
-            }
-        } catch(e) { console.error("Session parse error", e); }
-
-    } else if (cacheRaw) {
-        try { studentSessionData = JSON.parse(cacheRaw); } catch(e) {}
+            S.id              = db.id                 || '';
+            S.username        = db.username            || '';
+            S.full_name       = db.full_name           || '';
+            S.matric_no       = db.matric_number       || '';
+            S.passport_id     = db.znode_passport_id   || '';
+            S.university      = db.institution         || '';
+            S.department      = db.department          || '';
+            S.faculty         = db.faculty             || '';
+            S.graduation_year = db.graduation_year     || '';
+            S.avatar_url      = db.avatar_url          || '';
+            S.email           = db.email               || '';
+            S.eternal_statement = db.eternal_statement || '';
+            S.skills_of_student = db.skills_of_student || '';
+            S.hobbies         = db.hobbies             || '';
+            S.current_project = db.current_project     || '';
+            S.known_for       = db.known_for           || '';
+            S.aspirations     = db.aspirations         || '';
+            S.quote           = db.quote               || '';
+            S.socials         = db.socials             || null;
+        } catch(e) { console.error(e); }
     }
 
-    syncViewRenderState();
+    if (cacheRaw) {
+        try {
+            const c = JSON.parse(cacheRaw);
+            if (Array.isArray(c.custom_attributes)) S.custom_attributes = c.custom_attributes;
+            if (typeof c.yearbook_verified === 'boolean') S.yearbook_verified = c.yearbook_verified;
+            // also pull extended fields from cache if not in auth
+            ['eternal_statement','skills_of_student','hobbies','current_project','known_for','aspirations','quote','socials'].forEach(k => {
+                if (!S[k] && c[k]) S[k] = c[k];
+            });
+        } catch(e) {}
+    }
 
-    // PATCH 6b: Always fetch authoritative verified status from Supabase
+    render();
     fetchYearbookStatus();
 }
 
