@@ -434,6 +434,7 @@ const YEARBOOK_PRICE_KOBO  = 500000; // ← ₦5,000. Change as needed.
 
 // PATCH 2: Added yearbook_verified and email to session object
 let studentSessionData = {
+    student_id: "",
     username: "",
     full_name: "",
     matric_no: "",
@@ -608,7 +609,7 @@ async function markStudentAsVerified() {
     try {
         const { error } = await _db
             .from('students')
-            .update({ yearbook_verified: true })
+            .update({ yearbook_verified: true, yearbook_access: true, yearbook_activated_at: new Date().toISOString() })
             .eq('znode_passport_id', studentSessionData.passport_id);
 
         if (error) throw error;
@@ -634,11 +635,11 @@ async function redeemVoucherCode() {
     feedback.textContent = 'Verifying code...';
 
     try {
-        const { data, error } = await _db
-            .from('voucher_codes')
+       const { data, error } = await _db
+            .from('znode_vouchers')
             .select('*')
             .eq('code', code)
-            .eq('used', false)
+            .eq('is_used', false)
             .single();
 
         if (error || !data) {
@@ -649,9 +650,14 @@ async function redeemVoucherCode() {
 
         // Mark voucher consumed
         await _db
-            .from('voucher_codes')
-            .update({ used: true, used_by: studentSessionData.passport_id })
-            .eq('code', code);
+            .from('znode_vouchers')
+            .update({
+                is_used:  true,
+                status:   'used',
+                used_by:  studentSessionData.student_id,
+                used_at:  new Date().toISOString()
+            })
+            .eq('id', data.id);
 
         feedback.textContent = '';
         document.getElementById('voucherCodeInput').value = '';
@@ -799,7 +805,8 @@ function bootstrap() {
             studentSessionData.department  = db.department         || '';
             studentSessionData.faculty     = db.faculty            || '';
             studentSessionData.avatar_url  = db.avatar_url         || '';
-            studentSessionData.email       = db.email              || ''; // PATCH 6a
+            studentSessionData.email       = db.email              || '';
+            studentSessionData.student_id  = db.id                 || '';
 
             if (cacheRaw) {
                 try {
