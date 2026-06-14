@@ -166,11 +166,10 @@
             padding: 44px 20px 24px;
             border-bottom: 1px solid var(--paper-dark);
             z-index: 1;
-            overflow: hidden; /* Contains the pseudo-elements */
+            overflow: hidden; 
             transition: padding 0.4s var(--ease);
         }
 
-        /* The Black/Grayscale Image Layer */
         .cover-header::before {
             content: '';
             position: absolute; inset: 0;
@@ -178,11 +177,10 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            filter: grayscale(100%) contrast(1.1); /* Forces the image to black and white */
+            filter: grayscale(100%) contrast(1.1);
             z-index: -2;
         }
 
-        /* Overlay color mask system tied directly into theme engine */
         .cover-header::after {
             content: '';
             position: absolute; inset: 0;
@@ -190,12 +188,6 @@
             mix-blend-mode: normal;
             z-index: -1;
             transition: background 0.4s var(--ease);
-        }
-
-        .cover-top-deco {
-            display: flex; justify-content: space-between;
-            font-size: 15px; color: var(--navy); opacity: 0.4;
-            margin-bottom: 8px; font-family: 'Caveat', cursive;
         }
 
         .cover-dept-main {
@@ -244,25 +236,6 @@
             letter-spacing: 0.05em;
         }
 
-        /* Stats row */
-        .stats-row {
-            display: flex; align-items: stretch; justify-content: center;
-            margin: 18px 0 0;
-            border-top: 1px dashed var(--paper-dark);
-            border-bottom: 1px dashed var(--paper-dark);
-            padding: 8px 0;
-        }
-
-        .stat {
-            display: flex; align-items: center; gap: 6px;
-            padding: 4px 10px; border-right: 1px solid var(--paper-dark);
-        }
-        .stat:last-child { border-right: none; }
-        .stat-ico { font-size: 13px; line-height: 1; }
-        .stat-vals { display: flex; flex-direction: column; }
-        .stat-n { font-size: 13px; font-weight: 800; color: var(--navy); line-height: 1.1; }
-        .stat-lbl { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); }
-
         /* ══════════════════════════════
            HIDDEN FUNCTIONAL HEADER
         ══════════════════════════════ */
@@ -277,13 +250,6 @@
         .eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: var(--text-muted); margin-bottom: 10px; }
         .state-panel h3 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--navy); margin-bottom: 6px; }
         .state-panel p { font-family: 'Caveat', cursive; font-size: 17px; color: var(--text-muted); line-height: 1.5; }
-
-        /* ══════════════════════════════
-           COUNT BAR
-        ══════════════════════════════ */
-        .count-bar { display: flex; align-items: center; justify-content: space-between; padding: 9px 18px; background: var(--navy); }
-        .count-bar .eyebrow { color: var(--paper-dark); }
-        #studentCount { color: var(--paper) !important; }
 
         /* ══════════════════════════════
            STUDENT LIST DYNAMIC LAYOUT
@@ -354,11 +320,9 @@
             .cover-class-banner    { font-size: 11px; letter-spacing: 3px; padding: 6px 16px; }
             .info-name             { font-size: 27px; }
             .photo-col             { min-width: 108px; width: 108px; }
-            .stat                  { padding: 4px 7px; }
-            .stat-ico              { display: none; }
         }
 
-        /* ✨ Desktop View Enhancements */
+        /* Desktop View Enhancements */
         @media (min-width: 800px) {
             .page-content {
                 max-width: 1000px;
@@ -372,13 +336,8 @@
                 border-radius: 0 0 16px 16px;
             }
             .cover-dept-main {
-                font-size: 64px; /* Larger impact */
+                font-size: 64px; 
             }
-            .stats-row {
-                max-width: 500px;
-                margin: 24px auto 0;
-            }
-            /* Upgrades vertical list to 2-column grid */
             .student-grid-active {
                 display: grid !important;
                 grid-template-columns: repeat(2, 1fr);
@@ -426,10 +385,6 @@
 <main class="page-content">
 
     <div class="cover-header">
-        <div class="cover-top-deco">
-            <span>⊞</span><span>✦</span><span>⊞</span>
-        </div>
-
         <div class="cover-dept-main" id="deptLabel">DEPARTMENT OF —</div>
         
         <div class="cover-collaboration">
@@ -439,37 +394,6 @@
         <div class="cover-class-banner" id="classbanner">CLASS OF —</div>
         <br>
         <div class="cover-ephoto">— E-Photo Album —</div>
-
-        <div class="stats-row">
-            <div class="stat">
-                <span class="stat-ico">👥</span>
-                <div class="stat-vals">
-                    <span class="stat-n" id="statStudents">—</span>
-                    <span class="stat-lbl">Students</span>
-                </div>
-            </div>
-            <div class="stat">
-                <span class="stat-ico">📷</span>
-                <div class="stat-vals">
-                    <span class="stat-n">∞</span>
-                    <span class="stat-lbl">Photos</span>
-                </div>
-            </div>
-            <div class="stat">
-                <span class="stat-ico">📖</span>
-                <div class="stat-vals">
-                    <span class="stat-n">10</span>
-                    <span class="stat-lbl">Sections</span>
-                </div>
-            </div>
-            <div class="stat">
-                <span class="stat-ico">⭐</span>
-                <div class="stat-vals">
-                    <span class="stat-n">∞</span>
-                    <span class="stat-lbl">Memories</span>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div class="page-header">
@@ -485,11 +409,6 @@
         <div class="eyebrow">Z-NODE // OPENING ALBUM</div>
         <h3>Leafing Through Pages...</h3>
         <p>Fetching student memories from the archive.</p>
-    </div>
-
-    <div class="count-bar" id="countBar" style="display:none;">
-        <span class="eyebrow" id="studentCount">0 found</span>
-        <span class="eyebrow">ACTIVE DIRECTORY</span>
     </div>
 
     <div id="studentGrid" style="display:none;"></div>
@@ -676,21 +595,16 @@ async function bootstrap() {
 
     const students = await loadYearbook(dept, year);
     document.getElementById('loadingState').style.display = 'none';
-    document.getElementById('statStudents').textContent = String(students.length);
 
     if (!students.length) {
         document.getElementById('emptyState').style.display = 'block';
         return;
     }
 
-    document.getElementById('studentCount').textContent = `${students.length} node${students.length !== 1 ? 's' : ''} found`;
-    document.getElementById('countBar').style.display = 'flex';
-
     const grid = document.getElementById('studentGrid');
     grid.innerHTML = ''; 
     students.forEach((s, i) => grid.appendChild(renderCard(s, i)));
     
-    // JS layout trigger replacing hardcoded inline styles
     grid.style.display = ''; 
     grid.classList.add('student-grid-active');
 
