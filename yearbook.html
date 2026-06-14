@@ -587,40 +587,36 @@ async function loadYearbook(dept, year) {
     try {
         const sessionRaw = localStorage.getItem('znodeStudentProfile');
         let currentUsername = "";
-        
         if (sessionRaw) {
-            try { 
-                const parsed = JSON.parse(sessionRaw);
-                currentUsername = parsed.username || ""; 
-            } catch(e) {
-                console.error("Session parse error:", e);
-            }
+            try { currentUsername = JSON.parse(sessionRaw).username || ""; } 
+            catch(e) {}
         }
 
         let query = _db.from('students').select('*');
 
-        if (dept) { query = query.ilike('department', `%${dept}%`); }
-        
-        // Corrected Column Query: filtering on graduating_year
-        if (year) { query = query.eq('graduating_year', parseInt(year)); }
+        if (dept) query = query.ilike('department', `%${dept}%`);
+        if (year) query = query.eq('graduation_year', parseInt(year));
 
-        query = query.or(`yearbook_access.eq.true,username.eq.${currentUsername}`);
+        // Correct OR — filter by access OR it's the current user's own profile
+        if (currentUsername) {
+            query = query.or(`yearbook_access.eq.true,username.eq.${currentUsername}`);
+        } else {
+            query = query.eq('yearbook_access', true);
+        }
 
-        // Corrected Ordering Logic: sorting sequence by yearbook_activated_at
         const { data: students, error } = await query
-            .order('yearbook_activated_at', { ascending: true });
+            .order('is_dos', { ascending: false })
+            .order('full_name', { ascending: true });
 
         if (error) throw error;
-        
-        if (students && students.length > 0) {
-            students.sort((a, b) => {
-                const aArchived = a.yearbook_access === false || a.yearbook_access === 'false';
-                const bArchived = b.yearbook_access === false || b.yearbook_access === 'false';
-                if (aArchived === bArchived) return 0;
-                return aArchived ? 1 : -1;
-            });
-        }
-        return students || [];
+
+        // Sort archived to bottom
+        return (students || []).sort((a, b) => {
+            const aA = a.yearbook_access === false || a.yearbook_access === 'false';
+            const bA = b.yearbook_access === false || b.yearbook_access === 'false';
+            return aA === bA ? 0 : aA ? 1 : -1;
+        });
+
     } catch(e) {
         console.error("Yearbook query error:", e);
         return [];
