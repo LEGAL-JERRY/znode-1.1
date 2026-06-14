@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@400;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
+        :root, [data-theme='default'] {
             --paper:      #f0ebe0;
             --paper-mid:  #e4dac8;
             --paper-dark: #d4c8b0;
@@ -20,6 +20,54 @@
             --ease:       cubic-bezier(0.16, 1, 0.3, 1);
         }
 
+        [data-theme='monochrome-dark'] {
+            --paper:      #0a0a0a;
+            --paper-mid:  #1a1a1a;
+            --paper-dark: #2a2a2a;
+            --navy:       #ffffff;
+            --gold:       #8a8a8a;
+            --tape:       rgba(255, 255, 255, 0.15);
+            --text-main:  #ffffff;
+            --text-muted: #aaaaaa;
+            --text-faint: #555555;
+        }
+
+        [data-theme='deep-space'] {
+            --paper:      #05050a;
+            --paper-mid:  #0f0f1a;
+            --paper-dark: #1a1a2e;
+            --navy:       #e2e8f0;
+            --gold:       #ffb703;
+            --tape:       rgba(255, 183, 3, 0.2);
+            --text-main:  #f8fafc;
+            --text-muted: #94a3b8;
+            --text-faint: #475569;
+        }
+
+        [data-theme='slate-gray'] {
+            --paper:      #202124;
+            --paper-mid:  #2d2f34;
+            --paper-dark: #3c4043;
+            --navy:       #f1f3f4;
+            --gold:       #f2a900;
+            --tape:       rgba(242, 169, 0, 0.25);
+            --text-main:  #e8eaed;
+            --text-muted: #9aa0a6;
+            --text-faint: #5f6368;
+        }
+
+        [data-theme='minimal-light'] {
+            --paper:      #ffffff;
+            --paper-mid:  #f5f5f5;
+            --paper-dark: #e5e5e5;
+            --navy:       #000000;
+            --gold:       #d97706;
+            --tape:       rgba(0, 0, 0, 0.08);
+            --text-main:  #111111;
+            --text-muted: #666666;
+            --text-faint: #999999;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
@@ -27,6 +75,7 @@
             color: var(--text-main);
             min-height: 100vh;
             font-family: 'Inter', sans-serif;
+            transition: background 0.3s var(--ease), color 0.3s var(--ease);
         }
 
         /* ══════════════════════════════
@@ -38,6 +87,7 @@
             padding: 10px 18px;
             background: var(--paper);
             border-bottom: 1px dashed var(--paper-dark);
+            transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
         }
 
         .back-btn {
@@ -54,6 +104,20 @@
         .top-brand {
             font-family: 'Bebas Neue', sans-serif;
             font-size: 20px; letter-spacing: 4px; color: var(--navy);
+        }
+
+        .theme-select {
+            background: var(--paper-mid);
+            color: var(--text-main);
+            border: 1px solid var(--paper-dark);
+            font-family: 'Inter', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            outline: none;
         }
 
         .user-chip {
@@ -118,7 +182,7 @@
 
         .cover-class-banner {
             display: inline-block;
-            background: var(--navy); color: #fff;
+            background: var(--navy); color: var(--paper);
             font-family: 'Inter', sans-serif;
             font-size: 14px; font-weight: 900;
             letter-spacing: 6px; text-transform: uppercase;
@@ -199,8 +263,8 @@
             background: var(--navy);
         }
 
-        .count-bar .eyebrow { color: rgba(255,255,255,0.5); }
-        #studentCount { color: rgba(255,255,255,0.92) !important; }
+        .count-bar .eyebrow { color: var(--paper-dark); }
+        #studentCount { color: var(--paper) !important; }
 
         /* ══════════════════════════════
            STUDENT LIST
@@ -227,8 +291,7 @@
         .entry-l .info-col  { order: 1; }
 
         /* ══════════════════════════════
-           PHOTO FRAME  (double-frame
-           polaroid scrapbook effect)
+           PHOTO FRAME
         ══════════════════════════════ */
         .photo-col {
             position: relative;
@@ -237,21 +300,19 @@
             margin-top: 8px;
         }
 
-        /* Navy shadow frame — sits behind polaroid */
+        /* Navy shadow frame */
         .frame-bg {
             position: absolute; inset: 0;
             background: var(--navy);
             z-index: 0;
-            /* rotation applied inline per card */
         }
 
-        /* White polaroid frame — on top */
+        /* White polaroid frame */
         .frame-fg {
             position: relative; z-index: 1;
             background: #fff;
             padding: 7px 7px 24px;
             box-shadow: 3px 4px 14px rgba(0,0,0,0.18);
-            /* rotation applied inline per card */
         }
 
         /* Masking tape strip */
@@ -261,7 +322,6 @@
             width: 46px; height: 17px;
             background: var(--tape);
             z-index: 4;
-            /* transform (translateX + rotate) applied inline */
         }
 
         .student-photo {
@@ -359,27 +419,25 @@
         }
 
         .entry-archived {
-    saturate: 0;
-    filter: grayscale(100%);
-    opacity: 0.45;
-    pointer-events: none;
-}
-.archive-banner {
-    background: #c8823a;
-    color: #fff;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 8px 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 12px;
-    line-height: 1.4;
-}
+            filter: grayscale(100%);
+            opacity: 0.55;
+        }
+        
+        .archive-banner {
+            background: var(--gold);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 8px 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
 
-<!-- ══════════ TOP BAR ══════════ -->
 <header class="top-bar">
     <button class="back-btn" onclick="window.location.href='app.html'">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -387,6 +445,15 @@
         </svg>
         Back
     </button>
+    
+    <select class="theme-select" id="themeSwitcher" onchange="changeTheme(this.value)">
+        <option value="default">Default Paper</option>
+        <option value="monochrome-dark">Monochrome Dark</option>
+        <option value="deep-space">Deep Space</option>
+        <option value="slate-gray">Slate Gray</option>
+        <option value="minimal-light">Minimal Light</option>
+    </select>
+
     <span class="top-brand">Z-NODE</span>
     <div class="user-chip">
         <div class="user-avatar" id="navAvatar">?</div>
@@ -396,7 +463,6 @@
 
 <main class="page-content">
 
-    <!-- ══ YEARBOOK COVER ══ -->
     <div class="cover-header">
         <div class="cover-top-deco">
             <span>⊞</span><span>✦</span><span>⊞</span>
@@ -441,7 +507,6 @@
         </div>
     </div>
 
-    <!-- ══ HIDDEN FUNCTIONAL HEADER (JS refs kept intact) ══ -->
     <div class="page-header">
         <div class="eyebrow" id="queryLabel">YEARBOOK DIRECTORY</div>
         <h1 id="pageTitle">Loading...</h1>
@@ -451,30 +516,25 @@
         </div>
     </div>
 
-    <!-- ══ LOADING STATE ══ -->
     <div class="state-panel" id="loadingState">
         <div class="eyebrow">Z-NODE // OPENING ALBUM</div>
         <h3>Leafing Through Pages...</h3>
         <p>Fetching student memories from the archive.</p>
     </div>
 
-    <!-- ══ COUNT BAR ══ -->
     <div class="count-bar" id="countBar" style="display:none;">
         <span class="eyebrow" id="studentCount">0 found</span>
         <span class="eyebrow">ACTIVE DIRECTORY</span>
     </div>
 
-    <!-- ══ STUDENT LIST ══ -->
     <div id="studentGrid" style="display:none;"></div>
 
-    <!-- ══ EMPTY STATE ══ -->
     <div class="state-panel" id="emptyState" style="display:none;">
         <div class="eyebrow">Z-NODE // NULL RESPONSE</div>
         <h3>Empty Album.</h3>
         <p>No students found for this department and year.<br>They may not have registered yet.</p>
     </div>
 
-    <!-- ══ SCROLL CTA ══ -->
     <div class="scroll-cta" id="scrollCta" style="display:none;">
         ✦ Scroll to discover more ✦
         <span class="cta-arrow">↓</span>
@@ -488,13 +548,23 @@ const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const { createClient } = supabase;
 const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// ── Theme Switching System ───────────────────────────────────────────────────
+function changeTheme(themeName) {
+    document.documentElement.setAttribute('data-theme', themeName);
+    localStorage.setItem('znode_sys_theme', themeName);
+}
+
 // ── Session ──────────────────────────────────────────────────────────────────
 function initSession() {
     const raw = localStorage.getItem('znodeStudentProfile');
     if (!raw) { window.location.href = 'onboarding.html'; return null; }
     try {
         const s = JSON.parse(raw);
-        if (s.theme) document.body.setAttribute('data-theme', s.theme);
+        
+        // Check for globally set theme switcher preference first, then fallback to profile
+        const savedTheme = localStorage.getItem('znode_sys_theme') || s.theme || 'default';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.getElementById('themeSwitcher').value = savedTheme;
 
         const av = document.getElementById('navAvatar');
         if (s.avatar_url) {
@@ -525,10 +595,8 @@ const DECOS       = ['☆', '♡', '⚡', '◇', '✦', '☆', '♡', '⚡'];
 function renderCard(student, idx) {
     const entry = document.createElement('div');
     
-    // Check if this student is archived
     const isArchived = student.yearbook_access === false || student.yearbook_access === 'false';
     
-    // Apply styling layouts and grey out if archived
     entry.className = `student-entry ${idx % 2 === 0 ? 'entry-r' : 'entry-l'} ${isArchived ? 'entry-archived' : ''}`;
 
     const fr = FRAME_ROTS [idx % FRAME_ROTS.length];
@@ -536,7 +604,6 @@ function renderCard(student, idx) {
     const tr = TAPE_ROTS  [idx % TAPE_ROTS.length];
     const isDOS = student.is_dos === true || student.is_dos === 'true';
 
-    // Build the admin notification banner ONLY for archived user profiles
     const bannerHTML = isArchived 
         ? `<div class="archive-banner" style="grid-column: span 2; pointer-events: auto;">
             ⚠️ PROFILE ARCHIVED & UNPUBLISHED: Please contact DOS or complete your payment to publish your profile.
@@ -556,7 +623,8 @@ function renderCard(student, idx) {
         ? `<div class="info-quote">"${quote}"</div><div class="info-quote-line"></div>`
         : '';
 
-    const pid = student.znode_passport_id || student.matric_number || '';
+    // Mod: Changed variable mapping target from znode_passport_id to eternal_statement
+    const pid = student.eternal_statement || student.matric_number || '';
     const handleHTML = pid
         ? `<div class="info-handle">${pid}</div>`
         : `<div class="info-handle">@${student.username || '—'}</div>`;
@@ -608,7 +676,6 @@ async function loadYearbook(dept, year) {
             query = query.eq('graduation_year', parseInt(year));
         }
 
-        // Filter: Only show paid accounts OR the user's own profile
         query = query.or(`yearbook_access.eq.true,username.eq.${currentUsername}`);
 
         const { data: students, error } = await query
@@ -616,6 +683,17 @@ async function loadYearbook(dept, year) {
             .order('full_name', { ascending: true });
 
         if (error) throw error;
+        
+        // Mod: Dynamic sorting logic that puts archived (unregistered/unpaid) students at the bottom of the list array
+        if (students && students.length > 0) {
+            students.sort((a, b) => {
+                const aArchived = a.yearbook_access === false || a.yearbook_access === 'false';
+                const bArchived = b.yearbook_access === false || b.yearbook_access === 'false';
+                if (aArchived === bArchived) return 0;
+                return aArchived ? 1 : -1;
+            });
+        }
+
         return students || [];
 
     } catch(e) {
@@ -664,3 +742,5 @@ async function bootstrap() {
 
 bootstrap();
 </script>
+</body>
+</html>
