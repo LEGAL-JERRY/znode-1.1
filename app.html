@@ -422,8 +422,94 @@
                 </div>
                 <div class="photo-caption" id="photoCaptionText">—</div>
 
-                <!-- Yearbook status under photo -->
-                <div style="margin-top: 12px;" id="photoVerifiedArea"></div>
+           <!-- Yearbook status under photo -->
+        <div style="margin-top: 12px;" id="photoVerifiedArea"></div>
+    </div>
+
+    <!-- Profile Completion Prompt — unlocks after verification -->
+    <div id="profileCompletePrompt" style="display:none; margin-top:28px; grid-column: 1 / -1;">
+        <div class="status-panel" style="border-color:rgba(200,130,58,0.4); background:rgba(200,130,58,0.04);">
+            <div class="status-row">
+                <div class="status-dot" style="background:var(--gold); box-shadow:0 0 0 3px rgba(200,130,58,0.15);"></div>
+                <div class="status-title">You're in — now complete your yearbook entry.</div>
+            </div>
+            <div class="status-body">Add your personal details so classmates can know the full you. These appear on your yearbook card and profile modal.</div>
+            <button class="btn ghost" onclick="toggleCompleteForm()">Fill in details →</button>
+
+            <div id="completeProfileForm" style="display:none; margin-top:24px; padding-top:24px; border-top:1px solid var(--border-subtle);">
+                <div class="two-col">
+                    <div class="form-group">
+                        <label class="form-label">Skills</label>
+                        <input type="text" id="cpSkills" placeholder="Public Speaking, Excel, Design...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Hobbies</label>
+                        <input type="text" id="cpHobbies" placeholder="Reading, Football, Music...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Current Project / Side Hustle</label>
+                        <input type="text" id="cpProject" placeholder="Fintech app, final year thesis...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Known For</label>
+                        <input type="text" id="cpKnownFor" placeholder="Always cracking jokes in class...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Aspirations</label>
+                        <input type="text" id="cpAspirations" placeholder="To become a chartered accountant by 28...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Gender</label>
+                        <select id="cpGender">
+                            <option value="">Select</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date of Birth</label>
+                        <input type="date" id="cpDob">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone</label>
+                        <input type="tel" id="cpPhone" placeholder="+234 801 234 5678">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">State of Origin</label>
+                        <input type="text" id="cpState" placeholder="Lagos, Kano, Rivers...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">LGA</label>
+                        <input type="text" id="cpLga" placeholder="Your local government area">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tribe / Ethnicity</label>
+                        <input type="text" id="cpTribe" placeholder="Yoruba, Igbo, Hausa, Efik...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Religion</label>
+                        <select id="cpReligion">
+                            <option value="">Select</option>
+                            <option value="Christianity">Christianity</option>
+                            <option value="Islam">Islam</option>
+                            <option value="Traditional">Traditional</option>
+                            <option value="Other">Other</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Study Habit</label>
+                        <input type="text" id="cpStudyHabit" placeholder="Night owl, group study, voice notes...">
+                    </div>
+                </div>
+                <button class="btn" onclick="saveCompleteProfile()">Save to Yearbook →</button>
+                <p id="cpSaveStatus" style="font-size:12px; font-weight:700; margin-top:10px; min-height:16px;"></p>
+            </div>
+        </div>
+    </div>
+
+    <div style="display:none">
             </div>
 
             <!-- Core fields -->
@@ -826,6 +912,10 @@ function render() {
     document.getElementById('editFaculty').value     = S.faculty || '';
     document.getElementById('editGradYear').value    = S.graduation_year || '';
 
+// profile completion prompt
+    const prompt = document.getElementById('profileCompletePrompt');
+    if (prompt) prompt.style.display = S.yearbook_verified ? 'block' : 'none';
+
     // custom attrs
     renderCustomAttrs();
 }
@@ -1041,7 +1131,12 @@ async function markVerified() {
         if (error) throw error;
         S.yearbook_verified = true;
         saveLocal(); render();
-        showToast('You\'re in the yearbook!');
+       showToast('You\'re in the yearbook! Complete your profile below.');
+        switchView('view-profile', document.querySelector('[data-view="view-profile"]'));
+        setTimeout(() => {
+            document.getElementById('completeProfileForm').style.display = 'block';
+            document.getElementById('profileCompletePrompt')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 400);
     } catch(e) {
         console.error(e);
         showToast('Verification error — contact support.');
@@ -1062,6 +1157,50 @@ async function redeemVoucherCode() {
         await markVerified();
     } catch(e) {
         fb.style.color = 'var(--red)'; fb.textContent = 'Something went wrong. Try again.';
+    }
+}
+
+// ── PROFILE COMPLETION ──
+function toggleCompleteForm() {
+    const f = document.getElementById('completeProfileForm');
+    f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+async function saveCompleteProfile() {
+    const sts = document.getElementById('cpSaveStatus');
+    sts.style.color = 'var(--text-muted)'; sts.textContent = 'Saving...';
+    const updates = {
+        skills_of_student: document.getElementById('cpSkills').value.trim()    || null,
+        hobbies:           document.getElementById('cpHobbies').value.trim()   || null,
+        current_project:   document.getElementById('cpProject').value.trim()   || null,
+        known_for:         document.getElementById('cpKnownFor').value.trim()  || null,
+        aspirations:       document.getElementById('cpAspirations').value.trim()|| null,
+        gender:            document.getElementById('cpGender').value            || null,
+        dob:               document.getElementById('cpDob').value               || null,
+        phone:             document.getElementById('cpPhone').value.trim()      || null,
+        state_of_origin:   document.getElementById('cpState').value.trim()     || null,
+        lga:               document.getElementById('cpLga').value.trim()        || null,
+        tribe:             document.getElementById('cpTribe').value.trim()      || null,
+        religion:          document.getElementById('cpReligion').value          || null,
+        study_habit:       document.getElementById('cpStudyHabit').value.trim()|| null,
+    };
+    try {
+        const { error } = await _db.from('students').update(updates).eq('id', S.id);
+        if (error) throw error;
+        // sync into local session
+        Object.assign(S, {
+            skills_of_student: updates.skills_of_student,
+            hobbies:           updates.hobbies,
+            current_project:   updates.current_project,
+            known_for:         updates.known_for,
+            aspirations:       updates.aspirations,
+        });
+        saveLocal(); render();
+        sts.style.color = 'var(--green)'; sts.textContent = 'Saved — your yearbook card is updated.';
+        showToast('Profile completed!');
+        setTimeout(() => { document.getElementById('profileCompletePrompt').style.display = 'none'; }, 2500);
+    } catch(e) {
+        sts.style.color = 'var(--red)'; sts.textContent = 'Save failed — try again.';
     }
 }
 
