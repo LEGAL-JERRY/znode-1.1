@@ -573,11 +573,11 @@
         </div>
     </section>
 
-    <!-- ══ YEARBOOK ══ -->
+   <!-- ══ YEARBOOK ══ -->
     <section class="view" id="view-yearbook">
         <div class="page-top">
             <div class="page-greeting">Yearbook.</div>
-            <div class="page-subtitle">Browse your department's graduating class or get your own entry published.</div>
+            <div class="page-subtitle">Open your department's yearbook, or browse any class directory.</div>
         </div>
 
         <!-- Gate — not verified -->
@@ -613,7 +613,16 @@
             </div>
         </div>
 
-        <!-- Query form -->
+        <!-- My Yearbook shortcut -->
+        <div class="query-card" style="margin-bottom:24px;" id="myYearbookCard">
+            <h3>My Department Yearbook</h3>
+            <p id="myYearbookDesc" style="margin-bottom:16px;">Jump straight to your class.</p>
+            <button class="btn" onclick="openMyYearbook()">Open My Yearbook →</button>
+        </div>
+
+        <div class="divider-label"><span>or search any directory</span></div>
+
+        <!-- Search any yearbook -->
         <div class="query-card">
             <h3>Browse student directory</h3>
             <p>Pick a department and year to pull up their class page.</p>
@@ -995,6 +1004,14 @@ function accessYearbook(e) {
         showToast(`Opening ${dept} — ${year}...`);
         setTimeout(() => { window.location.href = `yearbook.html?dept=${encodeURIComponent(dept)}&year=${encodeURIComponent(year)}`; }, 500);
     }
+}
+
+function openMyYearbook() {
+    if (!S.department || !S.graduation_year) {
+        showToast('Department or graduation year missing — check your profile settings.');
+        return;
+    }
+    window.location.href = `yearbook.html?dept=${encodeURIComponent(S.department)}&year=${encodeURIComponent(S.graduation_year)}`;
 }
 
 function toggleDOSVoucherPanel() {
