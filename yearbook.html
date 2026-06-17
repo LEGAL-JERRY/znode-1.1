@@ -439,7 +439,10 @@ function initSession() {
     } catch(e) { window.location.href = 'onboarding.html'; return null; }
 }
 
-function getParams() { return { dept: 'Economics', year: '2025' }; }
+function getParams() {
+    const p = new URLSearchParams(window.location.search);
+    return { dept: p.get('dept') || '', year: p.get('year') || '' };
+}
 
 // ── 🔍 SEARCH INTERACTION ROUTERS ───────────────────────────────────────────
 function toggleHeaderSearch(e) {
