@@ -1058,11 +1058,11 @@ async function uploadNewAvatar() {
     const path = `${S.passport_id}/avatar.${ext}`;
     sts.style.color = 'var(--text-muted)'; sts.textContent = 'Uploading...';
     try {
-        const { error: upErr } = await _db.storage.from('student-avatars').upload(path, file, { upsert: true });
+       const { error: upErr } = await _db.storage.from('avatars').upload(path, file, { upsert: true });
         if (upErr) throw upErr;
-        const { data: urlData } = _db.storage.from('student-avatars').getPublicUrl(path);
+       const { data: urlData } = _db.storage.from('avatars').getPublicUrl(path);
         const url = urlData.publicUrl;
-        await _db.from('students').update({ avatar_url: url }).eq('znode_passport_id', S.passport_id);
+        await _db.from('students').update({ avatar_url: url }).eq('id', S.id);
         S.avatar_url = url;
         // Sync auth store
         try {
