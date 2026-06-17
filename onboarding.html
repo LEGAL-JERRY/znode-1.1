@@ -124,8 +124,7 @@ h1,h2,h3{font-weight:900;letter-spacing:-0.03em;line-height:1.1;}
   <h1>Enter the<br>Network.</h1>
   <p>What would you like to do?</p>
   <div class="auth-options">
-    <button class="auth-btn auth-btn-primary" onclick="showFlow('create-yearbook')">📖 Create Department Yearbook</button>
-    <div class="auth-divider">or</div>
+  
     <button class="auth-btn auth-btn-secondary" onclick="showFlow('join-yearbook')">🎓 Join Department Yearbook</button>
     <button class="auth-btn auth-btn-secondary" onclick="showFlow('login')">🔑 Login</button>
   </div>
@@ -141,83 +140,6 @@ h1,h2,h3{font-weight:900;letter-spacing:-0.03em;line-height:1.1;}
     <div class="input-group"><input type="text" class="input-field" id="loginId" placeholder="Username or Email"></div>
     <div class="input-group"><input type="password" class="input-field" id="loginPass" placeholder="Password"></div>
     <button class="btn btn-primary" style="width:100%;margin-top:16px;" id="loginBtn" onclick="processLogin()">Authenticate</button>
-  </div>
-</div>
-
-<!-- CREATE YEARBOOK (DOS) -->
-<div class="onboarding-container" id="createYearbookPortal">
-  <div class="progress-header">
-    <span class="eyebrow" id="cyStepCounter">STAGE 1/2</span>
-    <div class="progress-bar"><div class="progress-fill" id="cyProgressFill" style="width:50%;"></div></div>
-    <span class="eyebrow" id="cyStepName">DOS IDENTITY</span>
-  </div>
-  <div class="brutalist-panel">
-
-    <!-- CY Step 0 -->
-    <div class="step-view active" id="cyStep0">
-      <h2>DOS Profile.</h2>
-      <p class="sub">Tell us about yourself as Director of Social.</p>
-      <div class="input-group"><label class="eyebrow">Full Name</label><input type="text" class="input-field" id="dosName" placeholder="Your full name"></div>
-      <div class="input-group"><label class="eyebrow">Email Address</label><input type="email" class="input-field" id="dosEmail" placeholder="your@email.com"></div>
-      <div class="input-group"><label class="eyebrow">Secure Password</label><input type="password" class="input-field" id="dosPassword" placeholder="••••••••"></div>
-      <div class="input-group"><label class="eyebrow">Username</label><input type="text" class="input-field" id="cyUsername" placeholder="dos_fulafia"></div>
-      <div class="input-group"><label class="eyebrow">Position / Role in Department</label><input type="text" class="input-field" id="cyPosition" placeholder="Director of Social, President, etc."></div>
-      <div class="input-group">
-        <label class="eyebrow">Matriculation Number</label>
-        <input type="text" class="input-field" id="cyMatric" placeholder="e.g. FUL/22/0001">
-        <p style="font-size:12px;color:var(--text-muted);margin-top:8px;font-weight:500;">Used to generate your Z-Node Passport ID</p>
-      </div>
-    </div>
-
-    <!-- CY Step 1 -->
-    <div class="step-view" id="cyStep1">
-      <h2>Department Setup.</h2>
-      <p class="sub">Link this yearbook to your department.</p>
-      <div class="input-group">
-        <label class="eyebrow">University</label>
-        <div class="search-wrap">
-          <input type="text" class="input-field" id="universitySearch" placeholder="Search your university..." autocomplete="off" oninput="searchUniversities()">
-          <div class="search-dropdown" id="universityResults"></div>
-        </div>
-        <div id="selectedInstitutionBadge" style="display:none;" class="selected-badge">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          <span id="selectedInstitutionName"></span>
-        </div>
-      </div>
-      <div class="cascade-section" id="facultyBox">
-        <div class="cascade-divider"></div>
-        <div class="input-group" style="margin-bottom:0;">
-          <label class="eyebrow">Faculty</label>
-          <div id="facultyResults" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
-          <div id="selectedFacultyBadge" style="display:none;" class="selected-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            <span id="selectedFacultyName"></span>
-          </div>
-        </div>
-      </div>
-      <div class="cascade-section" id="departmentBox">
-        <div class="cascade-divider"></div>
-        <div class="input-group" style="margin-bottom:0;">
-          <label class="eyebrow">Department</label>
-          <div id="departmentResults" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
-          <div id="selectedDepartmentBadge" style="display:none;" class="selected-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            <span id="selectedDepartmentName"></span>
-          </div>
-        </div>
-      </div>
-      <div style="margin-top:32px;padding-top:24px;border-top:1px solid var(--border-light);">
-        <div class="input-group">
-          <label class="eyebrow">Class Of (Graduating Year)</label>
-          <input type="number" class="input-field" id="cyYear" placeholder="2026" min="2024" max="2035">
-        </div>
-      </div>
-    </div>
-
-    <div class="form-nav">
-      <button class="btn btn-secondary" id="cyBtnBack" onclick="cyPrevStep()" style="visibility:hidden;">Back</button>
-      <button class="btn btn-primary" id="cyBtnNext" onclick="cyNextStep()">Proceed</button>
-    </div>
   </div>
 </div>
 
@@ -339,7 +261,7 @@ const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const { createClient } = supabase;
 const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-const themeOverlay=document.getElementById('themeOverlay'),authOverlay=document.getElementById('authChoiceOverlay'),loginOverlay=document.getElementById('loginOverlay'),createYearbookPortal=document.getElementById('createYearbookPortal'),joinYearbookPortal=document.getElementById('joinYearbookPortal'),submittingOverlay=document.getElementById('submittingOverlay');
+const themeOverlay=document.getElementById('themeOverlay'),authOverlay=document.getElementById('authChoiceOverlay'),loginOverlay=document.getElementById('loginOverlay'),joinYearbookPortal=document.getElementById('joinYearbookPortal'),submittingOverlay=document.getElementById('submittingOverlay');
 let studentImageBlob=null;
 
 function showToast(msg,type='success'){const c=document.getElementById('toastContainer'),t=document.createElement('div');t.className='toast';t.innerHTML=type==='error'?`⚠ ${msg}`:`✓ ${msg}`;c.appendChild(t);setTimeout(()=>t.remove(),3800);}
@@ -372,63 +294,7 @@ function makeCascadeSearch(cfg){
   };
 }
 
-// ── DOS FLOW STATE ──
-let selInst=null,selFac=null,selDept=null,uniTimer=null;
 
-async function searchUniversities(){
-  const val=document.getElementById('universitySearch').value,drop=document.getElementById('universityResults');
-  selInst=null;selFac=null;selDept=null;
-  document.getElementById('selectedInstitutionBadge').style.display='none';
-  document.getElementById('facultyBox').classList.remove('visible');
-  document.getElementById('departmentBox').classList.remove('visible');
-  if(val.length<2){drop.innerHTML='';drop.classList.remove('open');return;}
-  clearTimeout(uniTimer);drop.innerHTML='<div class="search-loading">Searching...</div>';drop.classList.add('open');
-  uniTimer=setTimeout(async()=>{
-    try{
-      const{data,error}=await _db.from('institutions').select('*').ilike('name',`%${val}%`).limit(10).order('name');
-      if(error||!data||!data.length){drop.innerHTML='<div class="search-loading">No universities found.</div>';return;}
-      drop.innerHTML='';
-      data.forEach(item=>{const div=document.createElement('div');div.className='search-option';div.textContent=item.name;div.onclick=()=>selectInstitution(item);drop.appendChild(div);});
-    }catch(e){drop.innerHTML='<div class="search-loading">Search unavailable.</div>';}
-  },350);
-}
-
-async function selectInstitution(item){
-  selInst=item;selFac=null;selDept=null;
-  document.getElementById('universitySearch').value=item.name;
-  const drop=document.getElementById('universityResults');drop.innerHTML='';drop.classList.remove('open');
-  document.getElementById('selectedInstitutionName').textContent=item.name;
-  document.getElementById('selectedInstitutionBadge').style.display='inline-flex';
-  document.getElementById('selectedFacultyBadge').style.display='none';
-  document.getElementById('selectedDepartmentBadge').style.display='none';
-  document.getElementById('departmentBox').classList.remove('visible');
-  const el=document.getElementById('facultyResults');
-  el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:4px 0;">Loading faculties...</div>';
-  document.getElementById('facultyBox').classList.add('visible');
-  try{
-    const{data,error}=await _db.from('nuc_faculties').select('*').order('name');
-    if(error||!data||!data.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:4px 0;">No faculties found.</div>';return;}
-    el.innerHTML='';
-    data.forEach(f=>{const div=document.createElement('div');div.className='search-option';div.style.cssText='border-radius:12px;border:1px solid var(--border-strong);';div.textContent=f.name;div.onclick=()=>selectFaculty(f);el.appendChild(div);});
-  }catch(e){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:4px 0;">Could not load faculties.</div>';}
-}
-
-async function selectFaculty(f){
-  selFac=f;selDept=null;
-  document.getElementById('selectedFacultyName').textContent=f.name;
-  document.getElementById('selectedFacultyBadge').style.display='inline-flex';
-  document.getElementById('selectedDepartmentBadge').style.display='none';
-  document.getElementById('facultyResults').innerHTML='';
-  const el=document.getElementById('departmentResults');
-  el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:4px 0;">Loading departments...</div>';
-  document.getElementById('departmentBox').classList.add('visible');
-  try{
-    const{data,error}=await _db.from('nuc_departments').select('*').eq('faculty_id',f.id).order('name');
-    if(error||!data||!data.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:4px 0;">No departments found.</div>';return;}
-    el.innerHTML='';
-    data.forEach(d=>{const div=document.createElement('div');div.className='search-option';div.style.cssText='border-radius:12px;border:1px solid var(--border-strong);';div.textContent=d.name;div.onclick=()=>{selDept=d;document.getElementById('selectedDepartmentName').textContent=d.name;document.getElementById('selectedDepartmentBadge').style.display='inline-flex';el.innerHTML='';showToast(`Department: ${d.name}`);};el.appendChild(div);});
-  }catch(e){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:4px 0;">Could not load departments.</div>';}
-}
 
 // ── JOIN FLOW STATE ──
 let jySelInst=null,jySelFac=null,jySelDept=null,jyUniTimer=null;
@@ -521,25 +387,6 @@ async function submitDOS(){
   }catch(err){submittingOverlay.classList.remove('active');createYearbookPortal.style.display='block';showToast(err.message,'error');}
 }
 
-// ── CREATE YEARBOOK NAV ──
-let cyStep=0;const cyTotalSteps=2,cyStepNames=['DOS IDENTITY','DEPARTMENT'];
-function cyUpdateView(){
-  document.querySelectorAll('#createYearbookPortal .step-view').forEach((el,i)=>el.classList.toggle('active',i===cyStep));
-  document.getElementById('cyStepCounter').textContent=`STAGE ${cyStep+1}/${cyTotalSteps}`;
-  document.getElementById('cyStepName').textContent=cyStepNames[cyStep];
-  document.getElementById('cyProgressFill').style.width=`${((cyStep+1)/cyTotalSteps)*100}%`;
-  document.getElementById('cyBtnBack').style.visibility=cyStep===0?'hidden':'visible';
-  document.getElementById('cyBtnNext').textContent=cyStep===cyTotalSteps-1?'Create Yearbook':'Proceed';
-}
-function cyValidateStep(){
-  if(cyStep===0){
-    if(!document.getElementById('dosName').value||!document.getElementById('dosEmail').value||!document.getElementById('dosPassword').value){showToast('Name, email and password are required.','error');return false;}
-    if(!document.getElementById('cyMatric').value){showToast('Matriculation number is required.','error');return false;}
-  }
-  return true;
-}
-function cyNextStep(){if(!cyValidateStep())return;if(cyStep<cyTotalSteps-1){cyStep++;cyUpdateView();}else submitDOS();}
-function cyPrevStep(){if(cyStep>0){cyStep--;cyUpdateView();}}
 
 // ── JOIN NAV ──
 let jyStep=0;const jyTotalSteps=3,jyStepNames=['YOUR IDENTITY','YOUR INSTITUTION','YOUR PRESENCE'];
