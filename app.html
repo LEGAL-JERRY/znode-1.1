@@ -244,6 +244,30 @@
         .query-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 28px; max-width: 480px; }
         .query-card h3 { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
         .query-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; }
+/* ── YEARBOOK CASCADE SEARCH ── */
+        .cascade-search-wrap { position: relative; }
+        .cascade-dropdown {
+            position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+            background: var(--bg-lift); border: 1px solid var(--border-strong);
+            z-index: 200; max-height: 220px; overflow-y: auto; display: none;
+        }
+        .cascade-dropdown.open { display: block; }
+        .cascade-option {
+            padding: 12px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+            color: var(--text-main); border-bottom: 1px solid var(--border-subtle);
+            transition: background 0.15s;
+        }
+        .cascade-option:last-child { border-bottom: none; }
+        .cascade-option:hover { background: var(--bg-surface); }
+        .cascade-loading { padding: 12px 16px; font-size: 12px; color: var(--text-muted); font-weight: 600; }
+        .cascade-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 10px; background: var(--bg-lift); border: 1px solid var(--border-strong);
+            font-size: 11px; font-weight: 700; color: var(--text-muted); margin-top: 6px;
+        }
+        .cascade-badge span { color: var(--text-main); }
+        .cascade-section { display: none; margin-top: 2px; }
+        .cascade-section.visible { display: block; }
 
         /* DOS Voucher */
         #dosVoucherPanel { transition: all 0.2s var(--ease); }
@@ -708,21 +732,49 @@
 
         <div class="divider-label"><span>or search any directory</span></div>
 
-        <!-- Search any yearbook -->
+   <!-- Search any yearbook — cascading -->
         <div class="query-card">
             <h3>Browse student directory</h3>
-            <p>Pick a department and year to pull up their class page.</p>
-            <form onsubmit="accessYearbook(event)">
+            <p>Select institution, faculty, department and year to open that class page.</p>
+
+            <!-- University -->
+            <div class="form-group">
+                <label class="form-label">University</label>
+                <div class="cascade-search-wrap">
+                    <input type="text" id="ybUniSearch" placeholder="Search university..." autocomplete="off" oninput="ybSearchUniversities()">
+                    <div class="cascade-dropdown" id="ybUniDrop"></div>
+                </div>
+                <div id="ybUniBadge" class="cascade-badge" style="display:none;">✓ <span id="ybUniName"></span></div>
+            </div>
+
+            <!-- Faculty -->
+            <div class="cascade-section" id="ybFacultySection">
+                <div class="form-group">
+                    <label class="form-label">Faculty</label>
+                    <div id="ybFacultyList" style="display:flex; flex-direction:column; gap:4px; margin-top:4px;"></div>
+                    <div id="ybFacBadge" class="cascade-badge" style="display:none;">✓ <span id="ybFacName"></span></div>
+                </div>
+            </div>
+
+            <!-- Department -->
+            <div class="cascade-section" id="ybDeptSection">
                 <div class="form-group">
                     <label class="form-label">Department</label>
-                    <input type="text" id="directoryDept" placeholder="e.g. Economics, Computer Science..." required>
+                    <div id="ybDeptList" style="display:flex; flex-direction:column; gap:4px; margin-top:4px;"></div>
+                    <div id="ybDeptBadge" class="cascade-badge" style="display:none;">✓ <span id="ybDeptName"></span></div>
                 </div>
+            </div>
+
+            <!-- Year -->
+            <div class="cascade-section visible" id="ybYearSection">
                 <div class="form-group">
                     <label class="form-label">Graduating year</label>
-                    <input type="number" id="directoryYear" placeholder="e.g. 2025, 2026..." min="2020" max="2035" required>
+                    <input type="number" id="directoryYear" placeholder="e.g. 2025, 2026..." min="2020" max="2035">
                 </div>
-                <button type="submit" class="btn" style="width:100%; margin-top:4px;">Open directory →</button>
-            </form>
+            </div>
+
+            <button class="btn" style="width:100%; margin-top:4px;" onclick="accessYearbook()">Open directory →</button>
+            <p id="ybOpenError" style="font-size:12px; font-weight:700; color:var(--red); margin-top:8px; min-height:14px;"></p>
         </div>
     </section>
 
@@ -1086,14 +1138,109 @@ function commitProfileEdits() {
 }
 
 // ── YEARBOOK ──
-function accessYearbook(e) {
-    e.preventDefault();
-    const dept = document.getElementById('directoryDept').value.trim();
+// ── YEARBOOK CASCADE STATE ──
+let ybSelInst = null, ybSelFac = null, ybSelDept = null, ybUniTimer = null;
+
+async function ybSearchUniversities() {
+    const val = document.getElementById('ybUniSearch').value;
+    const drop = document.getElementById('ybUniDrop');
+    // reset downstream
+    ybSelInst = null; ybSelFac = null; ybSelDept = null;
+    document.getElementById('ybUniBadge').style.display = 'none';
+    document.getElementById('ybFacultySection').classList.remove('visible');
+    document.getElementById('ybDeptSection').classList.remove('visible');
+    if (val.length < 2) { drop.innerHTML = ''; drop.classList.remove('open'); return; }
+    clearTimeout(ybUniTimer);
+    drop.innerHTML = '<div class="cascade-loading">Searching...</div>';
+    drop.classList.add('open');
+    ybUniTimer = setTimeout(async () => {
+        try {
+            const { data, error } = await _db.from('institutions').select('*').ilike('name', `%${val}%`).limit(10).order('name');
+            if (error || !data?.length) { drop.innerHTML = '<div class="cascade-loading">No universities found.</div>'; return; }
+            drop.innerHTML = '';
+            data.forEach(item => {
+                const d = document.createElement('div');
+                d.className = 'cascade-option';
+                d.textContent = item.name;
+                d.onclick = () => ybSelectInstitution(item);
+                drop.appendChild(d);
+            });
+        } catch(e) { drop.innerHTML = '<div class="cascade-loading">Search unavailable.</div>'; }
+    }, 350);
+}
+
+async function ybSelectInstitution(item) {
+    ybSelInst = item; ybSelFac = null; ybSelDept = null;
+    document.getElementById('ybUniSearch').value = item.name;
+    document.getElementById('ybUniDrop').innerHTML = '';
+    document.getElementById('ybUniDrop').classList.remove('open');
+    document.getElementById('ybUniName').textContent = item.name;
+    document.getElementById('ybUniBadge').style.display = 'inline-flex';
+    document.getElementById('ybFacBadge').style.display = 'none';
+    document.getElementById('ybDeptBadge').style.display = 'none';
+    document.getElementById('ybDeptSection').classList.remove('visible');
+
+    const list = document.getElementById('ybFacultyList');
+    list.innerHTML = '<div class="cascade-loading">Loading faculties...</div>';
+    document.getElementById('ybFacultySection').classList.add('visible');
+
+    try {
+        const { data, error } = await _db.from('nuc_faculties').select('*').order('name');
+        if (error || !data?.length) { list.innerHTML = '<div class="cascade-loading">No faculties found.</div>'; return; }
+        list.innerHTML = '';
+        data.forEach(f => {
+            const d = document.createElement('div');
+            d.className = 'cascade-option';
+            d.style.border = '1px solid var(--border-strong)';
+            d.textContent = f.name;
+            d.onclick = () => ybSelectFaculty(f);
+            list.appendChild(d);
+        });
+    } catch(e) { list.innerHTML = '<div class="cascade-loading">Could not load faculties.</div>'; }
+}
+
+async function ybSelectFaculty(f) {
+    ybSelFac = f; ybSelDept = null;
+    document.getElementById('ybFacName').textContent = f.name;
+    document.getElementById('ybFacBadge').style.display = 'inline-flex';
+    document.getElementById('ybFacultyList').innerHTML = '';
+    document.getElementById('ybDeptBadge').style.display = 'none';
+
+    const list = document.getElementById('ybDeptList');
+    list.innerHTML = '<div class="cascade-loading">Loading departments...</div>';
+    document.getElementById('ybDeptSection').classList.add('visible');
+
+    try {
+        const { data, error } = await _db.from('nuc_departments').select('*').eq('faculty_id', f.id).order('name');
+        if (error || !data?.length) { list.innerHTML = '<div class="cascade-loading">No departments found.</div>'; return; }
+        list.innerHTML = '';
+        data.forEach(d => {
+            const el = document.createElement('div');
+            el.className = 'cascade-option';
+            el.style.border = '1px solid var(--border-strong)';
+            el.textContent = d.name;
+            el.onclick = () => {
+                ybSelDept = d;
+                document.getElementById('ybDeptName').textContent = d.name;
+                document.getElementById('ybDeptBadge').style.display = 'inline-flex';
+                list.innerHTML = '';
+                showToast(`Department: ${d.name}`);
+            };
+            list.appendChild(el);
+        });
+    } catch(e) { list.innerHTML = '<div class="cascade-loading">Could not load departments.</div>'; }
+}
+
+function accessYearbook() {
+    const errEl = document.getElementById('ybOpenError');
     const year = document.getElementById('directoryYear').value.trim();
-    if (dept && year) {
-        showToast(`Opening ${dept} — ${year}...`);
-        setTimeout(() => { window.location.href = `yearbook.html?dept=${encodeURIComponent(dept)}&year=${encodeURIComponent(year)}`; }, 500);
-    }
+    if (!ybSelDept) { errEl.textContent = 'Please select a department first.'; return; }
+    if (!year) { errEl.textContent = 'Please enter a graduating year.'; return; }
+    errEl.textContent = '';
+    showToast(`Opening ${ybSelDept.name} — ${year}...`);
+    setTimeout(() => {
+        window.location.href = `yearbook.html?dept=${encodeURIComponent(ybSelDept.name)}&year=${encodeURIComponent(year)}`;
+    }, 500);
 }
 
 function openMyYearbook() {
