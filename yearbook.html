@@ -560,15 +560,17 @@ async function toggleLike(e, id, btnElement) {
     
     let currentVal = parseInt(counterSpan.textContent) || 0;
     
-    if (isLiked) {
-        btnElement.classList.remove('liked');
-        heartSpan.textContent = '♡';
-        currentVal--;
-    } else {
-        btnElement.classList.add('liked');
-        heartSpan.textContent = '♥';
-        currentVal++;
-    }
+   if (isLiked) {
+    btnElement.classList.remove('liked');
+    heartSpan.textContent = '♡';
+    currentVal--;
+    localStorage.removeItem(`znode_liked_${id}`);
+} else {
+    btnElement.classList.add('liked');
+    heartSpan.textContent = '♥';
+    currentVal++;
+    localStorage.setItem(`znode_liked_${id}`, '1');
+}
     counterSpan.textContent = currentVal;
 
     try {
@@ -696,14 +698,15 @@ function renderCard(student, idx) {
     `;
 
     // Active Like Check
-    const likes = student.likes_count || 0;
-    const likeHTML = `
-        <div class="like-section">
-            <button class="like-btn" onclick="toggleLike(event, '${student.id}', this)">
-                <span class="like-heart">♡</span> <span class="like-counter">${likes}</span>
-            </button>
-        </div>
-    `;
+  const likes = student.likes_count || 0;
+const hasLiked = !!localStorage.getItem(`znode_liked_${student.id}`);
+const likeHTML = `
+    <div class="like-section">
+        <button class="like-btn ${hasLiked ? 'liked' : ''}" onclick="toggleLike(event, '${student.id}', this)">
+            <span class="like-heart">${hasLiked ? '♥' : '♡'}</span> <span class="like-counter">${likes}</span>
+        </button>
+    </div>
+`;
 
     entry.innerHTML = `
         ${bannerHTML}
