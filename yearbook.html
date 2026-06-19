@@ -344,6 +344,7 @@
 <main class="page-content">
     <div class="cover-header">
         <div class="cover-dept-main" id="deptLabel">the department of economics</div>
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:3px; color:var(--gold); margin-bottom:6px;" id="instLabel"></div>
         <div class="cover-collaboration">In collaboration with <span class="cover-znode-badge">Z-NODE</span></div>
         <div class="cover-class-banner" id="classbanner">CLASS OF —</div><br>
         <div class="cover-ephoto">— E-Photo Album —</div>
@@ -441,7 +442,7 @@ function initSession() {
 
 function getParams() {
     const p = new URLSearchParams(window.location.search);
-    return { dept: p.get('dept') || '', year: p.get('year') || '' };
+    return { dept: p.get('dept') || '', year: p.get('year') || '', inst: p.get('inst') || '' };
 }
 
 // ── 🔍 SEARCH INTERACTION ROUTERS ───────────────────────────────────────────
@@ -729,7 +730,7 @@ function renderCard(student, idx) {
     return entry;
 }
 
-async function loadYearbook(dept, year) {
+async function loadYearbook(dept, year, inst) {
     try {
         const sessionRaw = localStorage.getItem('znodeStudentProfile');
         let currentUsername = "";
@@ -737,9 +738,11 @@ async function loadYearbook(dept, year) {
 
         const fetchColumns = 'id, department, faculty, state_of_origin, tribe, gender, dob, aspirations, hobbies, skills_of_student, current_project, lga, religion, study_habit, keeps_notes, likes_count, graduation_year, full_name, username, matric_number, eternal_statement, socials, institution, yearbook_verified, avatar_url, yearbook_access, is_dos';
         let query = _db.from('students').select(fetchColumns); 
+
         
-        if (dept) query = query.ilike('department', `%${dept}%`);
-        if (year) query = query.eq('graduation_year', parseInt(year));
+       if (dept) query = query.ilike('department', `%${dept}%`);
+    if (year) query = query.eq('graduation_year', parseInt(year));
+    if (inst) query = query.ilike('institution', `%${inst}%`);
         
         if (currentUsername) query = query.or(`yearbook_access.eq.true,username.eq.${currentUsername}`);
         else query = query.eq('yearbook_access', true);
@@ -760,13 +763,14 @@ async function loadYearbook(dept, year) {
 async function bootstrap() {
     const session = initSession();
     if (!session) return;
-    const { dept, year } = getParams();
+    const { dept, year, inst } = getParams();
 
     document.getElementById('topBrand').textContent   = dept ? `${dept} WEBSITE`.toUpperCase() : 'DEPARTMENT WEBSITE';
     document.getElementById('classbanner').textContent = year ? `CLASS OF ${year}` : 'CLASS OF —';
-    document.getElementById('deptLabel').textContent   = dept ? `the department of ${dept.toLowerCase()}` : 'the department';
+    document.getElementById('deptLabel').textContent = dept ? `the department of ${dept.toLowerCase()}` : 'the department';
+    document.getElementById('instLabel').textContent = inst ? inst.toUpperCase() : '';
 
-    allStudentsGlobal = await loadYearbook(dept, year);
+   allStudentsGlobal = await loadYearbook(dept, year, inst);
     document.getElementById('loadingState').style.display = 'none';
 
     if (!allStudentsGlobal.length) {
