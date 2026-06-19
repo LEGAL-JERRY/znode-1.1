@@ -92,7 +92,7 @@
             display: flex; align-items: center; justify-content: center;
             font-weight: 800; font-size: 13px; flex-shrink: 0; overflow: hidden;
         }
-        .u-avatar img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); }
+        .u-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: grayscale(100%); }
         .u-name { font-size: 13px; font-weight: 700; color: var(--text-main); }
         .u-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
 
@@ -128,11 +128,12 @@
             background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 12px;
             position: relative;
         }
-        .photo-frame img, .photo-placeholder {
-            width: 100%; aspect-ratio: 3/4; object-fit: cover;
-            filter: grayscale(100%); display: block;
-            transition: filter 0.3s;
-        }
+              .photo-frame img, .photo-placeholder {
+                        width: 100%; aspect-ratio: 3/4; object-fit: cover;
+                        object-position: top center;
+                        filter: grayscale(100%); display: block;
+                        transition: filter 0.3s;
+                    }
         .photo-frame:hover img { filter: grayscale(0%); }
         .photo-placeholder { background: var(--bg-lift); display: flex; align-items: center; justify-content: center; font-size: 52px; }
         .photo-caption { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 10px; text-align: center; }
@@ -284,7 +285,7 @@
             display: flex; align-items: center; justify-content: center; font-size: 24px;
             background: var(--bg-lift); margin-bottom: 14px;
         }
-        .avatar-preview img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); }
+        .avatar-preview img { width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: grayscale(100%); }
 
         /* ── TOAST ── */
         .toast-root { position: fixed; bottom: 28px; right: 28px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
