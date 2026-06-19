@@ -1239,7 +1239,7 @@ function accessYearbook() {
     errEl.textContent = '';
     showToast(`Opening ${ybSelDept.name} — ${year}...`);
     setTimeout(() => {
-        window.location.href = `yearbook.html?dept=${encodeURIComponent(ybSelDept.name)}&year=${encodeURIComponent(year)}`;
+        window.location.href = `yearbook.html?inst=${encodeURIComponent(ybSelInst.name)}&dept=${encodeURIComponent(ybSelDept.name)}&year=${encodeURIComponent(year)}`;
     }, 500);
 }
 
@@ -1248,7 +1248,7 @@ function openMyYearbook() {
         showToast('Department or graduation year missing — check your profile settings.');
         return;
     }
-    window.location.href = `yearbook.html?dept=${encodeURIComponent(S.department)}&year=${encodeURIComponent(S.graduation_year)}`;
+   window.location.href = `yearbook.html?inst=${encodeURIComponent(S.university)}&dept=${encodeURIComponent(S.department)}&year=${encodeURIComponent(S.graduation_year)}`;
 }
 
 function toggleDOSVoucherPanel() {
