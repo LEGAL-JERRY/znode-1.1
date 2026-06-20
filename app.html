@@ -286,7 +286,33 @@
             background: var(--bg-lift); margin-bottom: 14px;
         }
         .avatar-preview img { width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: grayscale(100%); }
+/* ── THEME SWITCH ── */
+.theme-switch-wrap { display: flex; align-items: center; gap: 14px; margin-top: 4px; }
+.theme-switch-label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+.switch { position: relative; display: inline-block; width: 48px; height: 26px; flex-shrink: 0; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background: var(--border-strong); transition: 0.3s var(--ease);
+}
+.slider::before {
+    content: ''; position: absolute;
+    width: 20px; height: 20px; left: 3px; bottom: 3px;
+    background: var(--text-main); transition: 0.3s var(--ease);
+}
+input:checked + .slider { background: var(--text-main); }
+input:checked + .slider::before { transform: translateX(22px); background: var(--accent-inv); }
 
+/* ── PHOTO UPLOAD ── */
+.photo-upload-zone {
+    border: 2px dashed var(--border-strong); padding: 24px;
+    text-align: center; cursor: pointer; transition: all 0.2s var(--ease);
+    margin-bottom: 14px; position: relative;
+}
+.photo-upload-zone:hover { border-color: var(--text-main); background: var(--bg-lift); }
+.photo-upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.photo-upload-preview { width: 72px; height: 72px; border: 1px solid var(--border-strong); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 24px; background: var(--bg-lift); margin: 0 auto 12px; }
+.photo-upload-preview img { width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: grayscale(100%); }
         /* ── TOAST ── */
         .toast-root { position: fixed; bottom: 28px; right: 28px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
         .toast {
@@ -730,7 +756,36 @@
             <p id="myYearbookDesc" style="margin-bottom:16px;">Jump straight to your class.</p>
             <button class="btn" onclick="openMyYearbook()">Open My Yearbook →</button>
         </div>
+        <div class="divider-label"><span>my groups <span style="font-size:9px; background:var(--text-main); color:var(--accent-inv); padding:2px 6px; letter-spacing:0.1em;">BETA</span></span></div>
 
+<div style="display:flex; flex-direction:column; gap:10px; margin-bottom:28px;" id="myGroupsPanel">
+    <!-- Institution group -->
+    <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); padding:16px 20px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;" onclick="openGroupYearbook('inst')" id="groupInst">
+        <div>
+            <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.14em; color:var(--text-muted); margin-bottom:3px;">🏫 Institution</div>
+            <div style="font-size:14px; font-weight:700;" id="groupInstName">—</div>
+        </div>
+        <span style="font-size:18px; color:var(--text-muted);">→</span>
+    </div>
+
+    <!-- Faculty group -->
+    <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); padding:16px 20px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;" onclick="openGroupYearbook('faculty')" id="groupFaculty">
+        <div>
+            <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.14em; color:var(--text-muted); margin-bottom:3px;">📚 Faculty</div>
+            <div style="font-size:14px; font-weight:700;" id="groupFacultyName">—</div>
+        </div>
+        <span style="font-size:18px; color:var(--text-muted);">→</span>
+    </div>
+
+    <!-- Department group -->
+    <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); padding:16px 20px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;" onclick="openGroupYearbook('dept')" id="groupDept">
+        <div>
+            <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.14em; color:var(--text-muted); margin-bottom:3px;">🎓 Department · Class of <span id="groupYear">—</span></div>
+            <div style="font-size:14px; font-weight:700;" id="groupDeptName">—</div>
+        </div>
+        <span style="font-size:18px; color:var(--text-muted);">→</span>
+    </div>
+</div>
         <div class="divider-label"><span>or search any directory</span></div>
 
    <!-- Search any yearbook — cascading -->
@@ -779,74 +834,85 @@
         </div>
     </section>
 
-    <!-- ══ SETTINGS ══ -->
-    <section class="view" id="view-settings">
-        <div class="page-top">
-            <div class="page-greeting">Settings.</div>
-            <div class="page-subtitle">Update your core details, photo, and preferences.</div>
-        </div>
+<!-- ══ SETTINGS ══ -->
+<section class="view" id="view-settings">
+    <div class="page-top">
+        <div class="page-greeting">Settings.</div>
+        <div class="page-subtitle">Update your core details, photo, and preferences.</div>
+    </div>
 
-        <div class="settings-cols">
-            <!-- Identity card -->
-            <div class="settings-card" style="grid-column: 1 / -1;">
-                <h3>Core identity</h3>
-                <p>Changes here update your profile display. They don't affect your verification status.</p>
-                <div class="two-col">
-                    <div class="form-group">
-                        <label class="form-label">Full name</label>
-                        <input type="text" id="editFullName">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Matric number</label>
-                        <input type="text" id="editMatricNo">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">University</label>
-                        <input type="text" id="editUniversity">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Department</label>
-                        <input type="text" id="editDept">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Faculty</label>
-                        <input type="text" id="editFaculty">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Graduation year</label>
-                        <input type="number" id="editGradYear" min="2020" max="2035">
-                    </div>
-                </div>
-                <button class="btn" onclick="commitProfileEdits()">Save changes</button>
-            </div>
-
-            <!-- Avatar -->
-            <div class="settings-card">
-                <h3>Profile photo</h3>
-                <p>Upload a new photo. It shows up on your yearbook card and everywhere on Z-Node.</p>
-                <div class="avatar-preview" id="settingsAvatar">👤</div>
+    <div class="settings-cols">
+        <!-- Identity card -->
+        <div class="settings-card" style="grid-column: 1 / -1;">
+            <h3>Core identity</h3>
+            <p>Changes here update your profile display. They don't affect your verification status.</p>
+            <div class="two-col">
                 <div class="form-group">
-                    <input type="file" id="avatarFileInput" accept="image/*" style="font-size:12px; padding:8px 12px;">
+                    <label class="form-label">Full name</label>
+                    <input type="text" id="editFullName">
                 </div>
-                <button class="btn" onclick="uploadNewAvatar()">Upload photo</button>
-                <p id="avatarUploadStatus" style="font-size:12px; font-weight:700; margin-top:10px; min-height:16px;"></p>
+                <div class="form-group">
+                    <label class="form-label">Matric number</label>
+                    <input type="text" id="editMatricNo">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">University</label>
+                    <input type="text" id="editUniversity">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <input type="text" id="editDept">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Faculty</label>
+                    <input type="text" id="editFaculty">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Graduation year</label>
+                    <input type="number" id="editGradYear" min="2020" max="2035">
+                </div>
             </div>
+            <button class="btn" onclick="commitProfileEdits()">Save changes</button>
+        </div>
 
-            <!-- Theme -->
-            <div class="settings-card">
-                <h3>Appearance</h3>
-                <p>Switch between dark and light mode.</p>
-                <button class="btn ghost" onclick="toggleTheme()">Toggle dark / light</button>
+        <!-- Photo Upload -->
+        <div class="settings-card" style="grid-column: 1 / -1;">
+            <h3>Profile photo</h3>
+            <p>Upload a clear, front-facing photo. It shows on your yearbook card and everywhere on Z-Node.</p>
+            <div class="photo-upload-zone" id="photoUploadZone">
+                <input type="file" id="avatarFileInput" accept="image/*" onchange="previewAvatar(this)">
+                <div class="photo-upload-preview" id="uploadPreviewWrap">
+                    <span id="uploadPreviewIcon">👤</span>
+                </div>
+                <p style="font-size:13px; font-weight:700; color:var(--text-main);" id="uploadZoneLabel">Click or drag photo here</p>
+                <p style="font-size:11px; color:var(--text-muted); margin-top:4px;">JPG or PNG · Face should be clearly visible</p>
             </div>
+            <button class="btn" onclick="uploadNewAvatar()">Upload photo</button>
+            <p id="avatarUploadStatus" style="font-size:12px; font-weight:700; margin-top:10px; min-height:16px;"></p>
+        </div>
 
-            <!-- Danger zone -->
-            <div class="settings-card">
-                <h3>Danger zone</h3>
-                <p>Clear all local session data and start fresh. This won't delete your account.</p>
-                <button class="btn danger" onclick="resetSession()">Clear session data</button>
+        <!-- Appearance -->
+        <div class="settings-card">
+            <h3>Appearance</h3>
+            <p>Switch between dark and light mode.</p>
+            <div class="theme-switch-wrap">
+                <span class="theme-switch-label">Dark</span>
+                <label class="switch">
+                    <input type="checkbox" id="themeToggleSwitch" onchange="toggleTheme()">
+                    <span class="slider"></span>
+                </label>
+                <span class="theme-switch-label">Light</span>
             </div>
         </div>
-    </section>
+
+        <!-- Sign Out -->
+        <div class="settings-card">
+            <h3>Sign Out</h3>
+            <p>End your session and return to the login screen. Your data stays saved.</p>
+            <button class="btn danger" onclick="signOut()">Sign out of Z-Node</button>
+        </div>
+    </div>
+</section>
 
 </main>
 
@@ -967,8 +1033,17 @@ function render() {
 
 // profile completion prompt
     const prompt = document.getElementById('profileCompletePrompt');
-    if (prompt) prompt.style.display = S.yearbook_verified ? 'block' : 'none';
-
+    const alreadyFilled = !!localStorage.getItem(`znode_profile_filled_${S.id}`);
+    if (prompt) prompt.style.display = (S.yearbook_verified && !alreadyFilled) ? 'block' : 'none';
+// yearbook groups
+const gInst = document.getElementById('groupInstName');
+const gFac  = document.getElementById('groupFacultyName');
+const gDept = document.getElementById('groupDeptName');
+const gYear = document.getElementById('groupYear');
+if (gInst) gInst.textContent = S.university    || 'Not set';
+if (gFac)  gFac.textContent  = S.faculty       || 'Not set';
+if (gDept) gDept.textContent = S.department    || 'Not set';
+if (gYear) gYear.textContent = S.graduation_year || '—';
     // custom attrs
     renderCustomAttrs();
 }
@@ -1251,7 +1326,20 @@ function openMyYearbook() {
     }
    window.location.href = `yearbook.html?inst=${encodeURIComponent(S.university)}&dept=${encodeURIComponent(S.department)}&year=${encodeURIComponent(S.graduation_year)}`;
 }
-
+function openGroupYearbook(type) {
+    if (!S.university) { showToast('No institution found on your profile.'); return; }
+    let url = '';
+    if (type === 'inst') {
+        url = `yearbook.html?inst=${encodeURIComponent(S.university)}&year=${encodeURIComponent(S.graduation_year)}`;
+    } else if (type === 'faculty') {
+        if (!S.faculty) { showToast('No faculty found on your profile.'); return; }
+        url = `yearbook.html?inst=${encodeURIComponent(S.university)}&faculty=${encodeURIComponent(S.faculty)}&year=${encodeURIComponent(S.graduation_year)}`;
+    } else if (type === 'dept') {
+        if (!S.department) { showToast('No department found on your profile.'); return; }
+        url = `yearbook.html?inst=${encodeURIComponent(S.university)}&dept=${encodeURIComponent(S.department)}&year=${encodeURIComponent(S.graduation_year)}`;
+    }
+    if (url) window.location.href = url;
+}
 function toggleDOSVoucherPanel() {
     const p = document.getElementById('dosVoucherPanel');
     p.style.display = p.style.display === 'none' ? 'block' : 'none';
@@ -1346,7 +1434,8 @@ async function saveCompleteProfile() {
         saveLocal(); render();
         sts.style.color = 'var(--green)'; sts.textContent = 'Saved — your yearbook card is updated.';
         showToast('Profile completed!');
-        setTimeout(() => { document.getElementById('profileCompletePrompt').style.display = 'none'; }, 2500);
+            localStorage.setItem(`znode_profile_filled_${S.id}`, '1');
+            setTimeout(() => { document.getElementById('profileCompletePrompt').style.display = 'none'; }, 2500);
     } catch(e) {
         sts.style.color = 'var(--red)'; sts.textContent = 'Save failed — try again.';
     }
@@ -1395,7 +1484,21 @@ function saveLocal() { localStorage.setItem('znode_session', JSON.stringify(S));
 
 function toggleTheme() {
     const cur = document.body.getAttribute('data-theme');
-    document.body.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', next);
+    const sw = document.getElementById('themeToggleSwitch');
+    if (sw) sw.checked = next === 'light';
+}
+
+function previewAvatar(input) {
+    if (!input.files?.length) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        const wrap = document.getElementById('uploadPreviewWrap');
+        wrap.innerHTML = `<img src="${e.target.result}" alt="preview">`;
+        document.getElementById('uploadZoneLabel').textContent = '✓ Photo ready — click Upload to save';
+    };
+    reader.readAsDataURL(input.files[0]);
 }
 
 function resetSession() {
@@ -1466,8 +1569,10 @@ function bootstrap() {
     }
 
     render();
-    fetchYearbookStatus();
-}
+        fetchYearbookStatus();
+        const sw = document.getElementById('themeToggleSwitch');
+        if (sw) sw.checked = document.body.getAttribute('data-theme') === 'light';
+        }
 
 bootstrap();
 </script>
