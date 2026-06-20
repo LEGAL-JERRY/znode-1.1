@@ -438,7 +438,7 @@ function prefillDemoStep1(){
   document.getElementById('jyYear').value   = '2026';
   document.getElementById('jyMatric').value = 'DEMO/2026/001';
 }document.getElementById('jyBtnNext').textContent=jyStep===jyTotalSteps-1?'Deploy Profile':'Proceed';
-}
+
 function jyValidateStep(){
   if(DEMO_MODE) return true; // demo always advances on click — that's the whole point of the "huge next button"
   if(jyStep===0){if(!document.getElementById('jyFullName').value||!document.getElementById('jyUsername').value||!document.getElementById('jyEmail').value||!document.getElementById('jyPass').value){showToast('Name, Username, Email and Password are required.','error');return false;}}
