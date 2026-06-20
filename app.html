@@ -972,8 +972,11 @@ function render() {
     document.getElementById('sidebarDept').textContent = S.department || '—';
 
     // settings avatar
-    const sa = document.getElementById('settingsAvatar');
-    sa.innerHTML = S.avatar_url ? `<img src="${S.avatar_url}" alt="avatar">` : '👤';
+    // settings avatar — populate upload preview with current photo
+const uploadWrap = document.getElementById('uploadPreviewWrap');
+if (uploadWrap && S.avatar_url) {
+    uploadWrap.innerHTML = `<img src="${S.avatar_url}" alt="avatar">`;
+}
 
     // core fields
     document.getElementById('fFullName').textContent    = S.full_name     || '—';
