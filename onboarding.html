@@ -261,6 +261,14 @@ const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const { createClient } = supabase;
 const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// ── DEMO MODE ── triggered by onboarding.html?demo=true — no DB reads or writes ever happen in this mode.
+const DEMO_MODE = new URLSearchParams(location.search).get('demo') === 'true';
+const DEMO_DATA = {
+  institution: { id: 'demo-inst', name: 'Federal University, Lafia' },
+  faculty:     { id: 'demo-fac',  name: 'Faculty of Social Sciences' },
+  department:  { id: 'demo-dept', name: 'Economics' }
+};
+
 const themeOverlay=document.getElementById('themeOverlay'),authOverlay=document.getElementById('authChoiceOverlay'),loginOverlay=document.getElementById('loginOverlay'),joinYearbookPortal=document.getElementById('joinYearbookPortal'),submittingOverlay=document.getElementById('submittingOverlay');
 let studentImageBlob=null;
 
@@ -397,8 +405,42 @@ function jyUpdateView(){
   document.getElementById('jyProgressFill').style.width=`${((jyStep+1)/jyTotalSteps)*100}%`;
   document.getElementById('jyBtnBack').style.visibility=jyStep===0?'hidden':'visible';
   document.getElementById('jyBtnNext').textContent=jyStep===jyTotalSteps-1?'Deploy Profile':'Proceed';
+  if(DEMO_MODE){
+    if(jyStep===0) prefillDemoStep0();
+    if(jyStep===1) prefillDemoStep1();
+  }
+}
+
+// ── DEMO PREFILL ── populates the real on-screen fields with sample data so every
+// screen renders exactly as it would for a real student. Nothing here calls _db.
+function prefillDemoStep0(){
+  document.getElementById('jyFullName').value = 'Amaka Okafor';
+  document.getElementById('jyUsername').value = 'amaka_demo';
+  document.getElementById('jyQuote').value     = 'Code is temporary, infrastructure is forever.';
+  document.getElementById('jyEmail').value     = 'demo@znode.ng';
+  document.getElementById('jyPass').value      = 'demopass123';
+}
+function prefillDemoStep1(){
+  jySelInst = DEMO_DATA.institution;
+  jySelFac  = DEMO_DATA.faculty;
+  jySelDept = DEMO_DATA.department;
+  document.getElementById('jyUniSearch').value = jySelInst.name;
+  document.getElementById('jySelectedInstitutionName').textContent = jySelInst.name;
+  document.getElementById('jySelectedInstitutionBadge').style.display = 'inline-flex';
+  document.getElementById('jyFacultyBox').classList.add('visible');
+  document.getElementById('jyFacultyResults').innerHTML = '';
+  document.getElementById('jySelectedFacultyName').textContent = jySelFac.name;
+  document.getElementById('jySelectedFacultyBadge').style.display = 'inline-flex';
+  document.getElementById('jyDepartmentBox').classList.add('visible');
+  document.getElementById('jyDepartmentResults').innerHTML = '';
+  document.getElementById('jySelectedDepartmentName').textContent = jySelDept.name;
+  document.getElementById('jySelectedDepartmentBadge').style.display = 'inline-flex';
+  document.getElementById('jyYear').value   = '2026';
+  document.getElementById('jyMatric').value = 'DEMO/2026/001';
+}document.getElementById('jyBtnNext').textContent=jyStep===jyTotalSteps-1?'Deploy Profile':'Proceed';
 }
 function jyValidateStep(){
+  if(DEMO_MODE) return true; // demo always advances on click — that's the whole point of the "huge next button"
   if(jyStep===0){if(!document.getElementById('jyFullName').value||!document.getElementById('jyUsername').value||!document.getElementById('jyEmail').value||!document.getElementById('jyPass').value){showToast('Name, Username, Email and Password are required.','error');return false;}}
   if(jyStep===1){
     if(!jySelInst){showToast('Please select your university.','error');return false;}
@@ -409,7 +451,12 @@ function jyValidateStep(){
   }
   return true;
 }
-async function jyNextStep(){if(!jyValidateStep())return;if(jyStep<jyTotalSteps-1){jyStep++;jyUpdateView();}else submitJoinYearbook();}
+async function jyNextStep(){
+  if(!jyValidateStep())return;
+  if(jyStep<jyTotalSteps-1){jyStep++;jyUpdateView();}
+  else if(DEMO_MODE){ window.location.href='demo-yearbook.html'; }
+  else submitJoinYearbook();
+}
 function jyPrevStep(){if(jyStep>0){jyStep--;jyUpdateView();}}
 
 // ── JOIN SUBMIT ──
@@ -475,13 +522,24 @@ async function processLogin(){
 }
 
 // ── CLOSE DROPDOWNS ON OUTSIDE CLICK ──
+// ── CLOSE DROPDOWNS ON OUTSIDE CLICK ──
 document.addEventListener('click',e=>{
   if(!e.target.closest('.search-wrap')&&!e.target.closest('#universityResults')&&!e.target.closest('#facultyResults')&&!e.target.closest('#departmentResults')&&!e.target.closest('#jyUniversityResults')&&!e.target.closest('#jyFacultyResults')&&!e.target.closest('#jyDepartmentResults')){
     document.querySelectorAll('.search-dropdown').forEach(d=>{d.classList.remove('open');d.innerHTML='';});
   }
 });
 
-if(localStorage.getItem('znodeStudentProfile')){window.location.href='app.html';}
+// ── BOOT ──
+if (DEMO_MODE) {
+  // Skip the theme picker and auth choice entirely — go straight into the join flow.
+  // Also: never redirect to app.html here, even if a real session exists in this browser.
+  themeOverlay.classList.remove('active');
+  authOverlay.classList.remove('active');
+  joinYearbookPortal.style.display = 'block';
+  jyUpdateView();
+} else if (localStorage.getItem('znodeStudentProfile')) {
+  window.location.href = 'app.html';
+}
 </script>
 </body>
 </html>
