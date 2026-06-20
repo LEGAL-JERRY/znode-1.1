@@ -127,6 +127,17 @@
         }
         .btn-secondary:hover { border-color:rgba(0,0,0,0.6); color:var(--text); }
 
+        .hero-demo-link {
+            margin-top: 20px;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            color: var(--muted);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            transition: color 0.2s;
+        }
+        .hero-demo-link:hover { color: var(--text); }
+
         .hero-stat {
             margin-top:64px;
             display:flex; align-items:center; gap:48px;
@@ -275,9 +286,10 @@
 <!-- NAV -->
 <nav>
     <div class="nav-brand">Z-NODE</div>
-    <div class="nav-links">
+ <div class="nav-links">
         <a href="#features">Features</a>
         <a href="#how">How it works</a>
+        <a href="onboarding.html?demo=true">View Demo</a>
         <a href="app.html">Sign In</a>
         <a href="onboarding.html" class="nav-cta">Join Now →</a>
     </div>
@@ -294,13 +306,14 @@
     <p class="hero-sub fade-up">
         Create a digital footprint that exists in your department forever.
     </p>
-    <div class="hero-actions fade-up">
+  <div class="hero-actions fade-up">
         <a href="onboarding.html" class="btn-primary">
             <span>Join Z-Node</span>
             <span>→</span>
         </a>
         <a href="app.html" class="btn-secondary">Sign In</a>
     </div>
+    <a href="onboarding.html?demo=true" class="hero-demo-link fade-up">▶ See how it works — no signup needed</a>
 
     <div class="hero-stat fade-up" id="heroStats">
         <div class="hero-stat-item">
