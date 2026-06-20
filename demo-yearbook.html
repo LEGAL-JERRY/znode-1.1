@@ -1,1 +1,854 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="monochrome-dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Z-Node // Yearbook Archive</title>
+   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@400;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root, [data-theme='default'] {
+            --paper:      #f0ebe0;
+            --paper-mid:  #e4dac8;
+            --paper-dark: #d4c8b0;
+            --navy:       #1a2744;
+            --gold:       #c8823a;
+            --tape:       rgba(208, 182, 128, 0.72);
+            --text-main:  #1a2744;
+            --text-muted: #6b5e4a;
+            --text-faint: #a89880;
+            --ease:       cubic-bezier(0.16, 1, 0.3, 1);
+            --hero-mask:  rgba(240, 235, 224, 0.85);
+        }
 
+        [data-theme='monochrome-dark'] {
+            --paper:      #000000;
+            --paper-mid:  #111111;
+            --paper-dark: #333333;
+            --navy:       #ffffff;
+            --gold:       #aaaaaa;
+            --tape:       rgba(255, 255, 255, 0.2);
+            --text-main:  #ffffff;
+            --text-muted: #888888;
+            --text-faint: #444444;
+            --hero-mask:  rgba(0, 0, 0, 0.85);
+        }
+
+        [data-theme='deep-space'] {
+            --paper:      #05050a;
+            --paper-mid:  #0f0f1a;
+            --paper-dark: #1e1e38;
+            --navy:       #00ffcc;
+            --gold:       #ffb703;
+            --tape:       rgba(255, 183, 3, 0.3);
+            --text-main:  #ffffff;
+            --text-muted: #94a3b8;
+            --text-faint: #3b4252;
+            --hero-mask:  rgba(5, 5, 10, 0.88);
+        }
+
+        [data-theme='slate-gray'] {
+            --paper:      #1a1c1e;
+            --paper-mid:  #2d3033;
+            --paper-dark: #43474c;
+            --navy:       #90caf9;
+            --gold:       #ffcc80;
+            --tape:       rgba(144, 202, 249, 0.2);
+            --text-main:  #e3e2e6;
+            --text-muted: #8e9196;
+            --text-faint: #43474c;
+            --hero-mask:  rgba(26, 28, 30, 0.85);
+        }
+
+        [data-theme='minimal-light'] {
+            --paper:      #ffffff;
+            --paper-mid:  #f0f0f0;
+            --paper-dark: #111111;
+            --navy:       #000000;
+            --gold:       #000000;
+            --tape:       rgba(0, 0, 0, 0.15);
+            --text-main:  #000000;
+            --text-muted: #555555;
+            --text-faint: #999999;
+            --hero-mask:  rgba(255, 255, 255, 0.85);
+        }
+
+        [data-theme='pink-vibe'] {
+            --paper:      #fff0f5;
+            --paper-mid:  #ffe4e1;
+            --paper-dark: #ffb6c1;
+            --navy:       #ff1493;
+            --gold:       #ff69b4;
+            --tape:       rgba(255, 20, 147, 0.3);
+            --text-main:  #4a002a;
+            --text-muted: #c71585;
+            --text-faint: #db7093;
+            --hero-mask:  rgba(255, 240, 245, 0.85);
+        }
+        [data-theme='pink-vibe'] .frame-fg {
+            border-radius: 40% 60% 50% 50% / 50% 40% 60% 50%;
+            border: 3px dashed var(--navy);
+            background: #fffdfc;
+            padding: 12px 12px 28px;
+        }
+        [data-theme='pink-vibe'] .student-photo, [data-theme='pink-vibe'] .photo-empty { border-radius: 40% 60% 50% 50% / 50% 40% 60% 50%; }
+
+        [data-theme='sky-blue'] {
+            --paper:      #f0f8ff;
+            --paper-mid:  #e6f2ff;
+            --paper-dark: #b0e2ff;
+            --navy:       #00688b;
+            --gold:       #00bfff;
+            --tape:       rgba(0, 191, 255, 0.4);
+            --text-main:  #002244;
+            --text-muted: #4682b4;
+            --text-faint: #5cacee;
+            --hero-mask:  rgba(240, 248, 255, 0.85);
+        }
+        [data-theme='sky-blue'] .frame-fg { border-radius: 24px; border: 2px solid var(--navy); box-shadow: 0 10px 25px rgba(0, 104, 139, 0.15); padding: 10px 10px 24px; }
+        [data-theme='sky-blue'] .student-photo, [data-theme='sky-blue'] .photo-empty { border-radius: 16px; }
+
+        [data-theme='orange-burst'] {
+            --paper:      #fff5ee;
+            --paper-mid:  #ffebcd;
+            --paper-dark: #ffcc99;
+            --navy:       #ff4500;
+            --gold:       #ff8c00;
+            --tape:       rgba(255, 69, 0, 0.35);
+            --text-main:  #3a1a00;
+            --text-muted: #cd853f;
+            --text-faint: #f4a460;
+            --hero-mask:  rgba(255, 245, 238, 0.85);
+        }
+        [data-theme='orange-burst'] .frame-fg { transform: skewY(-2deg) rotate(2deg) !important; border-radius: 4px; border: 4px solid var(--navy); padding: 8px 8px 24px; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--paper); color: var(--text-main); min-height: 100vh; font-family: 'Inter', sans-serif; transition: background 0.4s var(--ease), color 0.4s var(--ease); }
+
+        /* ══════════════════════════════
+           TOP BAR & EXPANDABLE SEARCH
+        ══════════════════════════════ */
+        .top-bar {
+            position: sticky; top: 0; z-index: 50;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 18px; background: var(--paper);
+            border-bottom: 1px dashed var(--paper-dark); gap: 10px;
+        }
+
+        .back-btn {
+            display: flex; align-items: center; gap: 7px;
+            background: none; border: none; cursor: pointer;
+            color: var(--text-muted); font-size: 11px; font-weight: 800;
+            font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.1em;
+            padding: 6px 0; flex-shrink: 0; transition: color 0.2s;
+        }
+        .back-btn:hover { color: var(--navy); }
+
+        .top-brand {
+            font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; color: var(--navy);
+            text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 25%;
+        }
+
+        .palette-dock {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--paper-mid); padding: 6px 10px; border-radius: 20px;
+            border: 1px solid var(--paper-dark); flex-shrink: 0;
+        }
+        .palette-node {
+            width: 12px; height: 12px; border-radius: 50%; cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.1); transition: transform 0.2s;
+        }
+        .palette-node:hover { transform: scale(1.3); }
+        .palette-node.active-node { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--navy); }
+
+        .header-search-container { position: relative; display: flex; align-items: center; }
+        .search-input-wrapper { width: 0; overflow: hidden; transition: width 0.3s var(--ease); display: flex; align-items: center; }
+        .header-search-container.expanded .search-input-wrapper { width: 170px; margin-right: 6px; }
+        .header-search-input { width: 100%; padding: 6px 12px; border-radius: 16px; border: 1px solid var(--paper-dark); background: var(--paper-mid); color: var(--text-main); font-size: 12px; font-family: 'Inter', sans-serif; outline: none; }
+        
+        .search-toggle-btn {
+            background: var(--paper-mid); border: 1px solid var(--paper-dark);
+            cursor: pointer; width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; color: var(--text-main);
+        }
+        .search-toggle-btn:hover { background: var(--navy); color: var(--paper); }
+
+        .search-dropdown-menu {
+            position: absolute; top: 100%; right: 0; margin-top: 8px;
+            width: 240px; background: var(--paper-mid); border: 1px solid var(--paper-dark);
+            border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            max-height: 260px; overflow-y: auto; z-index: 120; display: none;
+        }
+        .search-dropdown-menu.active { display: block; }
+        .dropdown-item { padding: 10px 12px; font-size: 12px; cursor: pointer; border-bottom: 1px solid var(--paper-dark); color: var(--text-main); display: flex; align-items: center; gap: 8px; transition: background 0.15s; }
+        .dropdown-item:last-child { border-bottom: none; }
+        .dropdown-item:hover { background: var(--navy); color: var(--paper); }
+        .dropdown-item img { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; background: var(--paper-dark); }
+        .dropdown-item .item-meta { font-size: 10px; opacity: 0.7; margin-left: auto; font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.5px;}
+
+        .user-chip { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .user-avatar { width: 26px; height: 26px; overflow: hidden; border-radius: 50%; border: 2px solid var(--navy); background: var(--paper-mid); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; color: var(--navy); }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        #navUsername { font-size: 11px; font-weight: 700; color: var(--text-muted); display: none; }
+        @media (min-width: 450px) { #navUsername { display: block; } }
+
+        /* ══════════════════════════════
+           MAIN CONTENT & HERO HEADER
+        ══════════════════════════════ */
+        .page-content { max-width: 480px; margin: 0 auto; transition: max-width 0.4s var(--ease); }
+        .cover-header { position: relative; text-align: center; padding: 44px 20px 24px; border-bottom: 1px solid var(--paper-dark); z-index: 1; overflow: hidden; }
+        .cover-header::before { content: ''; position: absolute; inset: 0; background-image: url('WhatsApp Image 2026-06-11 at 8.58.01 PM (1).jpeg'); background-size: cover; background-position: center; filter: grayscale(100%) contrast(1.1); z-index: -2; }
+        .cover-header::after { content: ''; position: absolute; inset: 0; background: var(--hero-mask); mix-blend-mode: normal; z-index: -1; }
+        .cover-dept-main { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 1.5px; line-height: 1.05; color: var(--navy); text-transform: lowercase; margin-bottom: 4px; word-break: break-word; }
+        .cover-collaboration { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: var(--text-muted); margin-bottom: 18px; }
+        .cover-znode-badge { font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 2px; color: var(--gold); background: var(--paper-mid); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--paper-dark); }
+        .cover-class-banner { display: inline-block; background: var(--navy); color: var(--paper); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 900; letter-spacing: 5px; text-transform: uppercase; padding: 8px 24px; margin: 12px 0 6px; }
+        .cover-ephoto { font-family: 'Caveat', cursive; font-size: 18px; color: var(--gold); font-weight: 600; letter-spacing: 0.05em; }
+
+        /* ══════════════════════════════
+           TRENDING SECTION & STATE PANELS
+        ══════════════════════════════ */
+        .trending-wrapper { border-bottom: 1px dashed var(--paper-dark); background: var(--paper); }
+        .trending-container { display: flex; gap: 14px; overflow-x: auto; padding: 12px 20px 24px; scrollbar-width: none; }
+        .trending-container::-webkit-scrollbar { display: none; }
+        .trending-card { flex-shrink: 0; width: 68px; text-align: center; cursor: pointer; transition: transform 0.2s var(--ease); }
+        .trending-card:hover { transform: translateY(-4px); }
+        .trending-avatar { width: 60px; height: 60px; margin: 0 auto 6px; border-radius: 50%; border: 2px solid var(--gold); position: relative; padding: 2px; }
+        .trending-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: var(--paper-mid); }
+        .trending-rank { position: absolute; top: -4px; right: -8px; background: var(--navy); color: var(--paper); font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 10px; font-family: 'Inter', sans-serif; border: 1px solid var(--paper);}
+        .trending-name { font-size: 10px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main); font-family: 'Inter', sans-serif;}
+        .trending-likes { font-size: 9px; color: #e91e63; font-weight: 700; margin-top: 2px;}
+
+        .state-panel { border: 2px dashed var(--paper-dark); padding: 52px 24px; text-align: center; margin: 20px 18px; }
+        .eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: var(--text-muted); margin-bottom: 10px; }
+        .state-panel h3 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--navy); margin-bottom: 6px; }
+        .state-panel p { font-family: 'Caveat', cursive; font-size: 17px; color: var(--text-muted); line-height: 1.5; }
+
+        /* ══════════════════════════════
+           STUDENT ENTRY & GRID
+        ══════════════════════════════ */
+        #studentGrid { background: var(--paper); }
+        .student-grid-active { display: flex; flex-direction: column; }
+        .student-entry { display: flex; align-items: flex-start; gap: 20px; padding: 40px 18px 32px; position: relative; border-bottom: 1px solid var(--paper-mid); flex-wrap: wrap; cursor: pointer; transition: background 0.2s var(--ease); }
+        .student-entry:hover { background: var(--paper-mid); }
+        .entry-r .photo-col { order: 2; } .entry-r .info-col  { order: 3; }
+        .entry-l .photo-col { order: 3; } .entry-l .info-col  { order: 2; }
+
+        .photo-col { position: relative; min-width: 160px; width: 160px; flex-shrink: 0; margin-top: 8px; }
+        .frame-bg { position: absolute; inset: 0; background: var(--navy); z-index: 0; }
+        .frame-fg { position: relative; z-index: 1; background: #fff; padding: 8px 8px 26px; box-shadow: 4px 6px 18px rgba(0,0,0,0.2); transition: all 0.3s var(--ease); }
+        .frame-tape { position: absolute; top: -12px; left: 50%; width: 50px; height: 18px; background: var(--tape); z-index: 4; }
+        .student-photo { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; display: block; transition: all 0.3s var(--ease); }
+        .photo-empty { width: 100%; aspect-ratio: 3 / 4; background: var(--paper-mid); display: flex; align-items: center; justify-content: center; font-size: 32px; transition: all 0.3s var(--ease); }
+
+        .onboarding-tag { position: absolute; top: 12px; font-family: 'Bebas Neue', sans-serif; font-size: 12px; color: var(--text-muted); letter-spacing: 1px; background: var(--paper-mid); padding: 2px 6px; border: 1px solid var(--paper-dark); }
+        .entry-r .onboarding-tag { left: 18px; } .entry-l .onboarding-tag { right: 18px; }
+        .verified-badge { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; background: #2b7fff; color: white; border-radius: 50%; font-size: 10px; margin-left: 6px; transform: translateY(-2px); }
+
+        .info-col { flex: 1; min-width: 0; display: flex; flex-direction: column; padding-top: 14px; }
+        .info-crown { font-size: 16px; color: var(--gold); line-height: 1; margin-bottom: 4px; }
+        .info-name { font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 0.95; letter-spacing: 1px; color: var(--navy); word-break: break-word; }
+        .info-role { font-size: 12px; font-weight: 700; color: var(--gold); margin: 5px 0 4px; text-transform: uppercase; }
+        
+        .social-chip-group { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+        .social-chip { font-size: 9px; font-weight: 700; color: var(--text-muted); background: var(--paper-mid); padding: 2px 6px; border-radius: 2px; text-transform: uppercase; border: 1px solid var(--paper-dark); }
+
+        .card-meta-box { margin-top: 10px; font-family: 'Inter', sans-serif; font-size: 11px; background: var(--paper-mid); border: 1px dashed var(--paper-dark); padding: 10px 12px; border-radius: 6px; color: var(--text-main); }
+        .truncate-line { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+        .truncate-line:last-child { margin-bottom: 0; }
+        .truncate-line strong { font-weight: 800; color: var(--navy); text-transform: uppercase; font-size: 10px; letter-spacing: 0.05em; margin-right: 4px;}
+
+        /* LIKE INTERACTION */
+        .like-section { margin-top: 12px; display: flex; align-items: center; gap: 8px; }
+        .like-btn { background: var(--paper-mid); border: 1px solid var(--paper-dark); color: var(--text-main); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        .like-btn:hover { background: var(--navy); color: var(--paper); }
+        .like-btn.liked { color: #e91e63; border-color: #e91e63; }
+        .like-btn.liked:hover { background: #e91e63; color: white; }
+
+        .info-quote { font-family: 'Caveat', cursive; font-size: 19px; font-weight: 700; line-height: 1.25; color: var(--text-main); margin: 8px 0; letter-spacing: 0.02em; }
+        .info-quote-line { width: 44px; height: 2px; background: var(--gold); margin-top: 6px; transform: rotate(-1deg); }
+        .info-handle { font-size: 9px; font-weight: 700; color: var(--text-faint); margin-top: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
+        .entry-deco { position: absolute; bottom: 14px; font-size: 14px; color: var(--navy); opacity: 0.28; user-select: none; line-height: 1; }
+        .scroll-cta { text-align: center; padding: 26px 20px; font-family: 'Caveat', cursive; font-size: 15px; color: var(--text-muted); border-top: 1px dashed var(--paper-dark); }
+        .scroll-cta .cta-arrow { display: block; font-size: 22px; margin-top: 4px; }
+
+        /* ══════════════════════════════
+           MODAL STYLES & SHARE DOCK
+        ══════════════════════════════ */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 999; display: none; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.3s var(--ease); }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content { background: var(--paper); color: var(--text-main); width: 100%; max-width: 600px; max-height: 90vh; border-radius: 12px; overflow-y: auto; position: relative; padding: 32px 24px; border: 1px solid var(--paper-dark); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .modal-close { position: absolute; top: 16px; right: 16px; background: var(--paper-mid); border: 1px solid var(--paper-dark); color: var(--text-main); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .modal-close:hover { background: var(--navy); color: var(--paper); transform: scale(1.1); }
+        .modal-header { text-align: center; margin-bottom: 24px; }
+        .modal-img { width: 100%; max-width: 220px; border-radius: 8px; margin: 0 auto 16px; display: block; border: 4px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .modal-name { font-family: 'Bebas Neue', sans-serif; font-size: 42px; line-height: 1; color: var(--navy); letter-spacing: 1px; margin-bottom: 4px;}
+        .modal-role { font-size: 13px; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 1px;}
+        
+        .share-dock { background: var(--paper-mid); padding: 16px; border-radius: 8px; margin-bottom: 24px; text-align: center; border: 1px solid var(--paper-dark); }
+        .share-dock-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px; }
+        .share-btn-group { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .share-btn { background: var(--paper); border: 1px solid var(--paper-dark); color: var(--text-main); font-size: 11px; font-weight: 700; padding: 8px 14px; border-radius: 20px; cursor: pointer; text-transform: uppercase; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;}
+        .share-btn:hover { background: var(--navy); color: var(--paper); border-color: var(--navy);}
+
+        .modal-table { width: 100%; border-collapse: collapse; font-size: 13px; font-family: 'Inter', sans-serif; }
+        .modal-table tr { border-bottom: 1px solid var(--paper-mid); }
+        .modal-table th { padding: 12px 8px 12px 0; font-weight: 800; color: var(--navy); width: 35%; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; text-align: left; vertical-align: top;}
+        .modal-table td { padding: 12px 0 12px 8px; color: var(--text-muted); word-break: break-word; line-height: 1.5;}
+
+        @media (max-width: 375px) { .cover-dept-main { font-size: 32px; } .cover-class-banner { font-size: 11px; letter-spacing: 3px; padding: 6px 16px; } .info-name { font-size: 27px; } .photo-col { min-width: 140px; width: 140px; } }
+        @media (min-width: 800px) { .page-content { max-width: 1000px; } .top-bar { padding: 16px 40px; } .header-search-container.expanded .search-input-wrapper { width: 280px; } .cover-header { padding: 80px 40px 40px; margin-bottom: 24px; border-radius: 0 0 16px 16px; } .cover-dept-main { font-size: 64px; } .student-grid-active { display: grid !important; grid-template-columns: repeat(2, 1fr); gap: 24px 60px; padding: 0 40px 60px; } .student-entry { border-bottom: 1px dashed var(--paper-dark); padding: 40px 10px 32px; } }
+        .entry-archived { filter: grayscale(100%); opacity: 0.55; }
+        .archive-banner { width: 100%; order: 1; background: var(--gold); color: #fff; font-size: 11px; font-weight: 700; padding: 8px 12px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+<header class="top-bar">
+    <button class="back-btn" onclick="window.location.href='index.html'">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back
+    </button>
+    <div class="palette-dock">
+        <div class="palette-node" data-title="Paper Default" style="background: #f0ebe0;" onclick="changeTheme('default', this)"></div>
+        <div class="palette-node active-node" data-title="Monochrome Dark" style="background: #000000;" onclick="changeTheme('monochrome-dark', this)"></div>
+        <div class="palette-node" data-title="Deep Space" style="background: #05050a;" onclick="changeTheme('deep-space', this)"></div>
+        <div class="palette-node" data-title="Slate Gray" style="background: #2d3033;" onclick="changeTheme('slate-gray', this)"></div>
+        <div class="palette-node" data-title="Minimal Light" style="background: #ffffff;" onclick="changeTheme('minimal-light', this)"></div>
+        <div class="palette-node" data-title="Pink Vibe" style="background: #ff66b2;" onclick="changeTheme('pink-vibe', this)"></div>
+        <div class="palette-node" data-title="Sky Blue" style="background: #33ccff;" onclick="changeTheme('sky-blue', this)"></div>
+        <div class="palette-node" data-title="Orange Burst" style="background: #ff9933;" onclick="changeTheme('orange-burst', this)"></div>
+    </div>
+    
+    <span class="top-brand" id="topBrand">ARCHIVE</span>
+
+    <div class="header-search-container" id="headerSearchContainer">
+        <div class="search-input-wrapper">
+            <input type="text" class="header-search-input" id="headerSearchInput" placeholder="Search student names..." oninput="handleLiveSearch(this.value)">
+        </div>
+        <button class="search-toggle-btn" onclick="toggleHeaderSearch(event)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </button>
+        <div class="search-dropdown-menu" id="searchDropdownMenu"></div>
+    </div>
+
+    <div class="user-chip">
+        <div class="user-avatar" id="navAvatar">?</div>
+        <span id="navUsername"></span>
+    </div>
+</header>
+
+<main class="page-content">
+    <div class="cover-header">
+        <div class="cover-dept-main" id="deptLabel">the department of economics</div>
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:3px; color:var(--gold); margin-bottom:6px;" id="instLabel"></div>
+        <div class="cover-collaboration">In collaboration with <span class="cover-znode-badge">Z-NODE</span></div>
+        <div class="cover-class-banner" id="classbanner">CLASS OF —</div><br>
+        <div class="cover-ephoto">— E-Photo Album —</div>
+    </div>
+
+    <div class="trending-wrapper" id="trendingWrapper" style="display:none;">
+        <div class="eyebrow" style="padding: 20px 20px 0;">Z-NODE // TRENDING PROFILES</div>
+        <div class="trending-container" id="trendingContainer"></div>
+    </div>
+
+    <div class="state-panel" id="loadingState">
+        <div class="eyebrow">Z-NODE // OPENING ALBUM</div>
+        <h3>Leafing Through Pages...</h3>
+        <p>Fetching student memories from the archive.</p>
+    </div>
+
+    <div id="studentGrid" style="display:none;"></div>
+
+    <div class="state-panel" id="emptyState" style="display:none;">
+        <div class="eyebrow">Z-NODE // NULL RESPONSE</div>
+        <h3>No Profiles Matches</h3>
+        <p>No student data corresponds with current parameters.</p>
+    </div>
+
+    <div class="scroll-cta" id="scrollCta" style="display:none;">
+        ✦ Scroll to discover more ✦
+        <span class="cta-arrow">↓</span>
+    </div>
+</main>
+
+<div class="modal-overlay" id="profileModal" onclick="closeProfileModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeProfileModal()">✕</button>
+        <div class="modal-header">
+            <img id="modalImg" class="modal-img" src="" alt="Profile Image" style="display:none;">
+            <h2 id="modalName" class="modal-name"></h2>
+            <div id="modalRole" class="modal-role"></div>
+        </div>
+        
+        <div class="share-dock">
+            <div class="share-dock-title">Share Profile link</div>
+            <div class="share-btn-group">
+                <button class="share-btn" onclick="shareTo('whatsapp')">WhatsApp</button>
+                <button class="share-btn" onclick="shareTo('x')">X (Twitter)</button>
+                <button class="share-btn" onclick="shareTo('facebook')">Facebook</button>
+                <button class="share-btn" onclick="shareTo('telegram')">Telegram</button>
+                <button class="share-btn" onclick="shareTo('copy')" title="Best for IG/TikTok Stories!">Copy Link</button>
+            </div>
+        </div>
+
+        <table class="modal-table">
+            <tbody id="modalTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+// ── DEMO MODE: no Supabase client exists in this file. No network call can ever touch real data. ──
+let allStudentsGlobal = [];
+let currentViewedProfile = null;
+
+const DEMO_STUDENTS = [
+  {
+    id: 'demo-1',
+    full_name: 'Amaka Okafor',
+    username: 'amaka_demo',
+    matric_number: 'ECO/2026/001',
+    department: 'Economics',
+    institution: 'Federal University, Lafia',
+    eternal_statement: "Code is temporary, infrastructure is forever.",
+    skills_of_student: 'Public Speaking, Excel',
+    hobbies: 'Reading, Football',
+    current_project: 'Final year thesis on monetary policy',
+    socials: { instagram: 'amaka.codes', twitter: 'amaka_dev' },
+    avatar_url: null,
+    likes_count: 14,
+    graduation_year: 2026,
+    yearbook_access: true,
+    yearbook_verified: true,
+    is_dos: true
+  },
+  {
+    id: 'demo-2',
+    full_name: 'Chidi Eze',
+    username: 'chidi_e',
+    matric_number: 'ECO/2026/014',
+    department: 'Economics',
+    institution: 'Federal University, Lafia',
+    eternal_statement: "Built different, every single time.",
+    skills_of_student: 'Data Analysis',
+    hobbies: 'Chess, Music',
+    current_project: 'Internship at a fintech startup',
+    socials: { linkedin: 'chidi-eze' },
+    avatar_url: null,
+    likes_count: 9,
+    graduation_year: 2026,
+    yearbook_access: true,
+    yearbook_verified: true,
+    is_dos: false
+  },
+  {
+    id: 'demo-3',
+    full_name: 'Fatima Bello',
+    username: 'fatima_b',
+    matric_number: 'ECO/2026/022',
+    department: 'Economics',
+    institution: 'Federal University, Lafia',
+    eternal_statement: "Still showing up, even on the hard days.",
+    skills_of_student: 'Writing, Critical Thinking',
+    hobbies: 'Photography',
+    current_project: 'Campus mentorship program',
+    socials: { instagram: 'fatima.shoots' },
+    avatar_url: null,
+    likes_count: 21,
+    graduation_year: 2026,
+    yearbook_access: true,
+    yearbook_verified: true,
+    is_dos: false
+  },
+  {
+    id: 'demo-4',
+    full_name: 'Tunde Bakare',
+    username: 'tunde_bk',
+    matric_number: 'ECO/2026/030',
+    department: 'Economics',
+    institution: 'Federal University, Lafia',
+    eternal_statement: "Working on it.",
+    skills_of_student: 'Excel',
+    hobbies: 'Football',
+    current_project: '—',
+    socials: {},
+    avatar_url: null,
+    likes_count: 2,
+    graduation_year: 2026,
+    yearbook_access: false,
+    yearbook_verified: false,
+    is_dos: false
+  }
+];
+
+function changeTheme(themeName, element) {
+    document.documentElement.setAttribute('data-theme', themeName);
+    localStorage.setItem('znode_sys_theme', themeName);
+    if(element) {
+        document.querySelectorAll('.palette-node').forEach(node => node.classList.remove('active-node'));
+        element.classList.add('active-node');
+    }
+}
+
+function initSession() {
+    // Demo visitors never have a real znodeStudentProfile session — and shouldn't need one.
+    const savedTheme = localStorage.getItem('znode_sys_theme') || 'monochrome-dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    const prefix = savedTheme.split('-')[0];
+    const targetNode = document.querySelector(`.palette-node[data-title*="${prefix.charAt(0).toUpperCase() + prefix.slice(1)}"]`) || document.querySelector('.palette-node');
+    if (targetNode) {
+        document.querySelectorAll('.palette-node').forEach(node => node.classList.remove('active-node'));
+        targetNode.classList.add('active-node');
+    }
+    document.getElementById('navAvatar').textContent = 'D';
+    document.getElementById('navUsername').textContent = '@demo';
+    return { username: 'demo' };
+}
+
+function getParams() {
+    const p = new URLSearchParams(window.location.search);
+    return { dept: p.get('dept') || '', year: p.get('year') || '', inst: p.get('inst') || '' };
+}
+
+// ── 🔍 SEARCH INTERACTION ROUTERS ───────────────────────────────────────────
+function toggleHeaderSearch(e) {
+    e.stopPropagation();
+    const container = document.getElementById('headerSearchContainer');
+    const input = document.getElementById('headerSearchInput');
+    const dropdown = document.getElementById('searchDropdownMenu');
+    
+    container.classList.toggle('expanded');
+    if (container.classList.contains('expanded')) {
+        input.focus();
+        if(input.value.trim().length > 0) dropdown.classList.add('active');
+    } else {
+        dropdown.classList.remove('active');
+    }
+}
+
+function handleLiveSearch(query) {
+    const q = query.toLowerCase().trim();
+    const dropdown = document.getElementById('searchDropdownMenu');
+    
+    if (!q) {
+        dropdown.innerHTML = '';
+        dropdown.classList.remove('active');
+        return;
+    }
+
+    const matches = allStudentsGlobal.filter(s => 
+        (s.full_name && s.full_name.toLowerCase().includes(q)) || 
+        (s.username && s.username.toLowerCase().includes(q))
+    );
+
+    dropdown.innerHTML = '';
+    if (matches.length === 0) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'dropdown-item';
+        emptyDiv.style.cursor = 'default';
+        emptyDiv.textContent = 'No matching student names';
+        dropdown.appendChild(emptyDiv);
+    } else {
+        matches.slice(0, 8).forEach(s => {
+            const item = document.createElement('div');
+            item.className = 'dropdown-item';
+            
+            const avatarHTML = s.avatar_url 
+                ? `<img src="${s.avatar_url}">` 
+                : `<div style="width:22px; height:22px; border-radius:50%; background:var(--paper-dark); display:flex; align-items:center; justify-content:center; font-size:9px;">👤</div>`;
+            
+            const matric = s.matric_number ? s.matric_number : `@${s.username || '—'}`;
+            
+            item.innerHTML = `${avatarHTML}<span>${s.full_name || 'Anonymous'}</span><span class="item-meta">${matric}</span>`;
+            
+            item.onclick = (e) => {
+                e.stopPropagation();
+                openProfileModal(s);
+                dropdown.classList.remove('active');
+            };
+            dropdown.appendChild(item);
+        });
+    }
+    dropdown.classList.add('active');
+}
+
+document.addEventListener('click', (e) => {
+    const container = document.getElementById('headerSearchContainer');
+    const dropdown = document.getElementById('searchDropdownMenu');
+    if (container && !container.contains(e.target)) {
+        dropdown.classList.remove('active');
+    }
+});
+
+// ── 🔥 TRENDING & LIKES LOGIC ───────────────────────────────────────────────
+function renderTrending() {
+    const container = document.getElementById('trendingContainer');
+    const wrapper = document.getElementById('trendingWrapper');
+    
+    if (!allStudentsGlobal || allStudentsGlobal.length === 0) {
+        wrapper.style.display = 'none';
+        return;
+    }
+    
+    const sorted = [...allStudentsGlobal].sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0)).slice(0, 10);
+    
+    if (sorted[0].likes_count === 0 || sorted[0].likes_count == null) {
+        wrapper.style.display = 'none';
+        return;
+    }
+
+    container.innerHTML = '';
+    wrapper.style.display = 'block';
+
+    sorted.forEach((s, idx) => {
+        const el = document.createElement('div');
+        el.className = 'trending-card';
+        el.onclick = () => openProfileModal(s);
+        const avatar = s.avatar_url ? `<img src="${s.avatar_url}">` : `<div style="width:100%; height:100%; background:var(--paper-dark); display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:24px;">👤</div>`;
+        el.innerHTML = `
+            <div class="trending-avatar">
+                ${avatar}
+                <div class="trending-rank">#${idx + 1}</div>
+            </div>
+            <div class="trending-name">${(s.full_name || 'Anon').split(' ')[0]}</div>
+            <div class="trending-likes">♥ ${s.likes_count || 0}</div>
+        `;
+        container.appendChild(el);
+    });
+}
+
+async function toggleLike(e, id, btnElement) {
+    e.stopPropagation(); 
+    const isLiked = btnElement.classList.contains('liked');
+    const counterSpan = btnElement.querySelector('.like-counter');
+    const heartSpan = btnElement.querySelector('.like-heart');
+    
+    let currentVal = parseInt(counterSpan.textContent) || 0;
+    
+   if (isLiked) {
+    btnElement.classList.remove('liked');
+    heartSpan.textContent = '♡';
+    currentVal--;
+    localStorage.removeItem(`znode_liked_${id}`);
+} else {
+    btnElement.classList.add('liked');
+    heartSpan.textContent = '♥';
+    currentVal++;
+    localStorage.setItem(`znode_liked_${id}`, '1');
+}
+counterSpan.textContent = currentVal;
+
+    // Demo mode: update in-memory only, never write anywhere real.
+    const memObj = allStudentsGlobal.find(x => x.id === id);
+    if (memObj) {
+        memObj.likes_count = currentVal;
+        renderTrending();
+    }
+}
+
+// ── 🔗 PROFILE MODAL & DEEP SHARING ──────────────────────────────────────────
+function openProfileModal(student) {
+    currentViewedProfile = student;
+    const modal = document.getElementById('profileModal');
+    const img = document.getElementById('modalImg');
+    const name = document.getElementById('modalName');
+    const role = document.getElementById('modalRole');
+    const tbody = document.getElementById('modalTableBody');
+
+    if (student.avatar_url) { img.src = student.avatar_url; img.style.display = 'block'; } 
+    else { img.style.display = 'none'; }
+
+    name.textContent = (student.full_name || 'Anonymous').toUpperCase();
+    role.textContent = student.department || '—';
+    tbody.innerHTML = '';
+    
+    const excludeKeys = ['avatar_url', 'id', 'yearbook_access', 'is_dos']; 
+    for (const [key, value] of Object.entries(student)) {
+        if (excludeKeys.includes(key)) continue;
+        
+        let displayVal = value;
+        if (displayVal === null || displayVal === '') displayVal = '—';
+        else if (typeof displayVal === 'object') displayVal = JSON.stringify(displayVal);
+        else if (typeof displayVal === 'boolean') displayVal = displayVal ? 'Yes' : 'No';
+
+        const formattedKey = key.replace(/_/g, ' ');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<th>${formattedKey}</th><td>${displayVal}</td>`;
+        tbody.appendChild(tr);
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden'; 
+}
+
+function closeProfileModal(e) {
+    if (e && e.target.classList.contains('modal-content')) return;
+    document.getElementById('profileModal').classList.remove('active');
+    document.body.style.overflow = ''; 
+    currentViewedProfile = null;
+}
+
+function shareTo(platform) {
+    if (!currentViewedProfile) return;
+    const student = currentViewedProfile;
+    const baseUrl = window.location.href.split('?')[0]; // Clean base URL
+    const url = `${baseUrl}?profile=${student.id}`;
+    const text = `Check out ${student.full_name}'s profile on the Department Archive! Drop a like 💖`;
+    
+    let finalUrl = '';
+    switch(platform) {
+        case 'whatsapp': finalUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text + '\n\n' + url)}`; break;
+        case 'x': finalUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`; break;
+        case 'facebook': finalUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`; break;
+        case 'telegram': finalUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`; break;
+        case 'copy': 
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Profile link copied to clipboard!\n\nReady to paste into Instagram, TikTok, or anywhere else!');
+            }).catch(err => alert('Failed to copy link.'));
+            return;
+    }
+    if (finalUrl) window.open(finalUrl, '_blank', 'noopener,noreferrer');
+}
+
+// ── Card Rendering ───────────────────────────────────────────────────────────
+const FRAME_ROTS  = [-2, 2, -1.5, 2.5, -3, 1.5, -2.5, 3];
+const SHADOW_ROTS = [ 3,-3,  2.5,-3.5,  4,-2.5,  3.5,-4];
+const TAPE_ROTS   = [-4, 3, -2,   4,  -3, 2,   -4,   3];
+const DECOS       = ['☆', '♡', '⚡', '◇', '✦', '☆', '♡', '⚡'];
+
+function renderCard(student, idx) {
+    const entry = document.createElement('div');
+    const isArchived = student.yearbook_access === false || student.yearbook_access === 'false';
+    
+    entry.className = `student-entry ${idx % 2 === 0 ? 'entry-r' : 'entry-l'} ${isArchived ? 'entry-archived' : ''}`;
+    entry.onclick = () => openProfileModal(student);
+
+    const fr = FRAME_ROTS [idx % FRAME_ROTS.length];
+    const sr = SHADOW_ROTS[idx % SHADOW_ROTS.length];
+    const tr = TAPE_ROTS  [idx % TAPE_ROTS.length];
+    const isDOS = student.is_dos === true || student.is_dos === 'true';
+
+    const bannerHTML = isArchived ? `<div class="archive-banner">⚠️ PROFILE ARCHIVED & UNPUBLISHED: Please contact DOS or complete your payment.</div>` : '';
+    const photoHTML = student.avatar_url ? `<img class="student-photo" src="${student.avatar_url}" alt="${student.full_name || ''}" loading="lazy">` : `<div class="photo-empty">👤</div>`;
+    const crownHTML = isDOS ? `<div class="info-crown">♛</div>` : `<div class="info-crown" style="visibility:hidden;">♛</div>`;
+    const statement = student.eternal_statement || '...';
+    const quoteHTML = `<div class="info-quote">"${statement}"</div><div class="info-quote-line"></div>`;
+
+    const pid = student.matric_number || '';
+    const handleHTML = pid ? `<div class="info-handle">${pid}</div>` : `<div class="info-handle">@${student.username || '—'}</div>`;
+    const decoSide = idx % 2 === 0 ? 'right:14px' : 'left:14px';
+    const verifiedBadge = (student.yearbook_verified === true || student.yearbook_verified === 'true') ? `<span class="verified-badge" title="Verified Member">✓</span>` : '';
+
+    let socialsHTML = '';
+    if (student.socials) {
+        try {
+            const parsed = typeof student.socials === 'string' ? JSON.parse(student.socials) : student.socials;
+            const items = Object.entries(parsed).map(([platform, handle]) => `<span class="social-chip">${platform}: ${handle}</span>`).join('');
+            socialsHTML = `<div class="social-chip-group">${items}</div>`;
+        } catch(e) { socialsHTML = `<div class="social-chip-group"><span class="social-chip">${student.socials}</span></div>`; }
+    }
+
+    const extraFieldsHTML = `
+        <div class="card-meta-box">
+            <div class="truncate-line"><strong>Skill:</strong> ${student.skills_of_student || '—'}</div>
+            <div class="truncate-line"><strong>Hobbies:</strong> ${student.hobbies || '—'}</div>
+            <div class="truncate-line"><strong>Current Job / Project:</strong> ${student.current_project || '—'}</div>
+        </div>
+    `;
+
+    // Active Like Check
+  const likes = student.likes_count || 0;
+const hasLiked = !!localStorage.getItem(`znode_liked_${student.id}`);
+const likeHTML = `
+    <div class="like-section">
+        <button class="like-btn ${hasLiked ? 'liked' : ''}" onclick="toggleLike(event, '${student.id}', this)">
+            <span class="like-heart">${hasLiked ? '♥' : '♡'}</span> <span class="like-counter">${likes}</span>
+        </button>
+    </div>
+`;
+
+    entry.innerHTML = `
+        ${bannerHTML}
+        <div class="onboarding-tag">#${String(idx + 1).padStart(3, '0')} IN DEPT</div>
+        <div class="photo-col">
+            <div class="frame-bg" style="transform:rotate(${sr}deg);"></div>
+            <div class="frame-fg" style="transform:rotate(${fr}deg);">
+                <div class="frame-tape" style="transform:translateX(-50%) rotate(${tr}deg);"></div>
+                ${photoHTML}
+            </div>
+        </div>
+        <div class="info-col">
+            ${crownHTML}
+            <div class="info-name">${(student.full_name || 'Anonymous').toUpperCase()}${verifiedBadge}</div>
+            <div class="info-role">${student.department || '—'}</div>
+            ${socialsHTML}
+            ${extraFieldsHTML}
+            ${likeHTML}
+            ${quoteHTML}
+            ${handleHTML}
+        </div>
+        <span class="entry-deco" style="bottom:14px;${decoSide};">${DECOS[idx % DECOS.length]}</span>
+    `;
+    return entry;
+}
+
+async function loadYearbook(dept, year, inst) {
+    // Demo mode: always returns the fixed sample set. dept/year/inst args are accepted
+    // for compatibility with bootstrap()'s call signature but intentionally ignored.
+    return [...DEMO_STUDENTS].sort((a, b) => {
+        if (a.is_dos !== b.is_dos) return a.is_dos ? -1 : 1;
+        const aArchived = a.yearbook_access === false;
+        const bArchived = b.yearbook_access === false;
+        if (aArchived !== bArchived) return aArchived ? 1 : -1;
+        return (a.full_name || '').localeCompare(b.full_name || '');
+    });
+}
+
+async function bootstrap() {
+    const session = initSession();
+    if (!session) return;
+    const { dept, year, inst } = getParams();
+
+    document.getElementById('topBrand').textContent   = dept ? `${dept} WEBSITE`.toUpperCase() : 'DEPARTMENT WEBSITE';
+    document.getElementById('classbanner').textContent = year ? `CLASS OF ${year}` : 'CLASS OF —';
+    document.getElementById('deptLabel').textContent = dept ? `the department of ${dept.toLowerCase()}` : 'the department';
+    document.getElementById('instLabel').textContent = inst ? inst.toUpperCase() : '';
+
+   allStudentsGlobal = await loadYearbook(dept, year, inst);
+    document.getElementById('loadingState').style.display = 'none';
+
+    if (!allStudentsGlobal.length) {
+        document.getElementById('emptyState').style.display = 'block';
+        return;
+    }
+
+    // Populate Data Grids
+    const grid = document.getElementById('studentGrid');
+    grid.innerHTML = ''; 
+    allStudentsGlobal.forEach((s, i) => grid.appendChild(renderCard(s, i)));
+    
+    grid.style.display = ''; 
+    grid.classList.add('student-grid-active');
+    document.getElementById('scrollCta').style.display = 'block';
+
+    // Boot Trending Strip
+    renderTrending();
+
+    // 🔗 DEEP LINK TRIGGER: Opens profile modal automatically if URL has ?profile=id parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetId = urlParams.get('profile');
+    if (targetId) {
+        const deepLinkedStudent = allStudentsGlobal.find(s => s.id === targetId);
+        if (deepLinkedStudent) {
+            openProfileModal(deepLinkedStudent);
+        }
+    }
+}
+
+bootstrap();
+</script>
+</body>
+</html>
