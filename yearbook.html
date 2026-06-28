@@ -826,6 +826,38 @@ async function bootstrap() {
 }
 
 bootstrap();
+
+// ── 🔄 BFCACHE BUST: Always re-fetch on page restore ─────────────────────────
+window.addEventListener('pageshow', async (event) => {
+    if (event.persisted) {
+        // Page was restored from bfcache — force a fresh data reload
+        const grid = document.getElementById('studentGrid');
+        const { dept, year, inst } = getParams();
+
+        // Reset UI to loading state
+        grid.style.display = 'none';
+        grid.innerHTML = '';
+        grid.classList.remove('student-grid-active');
+        document.getElementById('scrollCta').style.display = 'none';
+        document.getElementById('trendingWrapper').style.display = 'none';
+        document.getElementById('loadingState').style.display = 'block';
+
+        // Re-fetch fresh data
+        allStudentsGlobal = await loadYearbook(dept, year, inst);
+        document.getElementById('loadingState').style.display = 'none';
+
+        if (!allStudentsGlobal.length) {
+            document.getElementById('emptyState').style.display = 'block';
+            return;
+        }
+
+        allStudentsGlobal.forEach((s, i) => grid.appendChild(renderCard(s, i)));
+        grid.style.display = '';
+        grid.classList.add('student-grid-active');
+        document.getElementById('scrollCta').style.display = 'block';
+        renderTrending();
+    }
+});
 </script>
 </body>
 </html>
