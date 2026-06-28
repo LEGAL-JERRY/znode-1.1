@@ -308,6 +308,17 @@
         @media (min-width: 800px) { .page-content { max-width: 1000px; } .top-bar { padding: 16px 40px; } .header-search-container.expanded .search-input-wrapper { width: 280px; } .cover-header { padding: 80px 40px 40px; margin-bottom: 24px; border-radius: 0 0 16px 16px; } .cover-dept-main { font-size: 64px; } .student-grid-active { display: grid !important; grid-template-columns: repeat(2, 1fr); gap: 24px 60px; padding: 0 40px 60px; } .student-entry { border-bottom: 1px dashed var(--paper-dark); padding: 40px 10px 32px; } }
         .entry-archived { filter: grayscale(100%); opacity: 0.55; }
         .archive-banner { width: 100%; order: 1; background: var(--gold); color: #fff; font-size: 11px; font-weight: 700; padding: 8px 12px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; line-height: 1.4; }
+        .cohort-share-btn {
+            margin-top: 16px;
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--navy); color: var(--paper);
+            border: none; cursor: pointer;
+            font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.12em;
+            padding: 10px 22px; border-radius: 24px;
+            transition: opacity 0.2s;
+}
+.cohort-share-btn:hover { opacity: 0.8; }
     </style>
 </head>
 <body>
@@ -355,6 +366,11 @@
         <div class="cover-collaboration">In collaboration with <span class="cover-znode-badge">Z-NODE</span></div>
         <div class="cover-class-banner" id="classbanner">CLASS OF —</div><br>
         <div class="cover-ephoto">— E-Photo Album —</div>
+
+        <button class="cohort-share-btn" onclick="shareCohortPage()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Share This Yearbook
+        </button>
     </div>
 
     <div class="trending-wrapper" id="trendingWrapper" style="display:none;">
@@ -824,7 +840,24 @@ async function bootstrap() {
         }
     }
 }
+function shareCohortPage() {
+    const { dept, year, inst } = getParams();
+    const base = 'https://znode-nlgc4nnzx-legal-jerrys-projects.vercel.app/yearbook.html';
+    const params = new URLSearchParams();
+    if (dept) params.set('dept', dept);
+    if (year) params.set('year', year);
+    if (inst) params.set('inst', inst);
+    const shareUrl = `${base}?${params.toString()}`;
+    const shareText = `Check out the ${dept ? dept.charAt(0).toUpperCase() + dept.slice(1) : 'Department'} Class of ${year || '2026'} Yearbook on Z-NODE! 🎓`;
 
+    if (navigator.share) {
+        navigator.share({ title: 'Z-NODE Yearbook', text: shareText, url: shareUrl });
+    } else {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            alert('Yearbook link copied!\n\n' + shareUrl);
+        });
+    }
+}
 bootstrap();
 
 // ── 🔄 BFCACHE BUST: Always re-fetch on page restore ─────────────────────────
