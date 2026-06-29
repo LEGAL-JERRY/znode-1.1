@@ -814,9 +814,9 @@ async function loadYearbook(dept, year, inst) {
         if (currentUsername) query = query.or(`yearbook_access.eq.true,username.eq.${currentUsername}`);
         else query = query.eq('yearbook_access', true);
 
-        const { data: students, error } = await query
+       const { data: students, error } = await query
             .order('is_dos', { ascending: false })
-            .order('full_name', { ascending: true });
+            .order('created_at', { ascending: true });
 
         if (error) throw error;
         return (students || []).sort((a, b) => {
