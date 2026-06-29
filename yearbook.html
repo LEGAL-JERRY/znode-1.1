@@ -305,11 +305,11 @@
         .modal-name { font-family: 'Bebas Neue', sans-serif; font-size: 42px; line-height: 1; color: var(--navy); letter-spacing: 1px; margin-bottom: 4px;}
         .modal-role { font-size: 13px; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 1px;}
         
-        .share-dock { background: var(--paper-mid); padding: 16px; border-radius: 8px; margin-bottom: 24px; text-align: center; border: 1px solid var(--paper-dark); }
-        .share-dock-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px; }
-        .share-btn-group { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-        .share-btn { background: var(--paper); border: 1px solid var(--paper-dark); color: var(--text-main); font-size: 11px; font-weight: 700; padding: 8px 14px; border-radius: 20px; cursor: pointer; text-transform: uppercase; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;}
-        .share-btn:hover { background: var(--navy); color: var(--paper); border-color: var(--navy);}
+        .modal-action-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+        .modal-action-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 20px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.08em; transition: all 0.2s; border: 1px solid var(--paper-dark); background: var(--paper-mid); color: var(--text-main); }
+        .modal-action-btn:hover { background: var(--navy); color: var(--paper); border-color: var(--navy); }
+        .modal-action-btn.liked { color: #e91e63; border-color: #e91e63; }
+        .modal-action-btn.liked:hover { background: #e91e63; color: white; border-color: #e91e63; }
 
        .modal-quote-block { margin: 0 0 20px; text-align: center; }
         .modal-quote-text { font-family: 'Caveat', cursive; font-size: 24px; font-weight: 700; color: var(--text-main); line-height: 1.3; }
@@ -426,15 +426,16 @@
             <div id="modalRole" class="modal-role"></div>
         </div>
         
-        <div class="share-dock">
-            <div class="share-dock-title">Share Profile link</div>
-            <div class="share-btn-group">
-                <button class="share-btn" onclick="shareTo('whatsapp')">WhatsApp</button>
-                <button class="share-btn" onclick="shareTo('x')">X (Twitter)</button>
-                <button class="share-btn" onclick="shareTo('facebook')">Facebook</button>
-                <button class="share-btn" onclick="shareTo('telegram')">Telegram</button>
-                <button class="share-btn" onclick="shareTo('copy')" title="Best for IG/TikTok Stories!">Copy Link</button>
-            </div>
+        <div class="modal-action-row">
+            <button class="modal-action-btn" id="modalLikeBtn" onclick="toggleModalLike()">
+                <span id="modalLikeHeart">♡</span>&nbsp;<span id="modalLikeCount">0</span>
+            </button>
+            <button class="modal-action-btn" onclick="shareProfileDeepLink()">
+                🔗 Share Link
+            </button>
+            <button class="modal-action-btn" onclick="shareProfileAsImage()">
+                📸 Share Image
+            </button>
         </div>
 
         <div class="modal-quote-block">
@@ -674,6 +675,13 @@ function openProfileModal(student) {
         waWrap.innerHTML = `<div class="modal-wa-none">No WhatsApp number provided</div>`;
     }
 
+   // — Seed modal like button from localStorage
+    const modalLikeBtn = document.getElementById('modalLikeBtn');
+    const modalAlreadyLiked = !!localStorage.getItem(`znode_liked_${student.id}`);
+    modalLikeBtn.classList.toggle('liked', modalAlreadyLiked);
+    document.getElementById('modalLikeHeart').textContent = modalAlreadyLiked ? '♥' : '♡';
+    document.getElementById('modalLikeCount').textContent = student.likes_count || 0;
+
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
@@ -817,6 +825,178 @@ async function loadYearbook(dept, year, inst) {
             return aA === bA ? 0 : aA ? 1 : -1;
         });
     } catch(e) { console.error("Yearbook query error:", e); return []; }
+}
+
+// ── 🔗 DEEP LINK SHARE ───────────────────────────────────────────────────────
+function shareProfileDeepLink() {
+    if (!currentViewedProfile) return;
+    const { dept, year, inst } = getParams();
+    const base = 'https://znode-1-1.vercel.app/yearbook.html';
+    const params = new URLSearchParams();
+    if (dept) params.set('dept', dept);
+    if (year) params.set('year', year);
+    if (inst) params.set('inst', inst);
+    params.set('profile', currentViewedProfile.id);
+    const shareUrl = `${base}?${params.toString()}`;
+    const shareText = `Check out ${currentViewedProfile.full_name}'s profile on the Z-NODE Yearbook! 🎓`;
+    if (navigator.share) {
+        navigator.share({ title: 'Z-NODE Profile', text: shareText, url: shareUrl }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(shareUrl).then(() => alert('Profile link copied!\n\n' + shareUrl));
+    }
+}
+
+// ── 👍 MODAL LIKE BUTTON ─────────────────────────────────────────────────────
+async function toggleModalLike() {
+    if (!currentViewedProfile) return;
+    const s = currentViewedProfile;
+    const btn        = document.getElementById('modalLikeBtn');
+    const heartSpan  = document.getElementById('modalLikeHeart');
+    const countSpan  = document.getElementById('modalLikeCount');
+    const wasLiked   = btn.classList.contains('liked');
+    let val = parseInt(countSpan.textContent) || 0;
+
+    if (wasLiked) {
+        btn.classList.remove('liked'); heartSpan.textContent = '♡'; val--;
+        localStorage.removeItem(`znode_liked_${s.id}`);
+    } else {
+        btn.classList.add('liked'); heartSpan.textContent = '♥'; val++;
+        localStorage.setItem(`znode_liked_${s.id}`, '1');
+    }
+    countSpan.textContent = val;
+
+    // Sync DB + global state + visible card button
+    try {
+        await _db.from('students').update({ likes_count: val }).eq('id', s.id);
+        const mem = allStudentsGlobal.find(x => x.id === s.id);
+        if (mem) { mem.likes_count = val; renderTrending(); }
+        // Sync the card in the grid if it's rendered
+        const cardBtn = document.querySelector(`.like-btn[onclick*="${s.id}"]`);
+        if (cardBtn) {
+            const ch = cardBtn.querySelector('.like-heart');
+            const cc = cardBtn.querySelector('.like-counter');
+            if (wasLiked) { cardBtn.classList.remove('liked'); if (ch) ch.textContent = '♡'; }
+            else           { cardBtn.classList.add('liked');    if (ch) ch.textContent = '♥'; }
+            if (cc) cc.textContent = val;
+        }
+    } catch (err) { console.error('Like update failed', err); }
+}
+
+// ── 📸 SHARE PROFILE AS IMAGE ────────────────────────────────────────────────
+function _loadCrossImage(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        // Cache-bust to force CORS header
+        img.src = src + (src.includes('?') ? '&' : '?') + '_cb=' + Date.now();
+    });
+}
+
+function _wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 99) {
+    const words = text.split(' ');
+    let line = '', drawn = 0;
+    for (let i = 0; i < words.length; i++) {
+        const test = line + words[i] + ' ';
+        if (ctx.measureText(test).width > maxWidth && i > 0) {
+            ctx.fillText(line.trim(), x, y);
+            line = words[i] + ' '; y += lineHeight; drawn++;
+            if (drawn >= maxLines - 1) { ctx.fillText((line + words.slice(i + 1).join(' ')).trim() + '…', x, y); return; }
+        } else { line = test; }
+    }
+    ctx.fillText(line.trim(), x, y);
+}
+
+async function shareProfileAsImage() {
+    if (!currentViewedProfile) return;
+    const s = currentViewedProfile;
+
+    const W = 800, H = 1080;
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    // Pull live CSS vars
+    const cs       = getComputedStyle(document.documentElement);
+    const bg       = cs.getPropertyValue('--paper').trim()     || '#000000';
+    const navy     = cs.getPropertyValue('--navy').trim()      || '#ffffff';
+    const gold     = cs.getPropertyValue('--gold').trim()      || '#aaaaaa';
+    const textMain = cs.getPropertyValue('--text-main').trim() || '#ffffff';
+    const midBg    = cs.getPropertyValue('--paper-mid').trim() || '#111111';
+
+    // — Background
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+    // — Top accent bar
+    ctx.fillStyle = navy; ctx.fillRect(0, 0, W, 8);
+
+    // — Photo zone (centred, 3:4 portrait)
+    const PW = 380, PH = 506, PX = (W - PW) / 2, PY = 50;
+    ctx.fillStyle = midBg; ctx.fillRect(PX, PY, PW, PH);
+
+    if (s.avatar_url) {
+        try {
+            const img = await _loadCrossImage(s.avatar_url);
+            // cover-fit crop
+            const iAR = img.naturalWidth / img.naturalHeight, bAR = PW / PH;
+            let sx, sy, sw, sh;
+            if (iAR > bAR) { sh = img.naturalHeight; sw = sh * bAR; sx = (img.naturalWidth - sw) / 2; sy = 0; }
+            else            { sw = img.naturalWidth; sh = sw / bAR; sx = 0; sy = (img.naturalHeight - sh) / 2; }
+            ctx.drawImage(img, sx, sy, sw, sh, PX, PY, PW, PH);
+        } catch (_) { /* keep midBg placeholder */ }
+    }
+
+    // Photo border + tape
+    ctx.strokeStyle = navy; ctx.lineWidth = 5;
+    ctx.strokeRect(PX - 2, PY - 2, PW + 4, PH + 4);
+    ctx.save();
+    ctx.translate(W / 2, PY - 2); ctx.rotate(-0.05);
+    ctx.fillStyle = gold; ctx.globalAlpha = 0.65;
+    ctx.fillRect(-35, -11, 70, 20);
+    ctx.restore(); ctx.globalAlpha = 1;
+
+    // — Name
+    ctx.textAlign = 'center'; ctx.fillStyle = navy;
+    ctx.font = 'bold 62px Arial Black, Impact, sans-serif';
+    _wrapText(ctx, (s.full_name || 'Anonymous').toUpperCase(), W / 2, PY + PH + 70, 720, 68, 2);
+
+    // Gold rule
+    ctx.fillStyle = gold; ctx.fillRect(W / 2 - 44, PY + PH + 90, 88, 4);
+
+    // — Quote
+    ctx.fillStyle = textMain; ctx.font = 'italic 25px Georgia, serif';
+    _wrapText(ctx, `"${s.eternal_statement || '...'}"`, W / 2, PY + PH + 136, 680, 36, 3);
+
+    // — Skill chip
+    const chipY = PY + PH + 270;
+    ctx.fillStyle = navy;
+    const chipPad = 28, skillLabel = (s.skills_of_student || '—').toUpperCase();
+    ctx.font = 'bold 14px Arial, sans-serif';
+    const chipW = Math.min(ctx.measureText(skillLabel).width + chipPad * 2, 480);
+    ctx.fillRect(W / 2 - chipW / 2, chipY - 22, chipW, 40);
+    ctx.fillStyle = bg;
+    ctx.fillText(skillLabel, W / 2, chipY + 4);
+
+    // — Z-NODE watermark
+    ctx.fillStyle = gold; ctx.font = 'bold 12px Arial, sans-serif';
+    ctx.fillText('Z-NODE  //  DEPT. OF ECONOMICS  //  CLASS OF 2026', W / 2, H - 30);
+
+    // — Bottom bar
+    ctx.fillStyle = navy; ctx.fillRect(0, H - 12, W, 12);
+
+    // — Export
+    canvas.toBlob(async (blob) => {
+        const fname = `${(s.full_name || 'profile').replace(/\s+/g, '-').toLowerCase()}-znode.jpg`;
+        const file  = new File([blob], fname, { type: 'image/jpeg' });
+        if (navigator.share && navigator.canShare({ files: [file] })) {
+            try { await navigator.share({ files: [file], title: `${s.full_name} — Z-NODE` }); return; }
+            catch (_) { /* fall through to download */ }
+        }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = fname; a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 8000);
+    }, 'image/jpeg', 0.92);
 }
 
 async function bootstrap() {
