@@ -612,12 +612,9 @@ function renderTrending() {
         return;
     }
     
-    const sorted = [...allStudentsGlobal].sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0)).slice(0, 10);
-    
-    if (sorted[0].likes_count === 0 || sorted[0].likes_count == null) {
-        wrapper.style.display = 'none';
-        return;
-    }
+   const withLikes = allStudentsGlobal.filter(s => (s.likes_count || 0) > 0);
+if (!withLikes.length) { wrapper.style.display = 'none'; return; }
+const sorted = [...withLikes].sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0)).slice(0, 10);
 
     container.innerHTML = '';
     wrapper.style.display = 'block';
@@ -1019,7 +1016,8 @@ async function shareProfileAsImage() {
 
     // — Z-NODE watermark
     ctx.fillStyle = gold; ctx.font = 'bold 12px Arial, sans-serif';
-    ctx.fillText('Z-NODE  //  DEPT. OF ECONOMICS  //  CLASS OF 2026', W / 2, H - 30);
+   const { dept: _dept, year: _year } = getParams();
+ctx.fillText(`Z-NODE  //  DEPT. OF ${(_dept || 'ECONOMICS').toUpperCase()}  //  CLASS OF ${_year || '2026'}`, W / 2, H - 30);
 
     // — Bottom bar
     ctx.fillStyle = navy; ctx.fillRect(0, H - 12, W, 12);
