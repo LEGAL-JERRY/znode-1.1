@@ -338,6 +338,25 @@
             transition: opacity 0.2s;
 }
 .cohort-share-btn:hover { opacity: 0.8; }
+
+        .guest-join-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+            background: var(--navy); color: var(--paper);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 20px; gap: 12px;
+            box-shadow: 0 -4px 24px rgba(0,0,0,0.35);
+            font-family: 'Inter', sans-serif;
+        }
+        .guest-join-bar-text { font-size: 13px; font-weight: 700; line-height: 1.3; }
+        .guest-join-bar-text span { display: block; font-size: 10px; font-weight: 500; opacity: 0.7; margin-top: 2px; }
+        .guest-join-btn {
+            flex-shrink: 0; background: var(--gold); color: var(--paper);
+            border: none; border-radius: 24px; padding: 10px 22px;
+            font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 800;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 0.08em;
+            transition: opacity 0.2s; white-space: nowrap;
+        }
+        .guest-join-btn:hover { opacity: 0.85; }
     </style>
 </head>
 <body>
@@ -472,26 +491,29 @@ function changeTheme(themeName, element) {
 }
 
 function initSession() {
+    const savedTheme = localStorage.getItem('znode_sys_theme') || 'monochrome-dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    const prefix = savedTheme.split('-')[0];
+    const targetNode = document.querySelector(`.palette-node[data-title*="${prefix.charAt(0).toUpperCase() + prefix.slice(1)}"]`) || document.querySelector('.palette-node');
+    if (targetNode) {
+        document.querySelectorAll('.palette-node').forEach(node => node.classList.remove('active-node'));
+        targetNode.classList.add('active-node');
+    }
+
     const raw = localStorage.getItem('znodeStudentProfile');
-    if (!raw) { window.location.href = 'onboarding.html'; return null; }
+    if (!raw) return { isGuest: true };
+
     try {
         const s = JSON.parse(raw);
-        const savedTheme = localStorage.getItem('znode_sys_theme') || 'monochrome-dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        const prefix = savedTheme.split('-')[0];
-        const targetNode = document.querySelector(`.palette-node[data-title*="${prefix.charAt(0).toUpperCase() + prefix.slice(1)}"]`) || document.querySelector('.palette-node');
-        if(targetNode) {
-            document.querySelectorAll('.palette-node').forEach(node => node.classList.remove('active-node'));
-            targetNode.classList.add('active-node');
-        }
         const av = document.getElementById('navAvatar');
         if (s.avatar_url) av.innerHTML = `<img src="${s.avatar_url}" alt="avatar">`;
         else av.textContent = (s.username || '?')[0].toUpperCase();
         document.getElementById('navUsername').textContent = `@${s.username || '—'}`;
         return s;
-    } catch(e) { window.location.href = 'onboarding.html'; return null; }
+    } catch(e) { return { isGuest: true }; }
 }
 
+    
 function getParams() {
     const p = new URLSearchParams(window.location.search);
     return { dept: p.get('dept') || '', year: p.get('year') || '', inst: p.get('inst') || '' };
@@ -1011,6 +1033,22 @@ async function bootstrap() {
 
    allStudentsGlobal = await loadYearbook(dept, year, inst);
     document.getElementById('loadingState').style.display = 'none';
+
+    // — Guest banner
+    if (session.isGuest) {
+        document.getElementById('navAvatar').textContent = '?';
+        const onboardUrl = `onboarding.html?dept=${encodeURIComponent(dept)}&inst=${encodeURIComponent(inst)}&year=${encodeURIComponent(year)}`;
+        const bar = document.createElement('div');
+        bar.className = 'guest-join-bar';
+        bar.innerHTML = `
+            <div class="guest-join-bar-text">
+                🎓 You're viewing the ${dept || 'Department'} Yearbook
+                <span>Pay ₦500 to add your profile & join your classmates</span>
+            </div>
+            <button class="guest-join-btn" onclick="window.location.href='${onboardUrl}'">Join — ₦500</button>
+        `;
+        document.body.appendChild(bar);
+    }
 
     if (!allStudentsGlobal.length) {
         document.getElementById('emptyState').style.display = 'block';
