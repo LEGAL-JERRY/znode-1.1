@@ -783,13 +783,7 @@ function renderCard(student, idx) {
         } catch(e) { socialsHTML = `<div class="social-chip-group"><span class="social-chip">${student.socials}</span></div>`; }
     }
 
-    const extraFieldsHTML = `
-        <div class="card-meta-box">
-            <div class="truncate-line"><strong>Skill:</strong> ${student.skills_of_student || '—'}</div>
-            <div class="truncate-line"><strong>Hobbies:</strong> ${student.hobbies || '—'}</div>
-            <div class="truncate-line"><strong>Current Job / Project:</strong> ${student.current_project || '—'}</div>
-        </div>
-    `;
+    const extraFieldsHTML = '';
 
     // Active Like Check
   const likes = student.likes_count || 0;
