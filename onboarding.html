@@ -614,10 +614,10 @@ async function checkUsername(val) {
     usernameTimer = setTimeout(async () => {
         try {
             const { data } = await _db
-                .from('students')
-                .select('id')
-                .eq('username', clean)
-                .maybeSingle();
+                    .from('students')
+                    .select('id')
+                    .ilike('username', clean)
+                    .maybeSingle();
 
             if (data) {
                 status.style.color = '#ef4444';
@@ -654,7 +654,7 @@ async function submitJoinYearbook(){
   activateSubmitStep(0);
   try{
     const username=document.getElementById('jyUsername').value.trim();
-    const{data:existing}=await _db.from('students').select('id').eq('username',username).maybeSingle();
+    const{data:existing}=await _db.from('students').select('id').ilike('username',username).maybeSingle();
     if(existing)throw new Error(`@${username} is already taken.`);
 
     activateSubmitStep(1);
