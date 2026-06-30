@@ -246,8 +246,15 @@ h1,h2,h3{font-weight:900;letter-spacing:-0.03em;line-height:1.1;}
       <div style="margin-top:32px;padding-top:24px;border-top:1px solid var(--border-light);">
         <div class="input-group"><label class="eyebrow">Class Of (Graduating Year)</label><input type="number" class="input-field" id="jyYear" placeholder="2026" min="2024" max="2035"></div>
         <div class="input-group"><label class="eyebrow">Matriculation Number</label><input type="text" class="input-field" id="jyMatric" placeholder="Required for verified status"></div>
+        <div class="input-group">
+          <label class="eyebrow">WhatsApp Number</label>
+          <div style="position:relative;">
+            <span style="position:absolute;left:20px;top:50%;transform:translateY(-50%);font-size:18px;line-height:1;">📱</span>
+            <input type="tel" class="input-field" id="jyWhatsapp" placeholder="+234 801 234 5678" style="padding-left:50px;">
+          </div>
+          <p style="font-size:12px;color:var(--text-muted);margin-top:8px;font-weight:500;">Your classmates will use this to connect with you directly from your yearbook card.</p>
+        </div>
       </div>
-    </div>
 
     <!-- JY Step 2 -->
     <div class="step-view" id="jyStep2">
@@ -397,7 +404,7 @@ async function jySearchUniversities(){
   clearTimeout(jyUniTimer);drop.innerHTML='<div class="search-loading">Searching...</div>';drop.classList.add('open');
   jyUniTimer=setTimeout(async()=>{
     try{
-      const{data,error}=await _db.from('institutions').select('*').ilike('name',`%${val}%`).limit(10).order('name');
+      const{data,error}=await _db.from('institutions').select('*').ilike('name',`%${val}%`).limit(20).order('name');
       if(error||!data||!data.length){drop.innerHTML='<div class="search-loading">No universities found.</div>';return;}
       drop.innerHTML='';
       data.forEach(item=>{const div=document.createElement('div');div.className='search-option';div.textContent=item.name;div.onclick=()=>jySelectInstitution(item);drop.appendChild(div);});
@@ -603,6 +610,7 @@ async function submitJoinYearbook(){
       eternal_statement:document.getElementById('jyQuote').value.trim(),
       znode_passport_id:passportId,
       theme:document.body.getAttribute('data-theme')||'dark',
+      whatsapp_number:document.getElementById('jyWhatsapp').value.trim()||null,
       socials:getSocials(), is_dos:false, is_verified:false
     };
 
