@@ -1465,7 +1465,7 @@ async function uploadNewAvatar() {
     if (!fi.files?.length) { sts.style.color = 'var(--red)'; sts.textContent = 'Pick a photo first.'; return; }
     const file = fi.files[0];
     const ext  = file.name.split('.').pop().toLowerCase();
-    const path = `${S.passport_id}/avatar.${ext}`;
+    const path = `${S.id}/avatar.${ext}`;
     sts.style.color = 'var(--text-muted)'; sts.textContent = 'Uploading...';
     try {
        const { error: upErr } = await _db.storage.from('avatars').upload(path, file, { upsert: true });
