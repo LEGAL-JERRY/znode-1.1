@@ -644,24 +644,22 @@ async function toggleLike(e, id, btnElement) {
     
     let currentVal = parseInt(counterSpan.textContent) || 0;
     
- if (isLiked) {
-    btnElement.classList.remove('liked');
-    heartSpan.textContent = '♡';
-    currentVal = Math.max(0, currentVal - 1);
-    localStorage.removeItem(`znode_liked_${id}`);
-}
-} else {
-    btnElement.classList.add('liked');
-    heartSpan.textContent = '♥';
-    currentVal++;
-    localStorage.setItem(`znode_liked_${id}`, '1');
-}
+    if (isLiked) {
+        btnElement.classList.remove('liked');
+        heartSpan.textContent = '♡';
+        currentVal = Math.max(0, currentVal - 1);
+        localStorage.removeItem(`znode_liked_${id}`);
+    } else {
+        btnElement.classList.add('liked');
+        heartSpan.textContent = '♥';
+        currentVal++;
+        localStorage.setItem(`znode_liked_${id}`, '1');
+    }
     counterSpan.textContent = currentVal;
 
     try {
         await _db.from('students').update({ likes_count: currentVal }).eq('id', id);
         
-        // Update global state and re-render trending efficiently
         const memObj = allStudentsGlobal.find(x => x.id === id);
         if (memObj) {
             memObj.likes_count = currentVal;
@@ -671,7 +669,6 @@ async function toggleLike(e, id, btnElement) {
         console.error("Like update failed", err);
     }
 }
-
 // ── 🔗 PROFILE MODAL & DEEP SHARING ──────────────────────────────────────────
 function openProfileModal(student) {
     currentViewedProfile = student;
