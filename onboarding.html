@@ -696,8 +696,7 @@ if(existingEmail)throw new Error('An account with this email already exists. Try
 
     await new Promise(r=>setTimeout(r,900));
     msg.textContent='Opening your yearbook entry...';
-    const ybUrl=`yearbook.html?inst=${encodeURIComponent(jySelInst.name)}&dept=${encodeURIComponent(jySelDept.name)}&year=${encodeURIComponent(year)}&profile=${student.id}`;
-    setTimeout(()=>{ window.location.href=ybUrl; },800);
+    const ybUrl=`yearbook.html?inst=${encodeURIComponent(jySelInst.name)}&dept=${encodeURIComponent(jySelDept.name)}&faculty=${encodeURIComponent(jySelFac.name)}&year=${encodeURIComponent(year)}&profile=${student.id}`;setTimeout(()=>{ window.location.href=ybUrl; },800);
   }catch(err){
     submittingOverlay.classList.remove('active');
     joinYearbookPortal.style.display='block';
@@ -740,8 +739,7 @@ async function processLogin(){
       
     localStorage.setItem('znodeStudentProfile',JSON.stringify(student));
     btn.textContent='Success ✓';
-    const ybLogin = `yearbook.html?inst=${encodeURIComponent(student.institution||'')}&dept=${encodeURIComponent(student.department||'')}&year=${encodeURIComponent(student.graduation_year||'')}&profile=${student.id}`;
-    setTimeout(()=>{ window.location.href = ybLogin; },1000);
+    const ybLogin = `yearbook.html?inst=${encodeURIComponent(student.institution||'')}&dept=${encodeURIComponent(student.department||'')}&faculty=${encodeURIComponent(student.faculty||'')}&year=${encodeURIComponent(student.graduation_year||'')}&profile=${student.id}`;setTimeout(()=>{ window.location.href = ybLogin; },1000);
       
   }catch(err){showToast(err.message,'error');btn.textContent='Authenticate';btn.disabled=false;}
 }
@@ -765,7 +763,7 @@ if (DEMO_MODE) {
 } else if (localStorage.getItem('znodeStudentProfile')) {
   try {
     const s = JSON.parse(localStorage.getItem('znodeStudentProfile'));
-    window.location.href = `yearbook.html?inst=${encodeURIComponent(s.institution||'')}&dept=${encodeURIComponent(s.department||'')}&year=${encodeURIComponent(s.graduation_year||'')}`;
+    window.location.href = `yearbook.html?inst=${encodeURIComponent(s.institution||'')}&dept=${encodeURIComponent(s.department||'')}&faculty=${encodeURIComponent(s.faculty||'')}&year=${encodeURIComponent(s.graduation_year||'')}`;
   } catch(e) {
     window.location.href = 'yearbook.html';
   }
