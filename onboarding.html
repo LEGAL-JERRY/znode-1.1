@@ -655,7 +655,10 @@ async function submitJoinYearbook(){
   try{
     const username=document.getElementById('jyUsername').value.trim();
     const{data:existing}=await _db.from('students').select('id').ilike('username',username).maybeSingle();
-    if(existing)throw new Error(`@${username} is already taken.`);
+if(existing)throw new Error(`@${username} is already taken.`);
+
+const{data:existingEmail}=await _db.from('students').select('id').eq('email', document.getElementById('jyEmail').value.trim()).maybeSingle();
+if(existingEmail)throw new Error('An account with this email already exists. Try logging in instead.');
 
     activateSubmitStep(1);
     const pwdHash=await hashPassword(document.getElementById('jyPass').value);
