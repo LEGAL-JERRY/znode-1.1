@@ -86,6 +86,50 @@ h1,h2,h3{font-weight:900;letter-spacing:-0.03em;line-height:1.1;}
 .toast-container{position:fixed;bottom:32px;right:32px;z-index:9999;display:flex;flex-direction:column;gap:12px;}
 .toast{padding:16px 24px;border-radius:var(--radius-input);font-size:14px;font-weight:700;background:var(--bg-surface);border:1px solid var(--border-strong);color:var(--text-main);box-shadow:0 10px 30px rgba(0,0,0,0.1);animation:toastIn 0.3s var(--ease);}
 @keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* ── SUBMIT STEPS ── */
+.submit-step {
+  display: flex; align-items: flex-start; gap: 16px;
+  margin-bottom: 28px; opacity: 0.25;
+  transition: opacity 0.4s var(--ease);
+}
+.submit-step.active { opacity: 1; }
+.submit-step.done   { opacity: 0.55; }
+
+.submit-step-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  border: 2px solid var(--text-muted);
+  flex-shrink: 0; margin-top: 5px;
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+.submit-step.active .submit-step-dot {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.12);
+  animation: dotPulse 1.2s ease-in-out infinite;
+}
+.submit-step.done .submit-step-dot {
+  border-color: var(--accent); background: var(--accent); animation: none;
+}
+@keyframes dotPulse {
+  0%,100% { box-shadow: 0 0 0 3px rgba(255,255,255,0.10); }
+  50%      { box-shadow: 0 0 0 7px rgba(255,255,255,0.04); }
+}
+
+.submit-step-body { flex: 1; }
+.submit-step-label {
+  font-size: 15px; font-weight: 700; margin-bottom: 10px;
+  color: var(--text-main); letter-spacing: -0.02em;
+}
+.submit-step-bar {
+  height: 2px; background: var(--border-strong); overflow: hidden;
+}
+.submit-step-fill {
+  height: 100%; width: 0%; background: var(--accent);
+  transition: width 0.6s var(--ease);
+}
+.submit-step.active .submit-step-fill { width: 60%; }
+.submit-step.done   .submit-step-fill { width: 100%; }
 .form-nav{display:flex;justify-content:space-between;margin-top:48px;gap:16px;}
 .back-link{font-size:13px;color:var(--text-muted);cursor:pointer;font-weight:600;background:none;border:none;padding:0;margin-bottom:24px;display:block;}
 .back-link:hover{color:var(--text-main);}
@@ -250,10 +294,42 @@ h1,h2,h3{font-weight:900;letter-spacing:-0.03em;line-height:1.1;}
 </div>
 
 <!-- SUBMITTING -->
+<!-- SUBMITTING -->
 <div class="fullscreen-overlay" id="submittingOverlay">
-  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom:32px;animation:pulse 2s infinite;"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-  <h2>Deploying Node.</h2>
-  <p id="submitMsg">Writing to the network.</p>
+  <div id="submitStepsWrap" style="width:100%;max-width:420px;text-align:left;">
+    <div class="eyebrow" style="margin-bottom:32px;text-align:center;letter-spacing:0.3em;">Z-NODE // DEPLOYING</div>
+
+    <div class="submit-step" id="sstep0">
+      <div class="submit-step-dot"></div>
+      <div class="submit-step-body">
+        <div class="submit-step-label">Deploying to yearbook</div>
+        <div class="submit-step-bar"><div class="submit-step-fill"></div></div>
+      </div>
+    </div>
+    <div class="submit-step" id="sstep1">
+      <div class="submit-step-dot"></div>
+      <div class="submit-step-body">
+        <div class="submit-step-label">Filling important information</div>
+        <div class="submit-step-bar"><div class="submit-step-fill"></div></div>
+      </div>
+    </div>
+    <div class="submit-step" id="sstep2">
+      <div class="submit-step-dot"></div>
+      <div class="submit-step-body">
+        <div class="submit-step-label">Almost done</div>
+        <div class="submit-step-bar"><div class="submit-step-fill"></div></div>
+      </div>
+    </div>
+    <div class="submit-step" id="sstep3">
+      <div class="submit-step-dot"></div>
+      <div class="submit-step-body">
+        <div class="submit-step-label">Deployed</div>
+        <div class="submit-step-bar"><div class="submit-step-fill"></div></div>
+      </div>
+    </div>
+
+    <p id="submitMsg" style="margin-top:36px;font-size:13px;color:var(--text-muted);font-weight:600;text-align:center;min-height:18px;"></p>
+  </div>
 </div>
 
 <script>
@@ -483,19 +559,31 @@ function initiatePaystackPayment(){
 function jyPrevStep(){if(jyStep>0){jyStep--;jyUpdateView();}}
 
 // ── JOIN SUBMIT ──
+// ── SUBMIT STEP ANIMATOR ──
+function activateSubmitStep(index){
+  for(let i=0;i<4;i++){
+    const el=document.getElementById(`sstep${i}`);
+    el.classList.remove('active','done');
+    if(i<index) el.classList.add('done');
+    if(i===index) el.classList.add('active');
+  }
+}
+
+// ── JOIN SUBMIT ──
 async function submitJoinYearbook(){
-  joinYearbookPortal.style.display='none';submittingOverlay.classList.add('active');
+  joinYearbookPortal.style.display='none';
+  submittingOverlay.classList.add('active');
   const msg=document.getElementById('submitMsg');
+  activateSubmitStep(0);
   try{
     const username=document.getElementById('jyUsername').value.trim();
-    msg.textContent='Verifying handle...';
     const{data:existing}=await _db.from('students').select('id').eq('username',username).maybeSingle();
     if(existing)throw new Error(`@${username} is already taken.`);
-    msg.textContent='Securing credentials...';
+
+    activateSubmitStep(1);
     const pwdHash=await hashPassword(document.getElementById('jyPass').value);
     let avatarUrl=null;
     if(studentImageBlob){
-      msg.textContent='Uploading photo...';
       const fileName=`${username}_${Date.now()}.jpg`;
       await _db.storage.from('avatars').upload(fileName,studentImageBlob,{contentType:studentImageBlob.type||'image/jpeg',upsert:true});
       avatarUrl=_db.storage.from('avatars').getPublicUrl(fileName).data.publicUrl;
@@ -504,19 +592,37 @@ async function submitJoinYearbook(){
     const year=document.getElementById('jyYear').value;
     const suffix=matric.replace(/[^a-zA-Z0-9]/g,'').slice(-6).toUpperCase();
     const passportId=`ZNP-${jySelInst.name.toUpperCase().replace(/\s/g,'').slice(0,8)}-${year}-${suffix}`;
-    msg.textContent='Writing to the grid...';
-    const payload={username,full_name:document.getElementById('jyFullName').value.trim(),email:document.getElementById('jyEmail').value.trim(),password_hash:pwdHash,avatar_url:avatarUrl,institution:jySelInst.name,institution_id:jySelInst.id,faculty:jySelFac.name,department:jySelDept.name,graduation_year:parseInt(year),matric_number:matric,eternal_statement:document.getElementById('jyQuote').value.trim(),znode_passport_id:passportId,theme:document.body.getAttribute('data-theme')||'dark',socials:getSocials(),is_dos:false,is_verified:false};
+    const payload={
+      username, yearbook_verified:true, yearbook_access:true,
+      full_name:document.getElementById('jyFullName').value.trim(),
+      email:document.getElementById('jyEmail').value.trim(),
+      password_hash:pwdHash, avatar_url:avatarUrl,
+      institution:jySelInst.name, institution_id:jySelInst.id,
+      faculty:jySelFac.name, department:jySelDept.name,
+      graduation_year:parseInt(year), matric_number:matric,
+      eternal_statement:document.getElementById('jyQuote').value.trim(),
+      znode_passport_id:passportId,
+      theme:document.body.getAttribute('data-theme')||'dark',
+      socials:getSocials(), is_dos:false, is_verified:false
+    };
+
+    activateSubmitStep(2);
     const{data:student,error}=await _db.from('students').insert(payload).select().maybeSingle();
     if(error)throw new Error(error.message);
-      
-    localStorage.setItem('znodeStudentProfile',JSON.stringify(student));
-    document.querySelector('#submittingOverlay h2').textContent='Node Deployed ✓';
-    msg.textContent='Taking you to your yearbook entry...';
-    const ybUrl = `yearbook.html?inst=${encodeURIComponent(jySelInst.name)}&dept=${encodeURIComponent(jySelDept.name)}&year=${encodeURIComponent(document.getElementById('jyYear').value)}&profile=${student.id}`;
-    setTimeout(()=>{ window.location.href = ybUrl; },1500);
 
-      
-  }catch(err){submittingOverlay.classList.remove('active');joinYearbookPortal.style.display='block';showToast(err.message,'error');}
+    await new Promise(r=>setTimeout(r,600)); // let step 2 breathe
+    activateSubmitStep(3);
+    localStorage.setItem('znodeStudentProfile',JSON.stringify(student));
+
+    await new Promise(r=>setTimeout(r,900));
+    msg.textContent='Opening your yearbook entry...';
+    const ybUrl=`yearbook.html?inst=${encodeURIComponent(jySelInst.name)}&dept=${encodeURIComponent(jySelDept.name)}&year=${encodeURIComponent(year)}&profile=${student.id}`;
+    setTimeout(()=>{ window.location.href=ybUrl; },800);
+  }catch(err){
+    submittingOverlay.classList.remove('active');
+    joinYearbookPortal.style.display='block';
+    showToast(err.message,'error');
+  }
 }
 
 // ── SOCIALS ──
