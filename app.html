@@ -1036,8 +1036,8 @@ if (uploadWrap && S.avatar_url) {
 
 // profile completion prompt
     const prompt = document.getElementById('profileCompletePrompt');
-    const alreadyFilled = !!localStorage.getItem(`znode_profile_filled_${S.id}`);
-    if (prompt) prompt.style.display = (S.yearbook_verified && !alreadyFilled) ? 'block' : 'none';
+    const alreadyFilled = !!(S.skills_of_student || S.hobbies || S.aspirations || S.known_for || S.current_project);
+if (prompt) prompt.style.display = (S.yearbook_verified && !alreadyFilled) ? 'block' : 'none';
 // yearbook groups
 const gInst = document.getElementById('groupInstName');
 const gFac  = document.getElementById('groupFacultyName');
