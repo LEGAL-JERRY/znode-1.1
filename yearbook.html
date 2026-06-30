@@ -481,6 +481,19 @@ const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
 let allStudentsGlobal = [];
 let currentViewedProfile = null;
 
+// ── 🏫 INSTITUTION NAME ALIASES ──────────────────────────────────────────────
+// Add an entry here any time two institution name spellings end up live at once.
+// Both old cached sessions/links and new ones will resolve to the full student set.
+const INSTITUTION_ALIASES = {
+    'federal university, lafia': ['Federal University, Lafia', 'Federal University of Lafia'],
+    'federal university of lafia': ['Federal University, Lafia', 'Federal University of Lafia']
+};
+
+function resolveInstitutionVariants(inst) {
+    const key = (inst || '').trim().toLowerCase();
+    return INSTITUTION_ALIASES[key] || [inst];
+}
+
 function changeTheme(themeName, element) {
     document.documentElement.setAttribute('data-theme', themeName);
     localStorage.setItem('znode_sys_theme', themeName);
@@ -831,7 +844,11 @@ async function loadYearbook(dept, year, inst) {
         
        if (dept) query = query.ilike('department', `%${dept}%`);
     if (year) query = query.eq('graduation_year', parseInt(year));
-    if (inst) query = query.ilike('institution', `%${inst}%`);
+    if (inst) {
+        const variants = resolveInstitutionVariants(inst);
+        const orFilter = variants.map(v => `institution.ilike.%${v}%`).join(',');
+        query = query.or(orFilter);
+    }
         
         if (currentUsername) query = query.or(`yearbook_access.eq.true,username.eq.${currentUsername}`);
         else query = query.eq('yearbook_access', true);
