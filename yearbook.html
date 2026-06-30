@@ -217,8 +217,7 @@
         ══════════════════════════════ */
         .page-content { max-width: 480px; margin: 0 auto; transition: max-width 0.4s var(--ease); }
         .cover-header { position: relative; text-align: center; padding: 44px 20px 24px; border-bottom: 1px solid var(--paper-dark); z-index: 1; overflow: hidden; }
-        .cover-header::before { content: ''; position: absolute; inset: 0; background-image: url('WhatsApp Image 2026-06-11 at 8.58.01 PM (1).jpeg'); background-size: cover; background-position: center; filter: grayscale(100%) contrast(1.1); z-index: -2; }
-        .cover-header::after { content: ''; position: absolute; inset: 0; background: var(--hero-mask); mix-blend-mode: normal; z-index: -1; }
+       .cover-header::before { content: ''; position: absolute; inset: 0; background-image: var(--cover-bg, url('WhatsApp Image 2026-06-11 at 8.58.01 PM (1).jpeg')); background-size: cover; background-position: center; filter: grayscale(100%) contrast(1.1); z-index: -2; }.cover-header::after { content: ''; position: absolute; inset: 0; background: var(--hero-mask); mix-blend-mode: normal; z-index: -1; }
         .cover-dept-main { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 1.5px; line-height: 1.05; color: var(--navy); text-transform: lowercase; margin-bottom: 4px; word-break: break-word; }
         .cover-collaboration { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: var(--text-muted); margin-bottom: 18px; }
         .cover-znode-badge { font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 2px; color: var(--gold); background: var(--paper-mid); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--paper-dark); }
@@ -529,7 +528,7 @@ function initSession() {
     
 function getParams() {
     const p = new URLSearchParams(window.location.search);
-    return { dept: p.get('dept') || '', year: p.get('year') || '', inst: p.get('inst') || '' };
+    return { dept: p.get('dept') || '', year: p.get('year') || '', inst: p.get('inst') || '', faculty: p.get('faculty') || '' };
 }
 
 // ── 🔍 SEARCH INTERACTION ROUTERS ───────────────────────────────────────────
@@ -857,12 +856,13 @@ async function loadYearbook(dept, year, inst) {
 // ── 🔗 DEEP LINK SHARE ───────────────────────────────────────────────────────
 function shareProfileDeepLink() {
     if (!currentViewedProfile) return;
-    const { dept, year, inst } = getParams();
+    const { dept, year, inst, faculty } = getParams();
     const base = 'https://znode-1-1.vercel.app/yearbook.html';
     const params = new URLSearchParams();
     if (dept) params.set('dept', dept);
     if (year) params.set('year', year);
     if (inst) params.set('inst', inst);
+    if (faculty) params.set('faculty', faculty);
     params.set('profile', currentViewedProfile.id);
     const shareUrl = `${base}?${params.toString()}`;
     const shareText = `Check out ${currentViewedProfile.full_name}'s profile on the Z-NODE Yearbook! 🎓`;
@@ -1027,15 +1027,41 @@ ctx.fillText(`Z-NODE  //  DEPT. OF ${(_dept || 'ECONOMICS').toUpperCase()}  //  
     }, 'image/jpeg', 0.92);
 }
 
+// ── 🖼️ DYNAMIC COVER IMAGE ──────────────────────────────────────────────────
+// Looks for images/set_{department}_{faculty}_{institution}.jpeg.
+// Falls back silently to the default CSS background if the file doesn't exist.
+const COVER_IMAGE_BASE = 'images/'; // point this at your repo's raw image path if needed
+
+function _slugifyForFilename(str) {
+    return (str || '')
+        .toString()
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '');
+}
+
+function setCohortCoverImage(dept, faculty, inst) {
+    const fileName = `set_${_slugifyForFilename(dept)}_${_slugifyForFilename(faculty)}_${_slugifyForFilename(inst)}.jpeg`;
+    const url = `${COVER_IMAGE_BASE}${fileName}`;
+
+    const probe = new Image();
+    probe.onload  = () => document.documentElement.style.setProperty('--cover-bg', `url('${url}')`);
+    probe.onerror = () => console.warn(`Cover image not found: ${url} — using default background.`);
+    probe.src = url;
+}
+
 async function bootstrap() {
     const session = initSession();
     if (!session) return;
-    const { dept, year, inst } = getParams();
+    const { dept, year, inst, faculty } = getParams();
 
     document.getElementById('topBrand').textContent   = dept ? `${dept} WEBSITE`.toUpperCase() : 'DEPARTMENT WEBSITE';
     document.getElementById('classbanner').textContent = year ? `CLASS OF ${year}` : 'CLASS OF —';
     document.getElementById('deptLabel').textContent = dept ? `the department of ${dept.toLowerCase()}` : 'the department';
     document.getElementById('instLabel').textContent = inst ? inst.toUpperCase() : '';
+
+    setCohortCoverImage(dept, faculty, inst);
 
    allStudentsGlobal = await loadYearbook(dept, year, inst);
     document.getElementById('loadingState').style.display = 'none';
@@ -1084,12 +1110,13 @@ async function bootstrap() {
     }
 }
 function shareCohortPage() {
-    const { dept, year, inst } = getParams();
+    const { dept, year, inst, faculty } = getParams();
     const base = 'https://znode-1-1.vercel.app/yearbook.html';
     const params = new URLSearchParams();
     if (dept) params.set('dept', dept);
     if (year) params.set('year', year);
     if (inst) params.set('inst', inst);
+    if (faculty) params.set('faculty', faculty);
     const shareUrl = `${base}?${params.toString()}`;
     const shareText = `Check out the ${dept ? dept.charAt(0).toUpperCase() + dept.slice(1) : 'Department'} Class of ${year || '2026'} Yearbook on Z-NODE! 🎓`;
 
@@ -1108,7 +1135,8 @@ window.addEventListener('pageshow', async (event) => {
     if (event.persisted) {
         // Page was restored from bfcache — force a fresh data reload
         const grid = document.getElementById('studentGrid');
-        const { dept, year, inst } = getParams();
+        const { dept, year, inst, faculty } = getParams();
+        setCohortCoverImage(dept, faculty, inst);
 
         // Reset UI to loading state
         grid.style.display = 'none';
