@@ -722,7 +722,7 @@ async function processLogin(){
   try{
     const pwdHash=await hashPassword(pw);
     let student=null;
-    const{data:byUser}=await _db.from('students').select('*').eq('username',id).eq('password_hash',pwdHash).maybeSingle();
+    const{data:byUser}=await _db.from('students').select('*').ilike('username',id).eq('password_hash',pwdHash).maybeSingle();
     student=byUser;
     if(!student){const{data:byEmail}=await _db.from('students').select('*').eq('email',id).eq('password_hash',pwdHash).maybeSingle();student=byEmail;}
     if(!student)throw new Error('Invalid credentials.');
