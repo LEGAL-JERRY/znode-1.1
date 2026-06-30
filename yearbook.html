@@ -838,8 +838,7 @@ async function loadYearbook(dept, year, inst) {
         let currentUsername = "";
         if (sessionRaw) { try { currentUsername = JSON.parse(sessionRaw).username || ""; } catch(e) {} }
 
-        const fetchColumns = 'id, department, faculty, state_of_origin, tribe, gender, dob, aspirations, hobbies, skills_of_student, current_project, lga, religion, study_habit, keeps_notes, likes_count, graduation_year, full_name, username, matric_number, eternal_statement, socials, institution, yearbook_verified, avatar_url, yearbook_access, is_dos';
-        let query = _db.from('students').select(fetchColumns); 
+        const fetchColumns = 'id, department, faculty, whatsapp_number, state_of_origin, tribe, gender, dob, aspirations, hobbies, skills_of_student, current_project, lga, religion, study_habit, keeps_notes, likes_count, graduation_year, full_name, username, matric_number, eternal_statement, socials, institution, yearbook_verified, avatar_url, yearbook_access, is_dos';let query = _db.from('students').select(fetchColumns); 
 
         
        if (dept) query = query.ilike('department', `%${dept}%`);
