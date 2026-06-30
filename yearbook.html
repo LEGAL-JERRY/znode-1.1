@@ -485,8 +485,8 @@ let currentViewedProfile = null;
 // Add an entry here any time two institution name spellings end up live at once.
 // Both old cached sessions/links and new ones will resolve to the full student set.
 const INSTITUTION_ALIASES = {
-    'federal university, lafia': ['Federal University, Lafia', 'Federal University of Lafia'],
-    'federal university of lafia': ['Federal University, Lafia', 'Federal University of Lafia']
+    'federal university, lafia':  ['Federal University, Lafia',  'Federal University of Lafia'],
+    'federal university of lafia':['Federal University of Lafia', 'Federal University, Lafia']
 };
 
 function resolveInstitutionVariants(inst) {
@@ -846,7 +846,7 @@ async function loadYearbook(dept, year, inst) {
     if (year) query = query.eq('graduation_year', parseInt(year));
     if (inst) {
         const variants = resolveInstitutionVariants(inst);
-        const orFilter = variants.map(v => `institution.ilike.%${v}%`).join(',');
+        const orFilter = variants.map(v => `institution.ilike."%${v}%"`).join(',');
         query = query.or(orFilter);
     }
         
