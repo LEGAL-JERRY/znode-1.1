@@ -1332,7 +1332,7 @@ function accessYearbook() {
     errEl.textContent = '';
     showToast(`Opening ${ybSelDept.name} — ${year}...`);
     setTimeout(() => {
-        window.location.href = `yearbook.html?inst=${encodeURIComponent(ybSelInst.name)}&dept=${encodeURIComponent(ybSelDept.name)}&year=${encodeURIComponent(year)}`;
+        window.location.href = `yearbook.html?inst=${encodeURIComponent(ybSelInst.name)}&dept=${encodeURIComponent(ybSelDept.name)}&faculty=${encodeURIComponent(ybSelFac?.name||'')}&year=${encodeURIComponent(year)}`;
     }, 500);
 }
 
@@ -1341,7 +1341,7 @@ function openMyYearbook() {
         showToast('Department or graduation year missing — check your profile settings.');
         return;
     }
-   window.location.href = `yearbook.html?inst=${encodeURIComponent(S.university)}&dept=${encodeURIComponent(S.department)}&year=${encodeURIComponent(S.graduation_year)}`;
+   window.location.href = `yearbook.html?inst=${encodeURIComponent(S.university)}&dept=${encodeURIComponent(S.department)}&faculty=${encodeURIComponent(S.faculty||'')}&year=${encodeURIComponent(S.graduation_year)}`;
 }
 function openGroupYearbook(type) {
     if (!S.university) { showToast('No institution found on your profile.'); return; }
@@ -1353,7 +1353,7 @@ function openGroupYearbook(type) {
         url = `yearbook.html?inst=${encodeURIComponent(S.university)}&faculty=${encodeURIComponent(S.faculty)}&year=${encodeURIComponent(S.graduation_year)}`;
     } else if (type === 'dept') {
         if (!S.department) { showToast('No department found on your profile.'); return; }
-        url = `yearbook.html?inst=${encodeURIComponent(S.university)}&dept=${encodeURIComponent(S.department)}&year=${encodeURIComponent(S.graduation_year)}`;
+        url = `yearbook.html?inst=${encodeURIComponent(S.university)}&dept=${encodeURIComponent(S.department)}&faculty=${encodeURIComponent(S.faculty||'')}&year=${encodeURIComponent(S.graduation_year)}`;
     }
     if (url) window.location.href = url;
 }
