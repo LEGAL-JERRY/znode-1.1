@@ -597,19 +597,36 @@ async function jyNextStep(){
 }
 
 function initiatePaystackPayment(){
-  if(!jyValidateStep())return;
   const email = document.getElementById('jyEmail').value.trim();
   if(!email || !email.includes('@')){ showToast('Valid email required for payment.','error'); return; }
   const fullName = document.getElementById('jyFullName').value.trim();
+  const ref = `ZN-SIGNUP-${Date.now()}`;
   const handler = PaystackPop.setup({
     key:      PAYSTACK_KEY,
     email,
     amount:   PRICE_KOBO,
     currency: 'NGN',
-    ref:      `ZN-SIGNUP-${Date.now()}`,
-    metadata: { full_name: fullName },
-    callback: () => {
-      showToast('Payment confirmed — deploying your node...');
+    ref,
+    metadata: { full_name: fullName, email },
+    callback: async () => {
+      showToast('Payment confirmed — logging payment...');
+      // Log the payment BEFORE attempting account creation. student_id is null
+      // because the account doesn't exist yet — this row is the permanent,
+      // searchable record that the charge happened, independent of whether
+      // account creation below succeeds or fails.
+      try{
+        await _db.from('payments').insert({
+          student_id: null,
+          amount: PRICE_KOBO / 100,
+          paystack_ref: ref,
+          gateway: 'paystack',
+          status: 'SUCCESS',
+          paid_at: new Date().toISOString()
+        });
+      }catch(logErr){
+        console.error('Payment logging failed — proceeding anyway:', logErr);
+      }
+      window._znodeLastPaymentRef = ref;
       submitJoinYearbook();
     },
     onClose: () => showToast('Payment cancelled. Complete payment to join the yearbook.','error')
