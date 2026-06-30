@@ -201,8 +201,12 @@ h1,h2,h3{font-weight:900;letter-spacing:-0.03em;line-height:1.1;}
     <div class="step-view active" id="jyStep0">
       <div class="form-section-header"><h3>Your Identity</h3><p>Tell us about yourself</p></div>
       <div class="input-group"><label class="eyebrow">Your Full Name</label><input type="text" class="input-field" id="jyFullName" placeholder="David Olayinka"></div>
-      <div class="input-group"><label class="eyebrow">Your Username</label><input type="text" class="input-field" id="jyUsername" placeholder="david_o"></div>
-      <div class="input-group"><label class="eyebrow">Famous / Favourite Quote</label><input type="text" class="input-field" id="jyQuote" placeholder="Code is temporary, infrastructure is forever."></div>
+      <div class="input-group">
+              <label class="eyebrow">Your Username</label>
+              <input type="text" class="input-field" id="jyUsername" placeholder="david_o" oninput="checkUsername(this.value)">
+              <p id="usernameStatus" style="font-size:12px; font-weight:700; margin-top:8px; min-height:16px;"></p>
+            </div>
+        <div class="input-group"><label class="eyebrow">Famous / Favourite Quote</label><input type="text" class="input-field" id="jyQuote" placeholder="Code is temporary, infrastructure is forever."></div>
       <div class="input-group"><label class="eyebrow">Email Address</label><input type="email" class="input-field" id="jyEmail" placeholder="your@email.com"></div>
       <div class="input-group"><label class="eyebrow">Secure Password</label><input type="password" class="input-field" id="jyPass" placeholder="••••••••"></div>
     </div>
@@ -528,8 +532,23 @@ function prefillDemoStep1(){
 }
 function jyValidateStep(){
   if(DEMO_MODE) return true; // demo always advances on click — that's the whole point of the "huge next button"
-  if(jyStep===0){if(!document.getElementById('jyFullName').value||!document.getElementById('jyUsername').value||!document.getElementById('jyEmail').value||!document.getElementById('jyPass').value){showToast('Name, Username, Email and Password are required.','error');return false;}}
-  if(jyStep===1){
+ if (jyStep === 0) {
+    const name     = document.getElementById('jyFullName').value.trim();
+    const username = document.getElementById('jyUsername').value.trim();
+    const email    = document.getElementById('jyEmail').value.trim();
+    const pass     = document.getElementById('jyPass').value;
+
+    if (!name || !username || !email || !pass) {
+        showToast('Name, Username, Email and Password are required.', 'error');
+        return false;
+    }
+    if (!usernameValid) {
+        showToast('Please wait — username availability is still being checked.', 'error');
+        document.getElementById('usernameStatus').style.color = '#ef4444';
+        document.getElementById('usernameStatus').textContent = 'Verify your username before proceeding.';
+        return false;
+    }
+}if(jyStep===1){
     if(!jySelInst){showToast('Please select your university.','error');return false;}
     if(!jySelFac){showToast('Please select a faculty.','error');return false;}
     if(!jySelDept){showToast('Please select a department.','error');return false;}
@@ -565,6 +584,56 @@ function initiatePaystackPayment(){
   handler.openIframe();
 }
 function jyPrevStep(){if(jyStep>0){jyStep--;jyUpdateView();}}
+
+    // ── USERNAME AVAILABILITY CHECK ──
+let usernameTimer = null;
+let usernameValid = false;
+
+async function checkUsername(val) {
+    const status = document.getElementById('usernameStatus');
+    const clean = val.trim().toLowerCase();
+
+    // Reset
+    usernameValid = false;
+    clearTimeout(usernameTimer);
+
+    if (!clean) {
+        status.textContent = '';
+        return;
+    }
+    if (clean.length < 3) {
+        status.style.color = 'var(--text-muted)';
+        status.textContent = 'Username must be at least 3 characters.';
+        return;
+    }
+    if (DEMO_MODE) { usernameValid = true; return; }
+
+    status.style.color = 'var(--text-muted)';
+    status.textContent = 'Checking...';
+
+    usernameTimer = setTimeout(async () => {
+        try {
+            const { data } = await _db
+                .from('students')
+                .select('id')
+                .eq('username', clean)
+                .maybeSingle();
+
+            if (data) {
+                status.style.color = '#ef4444';
+                status.textContent = `✕ @${clean} is already taken — try another.`;
+                usernameValid = false;
+            } else {
+                status.style.color = '#22c55e';
+                status.textContent = `✓ @${clean} is available.`;
+                usernameValid = true;
+            }
+        } catch (e) {
+            status.style.color = 'var(--text-muted)';
+            status.textContent = 'Could not verify username — check your connection.';
+        }
+    }, 500);
+}
 
 // ── JOIN SUBMIT ──
 // ── SUBMIT STEP ANIMATOR ──
