@@ -1042,13 +1042,37 @@ function _slugifyForFilename(str) {
 }
 
 function setCohortCoverImage(dept, faculty, inst) {
-    const fileName = `set_${_slugifyForFilename(dept)}_${_slugifyForFilename(faculty)}_${_slugifyForFilename(inst)}.jpeg`;
-    const url = `${COVER_IMAGE_BASE}${fileName}`;
+    const deptSlug = _slugifyForFilename(dept);
+    const facSlug  = _slugifyForFilename(faculty);
+    const instSlug = _slugifyForFilename(inst);
 
-    const probe = new Image();
-    probe.onload  = () => document.documentElement.style.setProperty('--cover-bg', `url('${url}')`);
-    probe.onerror = () => console.warn(`Cover image not found: ${url} — using default background.`);
-    probe.src = url;
+    // Candidate 1: full filename with faculty. Candidate 2: fallback without faculty segment.
+    const candidates = [];
+    if (facSlug) candidates.push(`set_${deptSlug}_${facSlug}_${instSlug}.jpeg`);
+    candidates.push(`set_${deptSlug}_${instSlug}.jpeg`);
+
+    console.log('[Z-NODE] Cover image inputs →', { dept, faculty, inst });
+    console.log('[Z-NODE] Cover image candidates →', candidates);
+
+    function tryNext(i) {
+        if (i >= candidates.length) {
+            console.warn('[Z-NODE] No cover image found for any candidate — using default background.');
+            return;
+        }
+        const url = `${COVER_IMAGE_BASE}${candidates[i]}`;
+        const probe = new Image();
+        probe.onload = () => {
+            console.log('[Z-NODE] Cover image LOADED:', url);
+            document.documentElement.style.setProperty('--cover-bg', `url('${url}')`);
+        };
+        probe.onerror = () => {
+            console.warn('[Z-NODE] Cover image NOT FOUND:', url, '— trying next candidate.');
+            tryNext(i + 1);
+        };
+        probe.src = url;
+    }
+
+    tryNext(0);
 }
 
 async function bootstrap() {
