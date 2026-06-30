@@ -1151,7 +1151,7 @@ async function saveInlineField(key, dbCol) {
     };
 
     try {
-        const { error } = await _db.from('students').update({ [dbCol]: val }).eq('znode_passport_id', S.passport_id);
+        const { error } = await _db.from('students').update({ [dbCol]: val }).eq('id', S.id);
         if (error) throw error;
         S[sProp[key]] = val;
         saveLocal();
@@ -1172,7 +1172,7 @@ async function saveSocials() {
         github:    document.getElementById('inp-gh').value.trim(),
     };
     try {
-        const { error } = await _db.from('students').update({ socials: JSON.stringify(obj) }).eq('znode_passport_id', S.passport_id);
+        const { error } = await _db.from('students').update({ socials: JSON.stringify(obj) }).eq('id', S.id);
         if (error) throw error;
         S.socials = obj;
         saveLocal();
@@ -1205,15 +1205,29 @@ function removeCustomAttr(i) {
 }
 
 // ── SETTINGS ──
-function commitProfileEdits() {
-    S.full_name      = document.getElementById('editFullName').value;
-    S.matric_no      = document.getElementById('editMatricNo').value;
-    S.university     = document.getElementById('editUniversity').value;
-    S.department     = document.getElementById('editDept').value;
-    S.faculty        = document.getElementById('editFaculty').value;
-    S.graduation_year = document.getElementById('editGradYear').value;
-    saveLocal(); render();
-    showToast('Profile updated.');
+async function commitProfileEdits() {
+    S.full_name       = document.getElementById('editFullName').value.trim();
+    S.matric_no       = document.getElementById('editMatricNo').value.trim();
+    S.university      = document.getElementById('editUniversity').value.trim();
+    S.department      = document.getElementById('editDept').value.trim();
+    S.faculty         = document.getElementById('editFaculty').value.trim();
+    S.graduation_year = document.getElementById('editGradYear').value.trim();
+    try {
+        const { error } = await _db.from('students').update({
+            full_name:       S.full_name,
+            matric_number:   S.matric_no,
+            institution:     S.university,
+            department:      S.department,
+            faculty:         S.faculty,
+            graduation_year: S.graduation_year
+        }).eq('id', S.id);
+        if (error) throw error;
+        saveLocal(); render();
+        showToast('Profile updated.');
+    } catch(e) {
+        console.error(e);
+        showToast('Save failed — check your connection.');
+    }
 }
 
 // ── YEARBOOK ──
