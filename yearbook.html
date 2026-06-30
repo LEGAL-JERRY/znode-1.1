@@ -647,11 +647,12 @@ async function toggleLike(e, id, btnElement) {
     
     let currentVal = parseInt(counterSpan.textContent) || 0;
     
-   if (isLiked) {
+ if (isLiked) {
     btnElement.classList.remove('liked');
     heartSpan.textContent = '♡';
-    currentVal--;
+    currentVal = Math.max(0, currentVal - 1);
     localStorage.removeItem(`znode_liked_${id}`);
+}
 } else {
     btnElement.classList.add('liked');
     heartSpan.textContent = '♥';
@@ -894,10 +895,10 @@ async function toggleModalLike() {
     const wasLiked   = btn.classList.contains('liked');
     let val = parseInt(countSpan.textContent) || 0;
 
-    if (wasLiked) {
-        btn.classList.remove('liked'); heartSpan.textContent = '♡'; val--;
-        localStorage.removeItem(`znode_liked_${s.id}`);
-    } else {
+  if (wasLiked) {
+    btn.classList.remove('liked'); heartSpan.textContent = '♡'; val = Math.max(0, val - 1);
+    localStorage.removeItem(`znode_liked_${s.id}`);
+   } else {
         btn.classList.add('liked'); heartSpan.textContent = '♥'; val++;
         localStorage.setItem(`znode_liked_${s.id}`, '1');
     }
