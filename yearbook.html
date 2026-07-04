@@ -214,6 +214,51 @@
         @media (min-width: 450px) { #navUsername { display: block; } }
 
         /* ══════════════════════════════
+           VIEW TABS
+        ══════════════════════════════ */
+        .view-tab-dock { display:flex; gap:4px; background: var(--paper-mid); padding:4px; border-radius:20px; border:1px solid var(--paper-dark); flex-shrink:0; }
+        .view-tab-btn { background:none; border:none; cursor:pointer; font-family:'Inter',sans-serif; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; padding:6px 14px; border-radius:16px; color:var(--text-muted); transition: all 0.2s; }
+        .view-tab-btn.active { background: var(--navy); color: var(--paper); }
+
+        /* ══════════════════════════════
+           GALLERY
+        ══════════════════════════════ */
+        .gallery-toolbar { display:flex; align-items:center; justify-content:space-between; padding: 20px 18px 12px; gap:12px; flex-wrap:wrap; }
+        .gallery-upload-btn { background: var(--navy); color: var(--paper); border:none; padding:10px 20px; border-radius:20px; font-family:'Inter',sans-serif; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; transition:opacity 0.2s; }
+        .gallery-upload-btn:hover { opacity:0.85; }
+        .gallery-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; padding: 0 18px 40px; }
+        .gallery-item { position:relative; aspect-ratio:1; overflow:hidden; border-radius:8px; cursor:pointer; background:var(--paper-mid); border:1px solid var(--paper-dark); }
+        .gallery-item img { width:100%; height:100%; object-fit:cover; display:block; transition: transform 0.3s var(--ease); }
+        .gallery-item:hover img { transform: scale(1.05); }
+        .gallery-item-tag { position:absolute; top:6px; left:6px; background:rgba(0,0,0,0.6); color:#fff; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; padding:3px 7px; border-radius:10px; }
+        .gallery-item-likes { position:absolute; bottom:6px; right:6px; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px; display:flex; align-items:center; gap:4px; }
+        @media (min-width: 800px) { .gallery-grid { grid-template-columns: repeat(4, 1fr); padding: 0 40px 60px; gap:16px; } }
+
+        .gallery-lightbox-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:998; display:none; align-items:center; justify-content:center; padding:20px; }
+        .gallery-lightbox-overlay.active { display:flex; }
+        .gallery-lightbox-content { max-width:600px; width:100%; }
+        .gallery-lightbox-img { width:100%; max-height:70vh; object-fit:contain; border-radius:8px; display:block; margin-bottom:14px; }
+        .gallery-lightbox-caption { color:#fff; font-family:'Caveat',cursive; font-size:18px; text-align:center; margin-bottom:14px; }
+        .gallery-lightbox-actions { display:flex; justify-content:center; gap:10px; }
+        .gallery-lightbox-close { position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.15); border:none; color:#fff; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:16px; }
+
+        .gallery-upload-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:998; display:none; align-items:center; justify-content:center; padding:20px; }
+        .gallery-upload-modal-overlay.active { display:flex; }
+        .gallery-upload-modal { background:var(--paper); border:1px solid var(--paper-dark); border-radius:12px; padding:24px; max-width:400px; width:100%; }
+        .gallery-upload-modal h3 { font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--navy); margin-bottom:14px; }
+        .gallery-upload-modal input[type="file"] { width:100%; margin-bottom:14px; font-size:13px; color:var(--text-main); }
+        .gallery-upload-modal input[type="text"] { width:100%; padding:10px 14px; border-radius:8px; border:1px solid var(--paper-dark); background:var(--paper-mid); color:var(--text-main); font-size:13px; margin-bottom:14px; font-family:'Inter',sans-serif; }
+        .gallery-upload-modal-actions { display:flex; gap:10px; }
+        .gallery-upload-modal-actions button { flex:1; padding:10px; border-radius:20px; border:none; font-family:'Inter',sans-serif; font-size:12px; font-weight:800; text-transform:uppercase; cursor:pointer; }
+        .gallery-upload-submit { background:var(--navy); color:var(--paper); }
+        .gallery-upload-cancel { background:var(--paper-mid); color:var(--text-main); border:1px solid var(--paper-dark) !important; }
+        .gallery-empty-msg { text-align:center; padding:60px 24px; color:var(--text-muted); font-family:'Caveat',cursive; font-size:18px; }
+
+        /* ══════════════════════════════
+           MAIN CONTENT & HERO HEADER
+        ══════════════════════════════ */
+
+        /* ══════════════════════════════
            MAIN CONTENT & HERO HEADER
         ══════════════════════════════ */
         .page-content { max-width: 480px; margin: 0 auto; transition: max-width 0.4s var(--ease); }
@@ -378,6 +423,11 @@
     
     <span class="top-brand" id="topBrand">ARCHIVE</span>
 
+ <div class="view-tab-dock" id="viewTabDock">
+        <button class="view-tab-btn active" data-tab="yearbook" onclick="switchTopTab('yearbook', this)">Yearbook</button>
+        <button class="view-tab-btn" data-tab="gallery" onclick="switchTopTab('gallery', this)">Gallery</button>
+    </div>
+
     <div class="header-search-container" id="headerSearchContainer">
         <div class="search-input-wrapper">
             <input type="text" class="header-search-input" id="headerSearchInput" placeholder="Search student names..." oninput="handleLiveSearch(this.value)">
@@ -398,6 +448,7 @@
 </header>
 
 <main class="page-content">
+    <div class="view-tab-panel" id="tabYearbook">
     <div class="cover-header">
         <div class="cover-dept-main" id="deptLabel">the department of economics</div>
         <div style="font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:3px; color:var(--gold); margin-bottom:6px;" id="instLabel"></div>
@@ -433,6 +484,17 @@
     <div class="scroll-cta" id="scrollCta" style="display:none;">
         ✦ Scroll to discover more ✦
         <span class="cta-arrow">↓</span>
+    </div>
+    </div>
+
+    <div class="view-tab-panel" id="tabGallery" style="display:none;">
+        <div class="gallery-toolbar">
+            <div class="eyebrow" style="margin:0;">Z-NODE // GALLERY</div>
+            <button class="gallery-upload-btn" onclick="openGalleryUploadModal()">+ Add Photo</button>
+        </div>
+        <div id="galleryLoading" class="gallery-empty-msg">Loading photos...</div>
+        <div class="gallery-grid" id="galleryGrid" style="display:none;"></div>
+        <div class="gallery-empty-msg" id="galleryEmptyMsg" style="display:none;">No photos yet — be the first to add one.</div>
     </div>
 </main>
 
@@ -472,6 +534,32 @@
     </div>
 </div>
 
+<div class="gallery-lightbox-overlay" id="galleryLightbox" onclick="closeGalleryLightbox(event)">
+    <button class="gallery-lightbox-close" onclick="closeGalleryLightbox()">✕</button>
+    <div class="gallery-lightbox-content" onclick="event.stopPropagation()">
+        <img class="gallery-lightbox-img" id="lightboxImg" src="" alt="">
+        <div class="gallery-lightbox-caption" id="lightboxCaption"></div>
+        <div class="gallery-lightbox-actions">
+            <button class="modal-action-btn" id="lightboxLikeBtn" onclick="toggleGalleryLike()">
+                <span id="lightboxLikeHeart">♡</span>&nbsp;<span id="lightboxLikeCount">0</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="gallery-upload-modal-overlay" id="galleryUploadModal" onclick="closeGalleryUploadModal(event)">
+    <div class="gallery-upload-modal" onclick="event.stopPropagation()">
+        <h3>Add a Photo</h3>
+        <input type="file" id="galleryFileInput" accept="image/*">
+        <input type="text" id="galleryCaptionInput" placeholder="Caption (optional)">
+        <p id="galleryUploadStatus" style="font-size:12px; font-weight:700; margin-bottom:12px; min-height:16px; color:var(--text-muted);"></p>
+        <div class="gallery-upload-modal-actions">
+            <button class="gallery-upload-cancel" onclick="closeGalleryUploadModal()">Cancel</button>
+            <button class="gallery-upload-submit" onclick="submitGalleryPhoto()">Upload</button>
+        </div>
+    </div>
+</div>
+
 <script>
 const SUPABASE_URL  = "https://yohndnmwvgcwadkytmix.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvaG5kbm13dmdjd2Fka3l0bWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDEyODgsImV4cCI6MjA5NDYxNzI4OH0.hkUexJ-AS1GpLJL78F7iXDv5PkwuPbShj2fsGVXuEsg";
@@ -480,6 +568,9 @@ const _db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
 let allStudentsGlobal = [];
 let currentViewedProfile = null;
+let galleryPhotosGlobal = [];
+let galleryLoadedOnce = false;
+let currentGalleryPhoto = null;
 
 // ── 🏫 INSTITUTION NAME ALIASES ──────────────────────────────────────────────
 // Add an entry here any time two institution name spellings end up live at once.
@@ -530,6 +621,170 @@ function initSession() {
 function getParams() {
     const p = new URLSearchParams(window.location.search);
     return { dept: p.get('dept') || '', year: p.get('year') || '', inst: p.get('inst') || '', faculty: p.get('faculty') || '' };
+}
+
+// ── 🖼️ GALLERY TABS ─────────────────────────────────────────────────────────
+function switchTopTab(tab, btn) {
+    document.querySelectorAll('.view-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tabYearbook').style.display = tab === 'yearbook' ? '' : 'none';
+    document.getElementById('tabGallery').style.display  = tab === 'gallery'  ? '' : 'none';
+    if (tab === 'gallery' && !galleryLoadedOnce) {
+        galleryLoadedOnce = true;
+        loadGallery();
+    }
+}
+
+async function loadGallery() {
+    const { dept, year, inst } = getParams();
+    document.getElementById('galleryLoading').style.display = 'block';
+    document.getElementById('galleryGrid').style.display = 'none';
+    document.getElementById('galleryEmptyMsg').style.display = 'none';
+    try {
+        let query = _db.from('gallery_photos').select('*').eq('is_approved', true);
+        if (dept) query = query.ilike('department', `%${dept}%`);
+        if (year) query = query.eq('graduation_year', parseInt(year));
+        if (inst) {
+            const variants = resolveInstitutionVariants(inst);
+            const orFilter = variants.map(v => `institution.ilike."%${v}%"`).join(',');
+            query = query.or(orFilter);
+        }
+        const { data, error } = await query.order('created_at', { ascending: false });
+        if (error) throw error;
+        galleryPhotosGlobal = data || [];
+    } catch(e) {
+        console.error('Gallery load error:', e);
+        galleryPhotosGlobal = [];
+    }
+    document.getElementById('galleryLoading').style.display = 'none';
+    renderGalleryGrid();
+}
+
+function renderGalleryGrid() {
+    const grid  = document.getElementById('galleryGrid');
+    const empty = document.getElementById('galleryEmptyMsg');
+    if (!galleryPhotosGlobal.length) {
+        grid.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+    }
+    empty.style.display = 'none';
+    grid.style.display = 'grid';
+    grid.innerHTML = '';
+    galleryPhotosGlobal.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'gallery-item';
+        div.onclick = () => openGalleryLightbox(p);
+        div.innerHTML = `
+            <img src="${p.image_url}" alt="${p.caption || ''}" loading="lazy">
+            <span class="gallery-item-tag">${p.uploaded_by_type === 'dos' ? 'DOS' : 'STUDENT'}</span>
+            <span class="gallery-item-likes">♥ ${p.likes_count || 0}</span>
+        `;
+        grid.appendChild(div);
+    });
+}
+
+function openGalleryLightbox(photo) {
+    currentGalleryPhoto = photo;
+    document.getElementById('lightboxImg').src = photo.image_url;
+    document.getElementById('lightboxCaption').textContent = photo.caption || '';
+    const liked = !!localStorage.getItem(`znode_gliked_${photo.id}`);
+    document.getElementById('lightboxLikeBtn').classList.toggle('liked', liked);
+    document.getElementById('lightboxLikeHeart').textContent = liked ? '♥' : '♡';
+    document.getElementById('lightboxLikeCount').textContent = photo.likes_count || 0;
+    document.getElementById('galleryLightbox').classList.add('active');
+}
+
+function closeGalleryLightbox(e) {
+    document.getElementById('galleryLightbox').classList.remove('active');
+    currentGalleryPhoto = null;
+}
+
+async function toggleGalleryLike() {
+    if (!currentGalleryPhoto) return;
+    const p = currentGalleryPhoto;
+    const btn     = document.getElementById('lightboxLikeBtn');
+    const heart   = document.getElementById('lightboxLikeHeart');
+    const countEl = document.getElementById('lightboxLikeCount');
+    const wasLiked = btn.classList.contains('liked');
+    let val = parseInt(countEl.textContent) || 0;
+
+    if (wasLiked) {
+        btn.classList.remove('liked'); heart.textContent = '♡'; val = Math.max(0, val - 1);
+        localStorage.removeItem(`znode_gliked_${p.id}`);
+    } else {
+        btn.classList.add('liked'); heart.textContent = '♥'; val++;
+        localStorage.setItem(`znode_gliked_${p.id}`, '1');
+    }
+    countEl.textContent = val;
+
+    try {
+        await _db.from('gallery_photos').update({ likes_count: val }).eq('id', p.id);
+        const mem = galleryPhotosGlobal.find(x => x.id === p.id);
+        if (mem) { mem.likes_count = val; renderGalleryGrid(); }
+    } catch(err) { console.error('Gallery like failed', err); }
+}
+
+function openGalleryUploadModal() {
+    const raw = localStorage.getItem('znodeStudentProfile');
+    if (!raw) { alert('Please join or log in to upload photos.'); return; }
+    document.getElementById('galleryUploadModal').classList.add('active');
+}
+
+function closeGalleryUploadModal(e) {
+    if (e && e.target.classList.contains('gallery-upload-modal')) return;
+    document.getElementById('galleryUploadModal').classList.remove('active');
+    document.getElementById('galleryFileInput').value = '';
+    document.getElementById('galleryCaptionInput').value = '';
+    document.getElementById('galleryUploadStatus').textContent = '';
+}
+
+async function submitGalleryPhoto() {
+    const fi     = document.getElementById('galleryFileInput');
+    const status = document.getElementById('galleryUploadStatus');
+    const raw    = localStorage.getItem('znodeStudentProfile');
+    if (!raw) { status.style.color = '#ef4444'; status.textContent = 'Please log in first.'; return; }
+    if (!fi.files?.length) { status.style.color = '#ef4444'; status.textContent = 'Pick a photo first.'; return; }
+
+    let session;
+    try { session = JSON.parse(raw); } catch(e) { status.style.color = '#ef4444'; status.textContent = 'Session error — please re-login.'; return; }
+
+    const { dept, year, inst } = getParams();
+    const file    = fi.files[0];
+    const caption = document.getElementById('galleryCaptionInput').value.trim();
+    status.style.color = 'var(--text-muted)'; status.textContent = 'Uploading...';
+
+    try {
+        const ext  = file.name.split('.').pop().toLowerCase();
+        const path = `gallery/${session.id}_${Date.now()}.${ext}`;
+        const { error: upErr } = await _db.storage.from('avatars').upload(path, file, { upsert: true });
+        if (upErr) throw upErr;
+        const { data: urlData } = _db.storage.from('avatars').getPublicUrl(path);
+
+        const payload = {
+            institution: session.institution || inst || null,
+            institution_id: session.institution_id || null,
+            department: session.department || dept || null,
+            faculty: session.faculty || null,
+            graduation_year: session.graduation_year ? parseInt(session.graduation_year) : (year ? parseInt(year) : null),
+            image_url: urlData.publicUrl,
+            caption: caption || null,
+            uploaded_by_type: session.is_dos ? 'dos' : 'student',
+            uploaded_by_student_id: session.is_dos ? null : session.id
+        };
+        const { error: insErr } = await _db.from('gallery_photos').insert(payload);
+        if (insErr) throw insErr;
+
+        status.style.color = '#22c55e'; status.textContent = 'Uploaded!';
+        setTimeout(() => {
+            closeGalleryUploadModal();
+            galleryLoadedOnce = false;
+            loadGallery();
+        }, 800);
+    } catch(e) {
+        console.error(e);
+        status.style.color = '#ef4444'; status.textContent = 'Upload failed — try again.';
+    }
 }
 
 // ── 🔍 SEARCH INTERACTION ROUTERS ───────────────────────────────────────────
