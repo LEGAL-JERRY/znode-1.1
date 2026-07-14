@@ -234,6 +234,44 @@
         .gallery-item-likes { position:absolute; bottom:6px; right:6px; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px; display:flex; align-items:center; gap:4px; }
         @media (min-width: 800px) { .gallery-grid { grid-template-columns: repeat(4, 1fr); padding: 0 40px 60px; gap:16px; } }
 
+        .gallery-grid { display: flex; flex-direction: column; gap: 22px; padding: 20px 18px 40px; }
+
+.gallery-bubble-row { display: flex; flex-direction: column; max-width: 78%; }
+.gallery-bubble-row.mine  { align-self: flex-end; align-items: flex-end; }
+.gallery-bubble-row.theirs { align-self: flex-start; align-items: flex-start; }
+
+.gallery-bubble-name {
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    margin: 0 6px 4px;
+}
+.gallery-dos-tag {
+    background: var(--gold); color: #fff; font-size: 8px; font-weight: 800;
+    padding: 1px 6px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+.gallery-bubble {
+    background: var(--paper-mid); border: 1px solid var(--paper-dark);
+    border-radius: 14px; padding: 10px 10px 12px;
+}
+.gallery-bubble-row.mine .gallery-bubble { background: var(--navy); border-color: var(--navy); }
+.gallery-bubble-row.mine .gallery-bubble-caption { color: var(--paper); }
+
+.gallery-bubble-caption {
+    font-size: 13px; line-height: 1.4; color: var(--text-main);
+    margin-bottom: 8px; padding: 0 4px; white-space: pre-wrap; word-break: break-word;
+}
+
+.gallery-bubble-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 6px; max-width: 320px;
+}
+.gallery-bubble-grid .gallery-item { aspect-ratio: 1; border-radius: 8px; }
+
+@media (max-width: 500px) {
+    .gallery-bubble-row { max-width: 90%; }
+    .gallery-bubble-grid { max-width: 240px; }
+}
+
         .gallery-lightbox-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:998; display:none; align-items:center; justify-content:center; padding:20px; }
         .gallery-lightbox-overlay.active { display:flex; }
         .gallery-lightbox-content { max-width:600px; width:100%; }
@@ -670,21 +708,57 @@ function renderGalleryGrid() {
         return;
     }
     empty.style.display = 'none';
-    grid.style.display = 'grid';
+    grid.style.display = 'flex';
     grid.innerHTML = '';
+
+    // Get current session so we know which batches are "mine"
+    let mySessionId = null, amIDos = false;
+    const raw = localStorage.getItem('znodeStudentProfile');
+    if (raw) {
+        try { const s = JSON.parse(raw); mySessionId = s.id; amIDos = !!s.is_dos; } catch(e) {}
+    }
+
+    // Group photos by upload_batch_id, preserving order (already sorted desc by created_at)
+    const groups = [];
+    const seen = new Map();
     galleryPhotosGlobal.forEach(p => {
-        const div = document.createElement('div');
-        div.className = 'gallery-item';
-        div.onclick = () => openGalleryLightbox(p);
-        div.innerHTML = `
-            <img src="${p.image_url}" alt="${p.caption || ''}" loading="lazy">
-            <span class="gallery-item-tag">${p.uploaded_by_type === 'dos' ? 'DOS' : 'STUDENT'}</span>
-            <span class="gallery-item-likes">♥ ${p.likes_count || 0}</span>
+        const key = p.upload_batch_id || p.id; // fallback: treat as its own batch if null
+        if (!seen.has(key)) {
+            seen.set(key, { photos: [], meta: p });
+            groups.push(seen.get(key));
+        }
+        seen.get(key).photos.push(p);
+    });
+
+    groups.forEach(group => {
+        const meta = group.meta;
+        const isMine = meta.uploaded_by_type === 'dos'
+            ? amIDos
+            : (mySessionId && meta.uploaded_by_student_id === mySessionId);
+
+        const bubble = document.createElement('div');
+        bubble.className = `gallery-bubble-row ${isMine ? 'mine' : 'theirs'}`;
+
+        const name = meta.uploaded_by_name || (meta.uploaded_by_type === 'dos' ? 'DOS Team' : 'Unknown');
+        const captionHTML = meta.caption ? `<div class="gallery-bubble-caption">${meta.caption}</div>` : '';
+
+        const photosHTML = group.photos.map(p => `
+            <div class="gallery-item" onclick='openGalleryLightbox(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
+                <img src="${p.image_url}" alt="${p.caption || ''}" loading="lazy">
+                <span class="gallery-item-likes">♥ ${p.likes_count || 0}</span>
+            </div>
+        `).join('');
+
+        bubble.innerHTML = `
+            <div class="gallery-bubble-name">${name}${meta.uploaded_by_type === 'dos' ? ' <span class="gallery-dos-tag">DOS</span>' : ''}</div>
+            <div class="gallery-bubble">
+                ${captionHTML}
+                <div class="gallery-bubble-grid">${photosHTML}</div>
+            </div>
         `;
-        grid.appendChild(div);
+        grid.appendChild(bubble);
     });
 }
-
 function openGalleryLightbox(photo) {
     currentGalleryPhoto = photo;
     document.getElementById('lightboxImg').src = photo.image_url;
@@ -745,6 +819,19 @@ async function submitGalleryPhoto() {
     const status = document.getElementById('galleryUploadStatus');
     const raw    = localStorage.getItem('znodeStudentProfile');
     if (!raw) { status.style.color = '#ef4444'; status.textContent = 'Please log in first.'; return; }
+
+    let session;
+    try { session = JSON.parse(raw); } catch(e) { status.style.color = '#ef4444'; status.textContent = 'Session error — please re-login.'; return; }
+
+    if (!session.is_dos) {
+        const { data: studentCheck } = await _db.from('students').select('id').eq('id', session.id).maybeSingle();
+        if (!studentCheck) {
+            status.style.color = '#ef4444';
+            status.textContent = 'Your session is out of date — please log out and back in.';
+            return;
+        }
+    }
+
     if (!fi.files?.length) { status.style.color = '#ef4444'; status.textContent = 'Pick at least one photo.'; return; }
 
     const files = Array.from(fi.files);
@@ -754,11 +841,10 @@ async function submitGalleryPhoto() {
         return;
     }
 
-    let session;
-    try { session = JSON.parse(raw); } catch(e) { status.style.color = '#ef4444'; status.textContent = 'Session error — please re-login.'; return; }
-
     const { dept, year, inst } = getParams();
     const caption = document.getElementById('galleryCaptionInput').value.trim();
+    const batchId = crypto.randomUUID();
+    const uploaderName = session.is_dos ? (session.full_name || session.username || 'DOS Team') : (session.full_name || session.username || 'Anonymous');
 
     const submitBtn = document.querySelector('.gallery-upload-submit');
     submitBtn.disabled = true;
@@ -786,7 +872,9 @@ async function submitGalleryPhoto() {
                 image_url: urlData.publicUrl,
                 caption: caption || null,
                 uploaded_by_type: session.is_dos ? 'dos' : 'student',
-                uploaded_by_student_id: session.is_dos ? null : session.id
+                uploaded_by_student_id: session.is_dos ? null : session.id,
+                upload_batch_id: batchId,
+                uploaded_by_name: uploaderName
             };
             const { error: insErr } = await _db.from('gallery_photos').insert(payload);
             if (insErr) throw insErr;
