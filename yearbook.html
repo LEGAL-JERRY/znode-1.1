@@ -917,6 +917,27 @@ const sorted = [...withLikes].sort((a, b) => (b.likes_count || 0) - (a.likes_cou
         container.appendChild(el);
     });
 }
+    async function submitGalleryPhoto() {
+    const fi     = document.getElementById('galleryFileInput');
+    const status = document.getElementById('galleryUploadStatus');
+    const raw    = localStorage.getItem('znodeStudentProfile');
+    if (!raw) { status.style.color = '#ef4444'; status.textContent = 'Please log in first.'; return; }
+
+    let session;
+    try { session = JSON.parse(raw); } catch(e) { status.style.color = '#ef4444'; status.textContent = 'Session error — please re-login.'; return; }
+
+    // NEW: verify this session's student id still exists before wasting uploads
+    if (!session.is_dos) {
+        const { data: studentCheck } = await _db.from('students').select('id').eq('id', session.id).maybeSingle();
+        if (!studentCheck) {
+            status.style.color = '#ef4444';
+            status.textContent = 'Your session is out of date — please log out and back in.';
+            return;
+        }
+    }
+
+    if (!fi.files?.length) { status.style.color = '#ef4444'; status.textContent = 'Pick at least one photo.'; return; }
+    // ...rest stays the same
 
 async function toggleLike(e, id, btnElement) {
     e.stopPropagation(); 
