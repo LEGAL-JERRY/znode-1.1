@@ -745,47 +745,73 @@ async function submitGalleryPhoto() {
     const status = document.getElementById('galleryUploadStatus');
     const raw    = localStorage.getItem('znodeStudentProfile');
     if (!raw) { status.style.color = '#ef4444'; status.textContent = 'Please log in first.'; return; }
-    if (!fi.files?.length) { status.style.color = '#ef4444'; status.textContent = 'Pick a photo first.'; return; }
+    if (!fi.files?.length) { status.style.color = '#ef4444'; status.textContent = 'Pick at least one photo.'; return; }
+
+    const files = Array.from(fi.files);
+    if (files.length > 20) {
+        status.style.color = '#ef4444';
+        status.textContent = `Max 20 photos at once — you selected ${files.length}.`;
+        return;
+    }
 
     let session;
     try { session = JSON.parse(raw); } catch(e) { status.style.color = '#ef4444'; status.textContent = 'Session error — please re-login.'; return; }
 
     const { dept, year, inst } = getParams();
-    const file    = fi.files[0];
     const caption = document.getElementById('galleryCaptionInput').value.trim();
-    status.style.color = 'var(--text-muted)'; status.textContent = 'Uploading...';
 
-    try {
-        const ext  = file.name.split('.').pop().toLowerCase();
-        const path = `gallery/${session.id}_${Date.now()}.${ext}`;
-        const { error: upErr } = await _db.storage.from('avatars').upload(path, file, { upsert: true });
-        if (upErr) throw upErr;
-        const { data: urlData } = _db.storage.from('avatars').getPublicUrl(path);
+    const submitBtn = document.querySelector('.gallery-upload-submit');
+    submitBtn.disabled = true;
 
-        const payload = {
-            institution: session.institution || inst || null,
-            institution_id: session.institution_id || null,
-            department: session.department || dept || null,
-            faculty: session.faculty || null,
-            graduation_year: session.graduation_year ? parseInt(session.graduation_year) : (year ? parseInt(year) : null),
-            image_url: urlData.publicUrl,
-            caption: caption || null,
-            uploaded_by_type: session.is_dos ? 'dos' : 'student',
-            uploaded_by_student_id: session.is_dos ? null : session.id
-        };
-        const { error: insErr } = await _db.from('gallery_photos').insert(payload);
-        if (insErr) throw insErr;
+    let successCount = 0, failCount = 0;
 
-        status.style.color = '#22c55e'; status.textContent = 'Uploaded!';
-        setTimeout(() => {
-            closeGalleryUploadModal();
-            galleryLoadedOnce = false;
-            loadGallery();
-        }, 800);
-    } catch(e) {
-        console.error(e);
-        status.style.color = '#ef4444'; status.textContent = 'Upload failed — try again.';
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        status.style.color = 'var(--text-muted)';
+        status.textContent = `Uploading ${i + 1} of ${files.length}...`;
+
+        try {
+            const ext  = file.name.split('.').pop().toLowerCase();
+            const path = `gallery/${session.id}_${Date.now()}_${i}.${ext}`;
+            const { error: upErr } = await _db.storage.from('avatars').upload(path, file, { upsert: true });
+            if (upErr) throw upErr;
+            const { data: urlData } = _db.storage.from('avatars').getPublicUrl(path);
+
+            const payload = {
+                institution: session.institution || inst || null,
+                institution_id: session.institution_id || null,
+                department: session.department || dept || null,
+                faculty: session.faculty || null,
+                graduation_year: session.graduation_year ? parseInt(session.graduation_year) : (year ? parseInt(year) : null),
+                image_url: urlData.publicUrl,
+                caption: caption || null,
+                uploaded_by_type: session.is_dos ? 'dos' : 'student',
+                uploaded_by_student_id: session.is_dos ? null : session.id
+            };
+            const { error: insErr } = await _db.from('gallery_photos').insert(payload);
+            if (insErr) throw insErr;
+            successCount++;
+        } catch(e) {
+            console.error(`Upload failed for file ${i + 1}:`, e);
+            failCount++;
+        }
     }
+
+    submitBtn.disabled = false;
+
+    if (failCount === 0) {
+        status.style.color = '#22c55e';
+        status.textContent = `Uploaded all ${successCount} photos!`;
+    } else {
+        status.style.color = '#ef4444';
+        status.textContent = `${successCount} uploaded, ${failCount} failed — try again for the rest.`;
+    }
+
+    setTimeout(() => {
+        if (failCount === 0) closeGalleryUploadModal();
+        galleryLoadedOnce = false;
+        loadGallery();
+    }, 1000);
 }
 
 // ── 🔍 SEARCH INTERACTION ROUTERS ───────────────────────────────────────────
@@ -1090,7 +1116,7 @@ async function loadYearbook(dept, year, inst) {
     if (year) query = query.eq('graduation_year', parseInt(year));
     if (inst) {
         const variants = resolveInstitutionVariants(inst);
-        const orFilter = variants.map(v => `institution.ilike."%${v}%"`).join(',');
+        const orFilter = variants.map(v => `institution.ilike."*${v}*"`).join(',');
         query = query.or(orFilter);
     }
         
