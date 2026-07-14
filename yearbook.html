@@ -550,7 +550,8 @@
 <div class="gallery-upload-modal-overlay" id="galleryUploadModal" onclick="closeGalleryUploadModal(event)">
     <div class="gallery-upload-modal" onclick="event.stopPropagation()">
         <h3>Add a Photo</h3>
-        <input type="file" id="galleryFileInput" accept="image/*">
+        <input type="file" id="galleryFileInput" accept="image/*" multiple>
+        <p style="font-size:11px; color:var(--text-muted); margin:-8px 0 12px;">Up to 20 photos · one caption applies to all</p>
         <input type="text" id="galleryCaptionInput" placeholder="Caption (optional)">
         <p id="galleryUploadStatus" style="font-size:12px; font-weight:700; margin-bottom:12px; min-height:16px; color:var(--text-muted);"></p>
         <div class="gallery-upload-modal-actions">
