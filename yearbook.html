@@ -926,7 +926,7 @@ const sorted = [...withLikes].sort((a, b) => (b.likes_count || 0) - (a.likes_cou
     let session;
     try { session = JSON.parse(raw); } catch(e) { status.style.color = '#ef4444'; status.textContent = 'Session error — please re-login.'; return; }
 
-    // NEW: verify this session's student id still exists before wasting uploads
+    // Verify this session's student id still exists before wasting uploads
     if (!session.is_dos) {
         const { data: studentCheck } = await _db.from('students').select('id').eq('id', session.id).maybeSingle();
         if (!studentCheck) {
@@ -937,7 +937,70 @@ const sorted = [...withLikes].sort((a, b) => (b.likes_count || 0) - (a.likes_cou
     }
 
     if (!fi.files?.length) { status.style.color = '#ef4444'; status.textContent = 'Pick at least one photo.'; return; }
-    // ...rest stays the same
+
+    const files = Array.from(fi.files);
+    if (files.length > 20) {
+        status.style.color = '#ef4444';
+        status.textContent = `Max 20 photos at once — you selected ${files.length}.`;
+        return;
+    }
+
+    const { dept, year, inst } = getParams();
+    const caption = document.getElementById('galleryCaptionInput').value.trim();
+
+    const submitBtn = document.querySelector('.gallery-upload-submit');
+    submitBtn.disabled = true;
+
+    let successCount = 0, failCount = 0;
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        status.style.color = 'var(--text-muted)';
+        status.textContent = `Uploading ${i + 1} of ${files.length}...`;
+
+        try {
+            const ext  = file.name.split('.').pop().toLowerCase();
+            const path = `gallery/${session.id}_${Date.now()}_${i}.${ext}`;
+            const { error: upErr } = await _db.storage.from('avatars').upload(path, file, { upsert: true });
+            if (upErr) throw upErr;
+            const { data: urlData } = _db.storage.from('avatars').getPublicUrl(path);
+
+            const payload = {
+                institution: session.institution || inst || null,
+                institution_id: session.institution_id || null,
+                department: session.department || dept || null,
+                faculty: session.faculty || null,
+                graduation_year: session.graduation_year ? parseInt(session.graduation_year) : (year ? parseInt(year) : null),
+                image_url: urlData.publicUrl,
+                caption: caption || null,
+                uploaded_by_type: session.is_dos ? 'dos' : 'student',
+                uploaded_by_student_id: session.is_dos ? null : session.id
+            };
+            const { error: insErr } = await _db.from('gallery_photos').insert(payload);
+            if (insErr) throw insErr;
+            successCount++;
+        } catch(e) {
+            console.error(`Upload failed for file ${i + 1}:`, e);
+            failCount++;
+        }
+    }
+
+    submitBtn.disabled = false;
+
+    if (failCount === 0) {
+        status.style.color = '#22c55e';
+        status.textContent = `Uploaded all ${successCount} photos!`;
+    } else {
+        status.style.color = '#ef4444';
+        status.textContent = `${successCount} uploaded, ${failCount} failed — try again for the rest.`;
+    }
+
+    setTimeout(() => {
+        if (failCount === 0) closeGalleryUploadModal();
+        galleryLoadedOnce = false;
+        loadGallery();
+    }, 1000);
+}
 
 async function toggleLike(e, id, btnElement) {
     e.stopPropagation(); 
