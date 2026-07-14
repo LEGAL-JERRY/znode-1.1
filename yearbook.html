@@ -262,7 +262,7 @@
 }
 
 .gallery-bubble-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
     gap: 6px; max-width: 320px;
 }
 .gallery-bubble-grid .gallery-item { aspect-ratio: 1; border-radius: 8px; }
@@ -843,8 +843,10 @@ async function submitGalleryPhoto() {
 
     const { dept, year, inst } = getParams();
     const caption = document.getElementById('galleryCaptionInput').value.trim();
+
+    // ⚠️ THESE TWO LINES MUST BE OUTSIDE THE LOOP — one batch id, one name, shared by every photo in this submission
     const batchId = crypto.randomUUID();
-    const uploaderName = session.is_dos ? (session.full_name || session.username || 'DOS Team') : (session.full_name || session.username || 'Anonymous');
+    const uploaderName = session.full_name || session.username || (session.is_dos ? 'DOS Team' : 'Anonymous');
 
     const submitBtn = document.querySelector('.gallery-upload-submit');
     submitBtn.disabled = true;
