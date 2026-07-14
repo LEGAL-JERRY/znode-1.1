@@ -233,8 +233,7 @@
         .gallery-item-tag { position:absolute; top:6px; left:6px; background:rgba(0,0,0,0.6); color:#fff; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; padding:3px 7px; border-radius:10px; }
         .gallery-item-likes { position:absolute; bottom:6px; right:6px; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px; display:flex; align-items:center; gap:4px; }
         @media (min-width: 800px) { .gallery-grid { grid-template-columns: repeat(4, 1fr); padding: 0 40px 60px; gap:16px; } }
-
-        .gallery-grid { display: flex; flex-direction: column; gap: 22px; padding: 20px 18px 40px; }
+.gallery-grid { display: flex; flex-direction: column; gap: 22px; padding: 20px 18px 40px; }
 
 .gallery-bubble-row { display: flex; flex-direction: column; max-width: 78%; }
 .gallery-bubble-row.mine  { align-self: flex-end; align-items: flex-end; }
@@ -249,24 +248,26 @@
     padding: 1px 6px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.05em;
 }
 
-.gallery-bubble {
-    background: var(--paper-mid); border: 1px solid var(--paper-dark);
-    border-radius: 14px; padding: 10px 10px 12px;
-}
-.gallery-bubble-row.mine .gallery-bubble { background: var(--navy); border-color: var(--navy); }
-.gallery-bubble-row.mine .gallery-bubble-caption { color: var(--paper); }
+.gallery-bubble { display: flex; flex-direction: column; gap: 8px; }
 
 .gallery-bubble-caption {
     font-size: 13px; line-height: 1.4; color: var(--text-main);
-    margin-bottom: 8px; padding: 0 4px; white-space: pre-wrap; word-break: break-word;
+    padding: 0 4px; white-space: pre-wrap; word-break: break-word;
 }
+.gallery-bubble-row.mine .gallery-bubble-caption { text-align: right; }
 
 .gallery-bubble-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-    gap: 6px; max-width: 320px;
+    display: grid;
+    gap: 3px;
+    border-radius: 12px;
+    overflow: hidden;
+    width: fit-content;
 }
-.gallery-bubble-grid .gallery-item { aspect-ratio: 1; border-radius: 8px; }
-
+.gallery-bubble-grid .gallery-item {
+    width: 100px; height: 100px;
+    aspect-ratio: 1;
+    border-radius: 0;
+}
 @media (max-width: 500px) {
     .gallery-bubble-row { max-width: 90%; }
     .gallery-bubble-grid { max-width: 240px; }
@@ -730,7 +731,7 @@ function renderGalleryGrid() {
         seen.get(key).photos.push(p);
     });
 
-    groups.forEach(group => {
+groups.forEach(group => {
         const meta = group.meta;
         const isMine = meta.uploaded_by_type === 'dos'
             ? amIDos
@@ -741,6 +742,8 @@ function renderGalleryGrid() {
 
         const name = meta.uploaded_by_name || (meta.uploaded_by_type === 'dos' ? 'DOS Team' : 'Unknown');
         const captionHTML = meta.caption ? `<div class="gallery-bubble-caption">${meta.caption}</div>` : '';
+
+        const cols = Math.min(group.photos.length, 3);
 
         const photosHTML = group.photos.map(p => `
             <div class="gallery-item" onclick='openGalleryLightbox(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
@@ -753,7 +756,7 @@ function renderGalleryGrid() {
             <div class="gallery-bubble-name">${name}${meta.uploaded_by_type === 'dos' ? ' <span class="gallery-dos-tag">DOS</span>' : ''}</div>
             <div class="gallery-bubble">
                 ${captionHTML}
-                <div class="gallery-bubble-grid">${photosHTML}</div>
+                <div class="gallery-bubble-grid" style="grid-template-columns: repeat(${cols}, 100px);">${photosHTML}</div>
             </div>
         `;
         grid.appendChild(bubble);
