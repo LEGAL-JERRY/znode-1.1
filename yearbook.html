@@ -808,41 +808,6 @@ async function deleteOwnGalleryPhoto(e, photoId) {
     }
 }
 
-
-
-    
-
-groups.forEach(group => {
-        const meta = group.meta;
-        const isMine = meta.uploaded_by_type === 'dos'
-            ? amIDos
-            : (mySessionId && meta.uploaded_by_student_id === mySessionId);
-
-        const bubble = document.createElement('div');
-        bubble.className = `gallery-bubble-row ${isMine ? 'mine' : 'theirs'}`;
-
-        const name = meta.uploaded_by_name || (meta.uploaded_by_type === 'dos' ? 'DOS Team' : 'Unknown');
-        const captionHTML = meta.caption ? `<div class="gallery-bubble-caption">${meta.caption}</div>` : '';
-
-        const cols = Math.min(group.photos.length, 3);
-
-        const photosHTML = group.photos.map(p => `
-            <div class="gallery-item" onclick='openGalleryLightbox(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
-                <img src="${p.image_url}" alt="${p.caption || ''}" loading="lazy">
-                <span class="gallery-item-likes">♥ ${p.likes_count || 0}</span>
-            </div>
-        `).join('');
-
-        bubble.innerHTML = `
-            <div class="gallery-bubble-name">${name}${meta.uploaded_by_type === 'dos' ? ' <span class="gallery-dos-tag">DOS</span>' : ''}</div>
-            <div class="gallery-bubble">
-                ${captionHTML}
-                <div class="gallery-bubble-grid" style="grid-template-columns: repeat(${cols}, 100px);">${photosHTML}</div>
-            </div>
-        `;
-        grid.appendChild(bubble);
-    });
-}
 function openGalleryLightbox(photo) {
     currentGalleryPhoto = photo;
     document.getElementById('lightboxImg').src = photo.image_url;
@@ -926,77 +891,7 @@ function _resizeImageFile(file, maxDim = 1600, quality = 0.82) {
 }
 
 
-    const { dept, year, inst } = getParams();
-    const caption = document.getElementById('galleryCaptionInput').value.trim();
-    const submitBtn = document.querySelector('.gallery-upload-submit');
-    submitBtn.disabled = true;
-
-    let successCount = 0, failCount = 0;
-
-    for (let i = 0; i < files.length; i++) {
-        let file = files[i];
-        status.style.color = 'var(--text-muted)';
-
-        if (!GALLERY_ACCEPTED_TYPES.includes(file.type)) {
-            failCount++;
-            status.textContent = `Skipped ${file.name} — only JPG or PNG allowed.`;
-            continue;
-        }
-        if (file.size > GALLERY_MAX_BYTES) {
-            failCount++;
-            status.textContent = `Skipped ${file.name} — over 5MB.`;
-            continue;
-        }
-
-        status.textContent = `Uploading ${i + 1} of ${files.length}...`;
-        try {
-            file = await _resizeImageFile(file);
-            const ext  = (file.type === 'image/jpeg') ? 'jpg' : file.name.split('.').pop().toLowerCase();
-            const path = `gallery/${session.department_id || 'unassigned'}/${session.id}_${Date.now()}_${i}.${ext}`;
-            const { error: upErr } = await _db.storage.from('avatars').upload(path, file, { upsert: true });
-            if (upErr) throw upErr;
-            const { data: urlData } = _db.storage.from('avatars').getPublicUrl(path);
-
-            // department / department_id are sent for convenience only — the DB
-            // trigger overwrites both from the uploader's real student record,
-            // so this can't be spoofed even if edited client-side.
-            const payload = {
-                institution: session.institution || inst || null,
-                institution_id: session.institution_id || null,
-                department: session.department || dept || null,
-                faculty: session.faculty || null,
-                graduation_year: session.graduation_year ? parseInt(session.graduation_year) : (year ? parseInt(year) : null),
-                image_url: urlData.publicUrl,
-                caption: caption || null,
-                uploaded_by_type: session.is_dos ? 'dos' : 'student',
-                uploaded_by_student_id: session.is_dos ? null : session.id
-            };
-            const { error: insErr } = await _db.from('gallery_photos').insert(payload);
-            if (insErr) throw insErr;
-            successCount++;
-        } catch(e) {
-            console.error(`Upload failed for file ${i + 1}:`, e);
-            failCount++;
-        }
-    }
-
-    submitBtn.disabled = false;
-
-    if (failCount === 0) {
-        status.style.color = '#22c55e';
-        status.textContent = `Uploaded all ${successCount} photos!`;
-    } else {
-        status.style.color = '#ef4444';
-        status.textContent = `${successCount} uploaded, ${failCount} failed — try again for the rest.`;
-    }
-
-    setTimeout(() => {
-        if (failCount === 0) closeGalleryUploadModal();
-        galleryLoadedOnce = false;
-        loadGallery();
-    }, 1000);
-}
-
+   
 // ── 🔍 SEARCH INTERACTION ROUTERS ───────────────────────────────────────────
 function toggleHeaderSearch(e) {
     e.stopPropagation();
