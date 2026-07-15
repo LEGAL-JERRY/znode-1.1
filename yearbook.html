@@ -292,7 +292,39 @@
         .gallery-upload-submit { background:var(--navy); color:var(--paper); }
         .gallery-upload-cancel { background:var(--paper-mid); color:var(--text-main); border:1px solid var(--paper-dark) !important; }
         .gallery-empty-msg { text-align:center; padding:60px 24px; color:var(--text-muted); font-family:'Caveat',cursive; font-size:18px; }
+        /* ── ADD-A-MEMORY UPLOAD CARD ── */
+.gallery-add-card {
+    aspect-ratio: 1; border-radius: 8px; cursor: pointer;
+    border: 2px dashed var(--gold); background: var(--paper-mid);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px; transition: all 0.2s;
+}
+.gallery-add-card:hover { background: var(--paper-dark); transform: translateY(-2px); }
+.gallery-add-icon { font-size: 26px; color: var(--gold); }
+.gallery-add-label { font-family: 'Caveat', cursive; font-size: 17px; color: var(--gold); font-weight: 700; }
 
+/* ── ATTRIBUTION HEADER ── */
+.gallery-item-wrap { display: flex; flex-direction: column; gap: 6px; }
+.gallery-attribution { display: flex; align-items: center; gap: 8px; padding: 0 2px; }
+.gallery-avatar {
+    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid var(--gold); overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--navy); color: var(--paper);
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 800;
+}
+.gallery-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-contributor-name {
+    font-family: 'Caveat', cursive; font-size: 15px; font-weight: 700;
+    color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.gallery-own-delete {
+    margin-left: auto; background: none; border: none; color: var(--text-faint);
+    font-size: 14px; cursor: pointer; padding: 4px 6px; flex-shrink: 0;
+}
+.gallery-own-delete:hover { color: #ef4444; }
+
+        
         /* ══════════════════════════════
            MAIN CONTENT & HERO HEADER
         ══════════════════════════════ */
@@ -589,7 +621,7 @@
 <div class="gallery-upload-modal-overlay" id="galleryUploadModal" onclick="closeGalleryUploadModal(event)">
     <div class="gallery-upload-modal" onclick="event.stopPropagation()">
         <h3>Add a Photo</h3>
-        <input type="file" id="galleryFileInput" accept="image/*" multiple>
+        <input type="file" id="galleryFileInput" accept="image/jpeg,image/png" multiple>
         <p style="font-size:11px; color:var(--text-muted); margin:-8px 0 12px;">Up to 20 photos · one caption applies to all</p>
         <input type="text" id="galleryCaptionInput" placeholder="Caption (optional)">
         <p id="galleryUploadStatus" style="font-size:12px; font-weight:700; margin-bottom:12px; min-height:16px; color:var(--text-muted);"></p>
@@ -681,7 +713,10 @@ async function loadGallery() {
     document.getElementById('galleryGrid').style.display = 'none';
     document.getElementById('galleryEmptyMsg').style.display = 'none';
     try {
-        let query = _db.from('gallery_photos').select('*').eq('is_approved', true);
+        // Single joined query — pulls uploader name/avatar with the photo, no per-card N+1 fetches.
+        let query = _db.from('gallery_photos')
+            .select('*, uploader:students!gallery_photos_uploaded_by_student_id_fkey(id, full_name, username, avatar_url)')
+            .eq('is_approved', true);
         if (dept) query = query.ilike('department', `%${dept}%`);
         if (year) query = query.eq('graduation_year', parseInt(year));
         if (inst) {
@@ -703,33 +738,79 @@ async function loadGallery() {
 function renderGalleryGrid() {
     const grid  = document.getElementById('galleryGrid');
     const empty = document.getElementById('galleryEmptyMsg');
+
+    empty.style.display = 'none';
+    grid.style.display = 'grid';
+    grid.innerHTML = '';
+
+    // Always show the upload card first, department-scoped uploads only.
+    const addCard = document.createElement('div');
+    addCard.className = 'gallery-add-card';
+    addCard.onclick = openGalleryUploadModal;
+    addCard.innerHTML = `<span class="gallery-add-icon">📷</span><span class="gallery-add-label">add yours</span>`;
+    grid.appendChild(addCard);
+
     if (!galleryPhotosGlobal.length) {
-        grid.style.display = 'none';
         empty.style.display = 'block';
         return;
     }
-    empty.style.display = 'none';
-    grid.style.display = 'flex';
-    grid.innerHTML = '';
 
-    // Get current session so we know which batches are "mine"
-    let mySessionId = null, amIDos = false;
     const raw = localStorage.getItem('znodeStudentProfile');
-    if (raw) {
-        try { const s = JSON.parse(raw); mySessionId = s.id; amIDos = !!s.is_dos; } catch(e) {}
-    }
+    let mySessionId = null;
+    if (raw) { try { mySessionId = JSON.parse(raw).id; } catch(e) {} }
 
-    // Group photos by upload_batch_id, preserving order (already sorted desc by created_at)
-    const groups = [];
-    const seen = new Map();
     galleryPhotosGlobal.forEach(p => {
-        const key = p.upload_batch_id || p.id; // fallback: treat as its own batch if null
-        if (!seen.has(key)) {
-            seen.set(key, { photos: [], meta: p });
-            groups.push(seen.get(key));
-        }
-        seen.get(key).photos.push(p);
+        const wrap = document.createElement('div');
+        wrap.className = 'gallery-item-wrap';
+
+        const uploader = p.uploader || null;
+        const name = (p.uploaded_by_type === 'dos')
+            ? (p.uploaded_by_name || 'DOS')
+            : (uploader?.full_name || p.uploaded_by_name || 'Anonymous');
+        const initials = (name || '?').trim().charAt(0).toUpperCase();
+        const avatarHTML = uploader?.avatar_url
+            ? `<img src="${uploader.avatar_url}" alt="${name}">`
+            : initials;
+
+        const isMine = mySessionId && p.uploaded_by_student_id === mySessionId;
+        const deleteHTML = isMine
+            ? `<button class="gallery-own-delete" title="Delete your photo" onclick="deleteOwnGalleryPhoto(event, '${p.id}')">✕</button>`
+            : '';
+
+        wrap.innerHTML = `
+            <div class="gallery-attribution">
+                <div class="gallery-avatar">${avatarHTML}</div>
+                <span class="gallery-contributor-name">${name}</span>
+                ${deleteHTML}
+            </div>
+            <div class="gallery-item" data-photo-id="${p.id}">
+                <img src="${p.image_url}" alt="${p.caption || ''}" loading="lazy">
+                <span class="gallery-item-tag">${p.uploaded_by_type === 'dos' ? 'DOS' : 'STUDENT'}</span>
+                <span class="gallery-item-likes">♥ ${p.likes_count || 0}</span>
+            </div>
+        `;
+        wrap.querySelector('.gallery-item').onclick = () => openGalleryLightbox(p);
+        grid.appendChild(wrap);
     });
+}
+
+async function deleteOwnGalleryPhoto(e, photoId) {
+    e.stopPropagation();
+    if (!confirm('Remove this photo from the gallery?')) return;
+    try {
+        const { error } = await _db.from('gallery_photos').delete().eq('id', photoId);
+        if (error) throw error;
+        galleryPhotosGlobal = galleryPhotosGlobal.filter(p => p.id !== photoId);
+        renderGalleryGrid();
+    } catch (err) {
+        console.error('Delete failed', err);
+        alert('Could not delete photo — please try again.');
+    }
+}
+
+
+
+    
 
 groups.forEach(group => {
         const meta = group.meta;
@@ -817,11 +898,46 @@ function closeGalleryUploadModal(e) {
     document.getElementById('galleryUploadStatus').textContent = '';
 }
 
+const GALLERY_MAX_BYTES = 5 * 1024 * 1024; // 5MB
+const GALLERY_ACCEPTED_TYPES = ['image/jpeg', 'image/png'];
+
+function _resizeImageFile(file, maxDim = 1600, quality = 0.82) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            let { width, height } = img;
+            if (width > maxDim || height > maxDim) {
+                const scale = maxDim / Math.max(width, height);
+                width = Math.round(width * scale);
+                height = Math.round(height * scale);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width; canvas.height = height;
+            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+            canvas.toBlob((blob) => {
+                URL.revokeObjectURL(url);
+                resolve(blob ? new File([blob], file.name, { type: 'image/jpeg' }) : file);
+            }, 'image/jpeg', quality);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+        img.src = url;
+    });
+}
+
 async function submitGalleryPhoto() {
     const fi     = document.getElementById('galleryFileInput');
     const status = document.getElementById('galleryUploadStatus');
     const raw    = localStorage.getItem('znodeStudentProfile');
     if (!raw) { status.style.color = '#ef4444'; status.textContent = 'Please log in first.'; return; }
+    if (!fi.files?.length) { status.style.color = '#ef4444'; status.textContent = 'Pick at least one photo.'; return; }
+
+    const files = Array.from(fi.files);
+    if (files.length > 20) {
+        status.style.color = '#ef4444';
+        status.textContent = `Max 20 photos at once — you selected ${files.length}.`;
+        return;
+    }
 
     let session;
     try { session = JSON.parse(raw); } catch(e) { status.style.color = '#ef4444'; status.textContent = 'Session error — please re-login.'; return; }
@@ -835,39 +951,40 @@ async function submitGalleryPhoto() {
         }
     }
 
-    if (!fi.files?.length) { status.style.color = '#ef4444'; status.textContent = 'Pick at least one photo.'; return; }
-
-    const files = Array.from(fi.files);
-    if (files.length > 20) {
-        status.style.color = '#ef4444';
-        status.textContent = `Max 20 photos at once — you selected ${files.length}.`;
-        return;
-    }
-
     const { dept, year, inst } = getParams();
     const caption = document.getElementById('galleryCaptionInput').value.trim();
-
-    // ⚠️ THESE TWO LINES MUST BE OUTSIDE THE LOOP — one batch id, one name, shared by every photo in this submission
-    const batchId = crypto.randomUUID();
-    const uploaderName = session.full_name || session.username || (session.is_dos ? 'DOS Team' : 'Anonymous');
-
     const submitBtn = document.querySelector('.gallery-upload-submit');
     submitBtn.disabled = true;
 
     let successCount = 0, failCount = 0;
 
     for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+        let file = files[i];
         status.style.color = 'var(--text-muted)';
-        status.textContent = `Uploading ${i + 1} of ${files.length}...`;
 
+        if (!GALLERY_ACCEPTED_TYPES.includes(file.type)) {
+            failCount++;
+            status.textContent = `Skipped ${file.name} — only JPG or PNG allowed.`;
+            continue;
+        }
+        if (file.size > GALLERY_MAX_BYTES) {
+            failCount++;
+            status.textContent = `Skipped ${file.name} — over 5MB.`;
+            continue;
+        }
+
+        status.textContent = `Uploading ${i + 1} of ${files.length}...`;
         try {
-            const ext  = file.name.split('.').pop().toLowerCase();
-            const path = `gallery/${session.id}_${Date.now()}_${i}.${ext}`;
+            file = await _resizeImageFile(file);
+            const ext  = (file.type === 'image/jpeg') ? 'jpg' : file.name.split('.').pop().toLowerCase();
+            const path = `gallery/${session.department_id || 'unassigned'}/${session.id}_${Date.now()}_${i}.${ext}`;
             const { error: upErr } = await _db.storage.from('avatars').upload(path, file, { upsert: true });
             if (upErr) throw upErr;
             const { data: urlData } = _db.storage.from('avatars').getPublicUrl(path);
 
+            // department / department_id are sent for convenience only — the DB
+            // trigger overwrites both from the uploader's real student record,
+            // so this can't be spoofed even if edited client-side.
             const payload = {
                 institution: session.institution || inst || null,
                 institution_id: session.institution_id || null,
@@ -877,9 +994,7 @@ async function submitGalleryPhoto() {
                 image_url: urlData.publicUrl,
                 caption: caption || null,
                 uploaded_by_type: session.is_dos ? 'dos' : 'student',
-                uploaded_by_student_id: session.is_dos ? null : session.id,
-                upload_batch_id: batchId,
-                uploaded_by_name: uploaderName
+                uploaded_by_student_id: session.is_dos ? null : session.id
             };
             const { error: insErr } = await _db.from('gallery_photos').insert(payload);
             if (insErr) throw insErr;
