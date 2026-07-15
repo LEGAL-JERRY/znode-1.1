@@ -925,31 +925,6 @@ function _resizeImageFile(file, maxDim = 1600, quality = 0.82) {
     });
 }
 
-async function submitGalleryPhoto() {
-    const fi     = document.getElementById('galleryFileInput');
-    const status = document.getElementById('galleryUploadStatus');
-    const raw    = localStorage.getItem('znodeStudentProfile');
-    if (!raw) { status.style.color = '#ef4444'; status.textContent = 'Please log in first.'; return; }
-    if (!fi.files?.length) { status.style.color = '#ef4444'; status.textContent = 'Pick at least one photo.'; return; }
-
-    const files = Array.from(fi.files);
-    if (files.length > 20) {
-        status.style.color = '#ef4444';
-        status.textContent = `Max 20 photos at once — you selected ${files.length}.`;
-        return;
-    }
-
-    let session;
-    try { session = JSON.parse(raw); } catch(e) { status.style.color = '#ef4444'; status.textContent = 'Session error — please re-login.'; return; }
-
-    if (!session.is_dos) {
-        const { data: studentCheck } = await _db.from('students').select('id').eq('id', session.id).maybeSingle();
-        if (!studentCheck) {
-            status.style.color = '#ef4444';
-            status.textContent = 'Your session is out of date — please log out and back in.';
-            return;
-        }
-    }
 
     const { dept, year, inst } = getParams();
     const caption = document.getElementById('galleryCaptionInput').value.trim();
