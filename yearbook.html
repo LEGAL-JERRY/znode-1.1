@@ -323,7 +323,58 @@
     font-size: 14px; cursor: pointer; padding: 4px 6px; flex-shrink: 0;
 }
 .gallery-own-delete:hover { color: #ef4444; }
+/* ══════════════════════════════
+   POST-STYLE GALLERY LAYOUT
+══════════════════════════════ */
+.gallery-post { display:flex; flex-direction:column; gap:10px; margin-bottom:26px; }
+.gallery-post-attribution { display:flex; align-items:center; gap:8px; padding-left:26px; }
+.gallery-post-caption { font-family:'Caveat',cursive; font-size:19px; line-height:1.35; color:var(--text-main); padding-left:4px; white-space:pre-wrap; word-break:break-word; }
 
+.gallery-post-media.simple { display:grid; gap:4px; border-radius:10px; overflow:hidden; grid-template-columns: repeat(var(--cols,1), 1fr); }
+.gallery-post-media.simple .gallery-item { border-radius:0; }
+
+.gallery-collage-3 {
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap:4px;
+    aspect-ratio: 4 / 3;
+    border: 2px solid var(--gold);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--paper-mid);
+    cursor: pointer;
+}
+.gallery-collage-3 .gc-main { grid-row: 1 / 3; grid-column: 1; position:relative; overflow:hidden; }
+.gallery-collage-3 .gc-top  { grid-row: 1; grid-column: 2; position:relative; overflow:hidden; }
+.gallery-collage-3 .gc-bot  { grid-row: 2; grid-column: 2; position:relative; overflow:hidden; }
+.gallery-collage-3 img { width:100%; height:100%; object-fit:cover; display:block; }
+.gallery-collage-more {
+    position:absolute; inset:0; background:rgba(0,0,0,0.55); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:1px;
+}
+
+/* ══════════════════════════════
+   FULL-SCREEN POST VIEWER
+══════════════════════════════ */
+.gallery-fullscreen-viewer { position:fixed; inset:0; background:#000; z-index:1000; display:none; }
+.gallery-fullscreen-viewer.active { display:block; }
+.gfv-scroller { height:100%; overflow-y:scroll; scroll-snap-type:y mandatory; -webkit-overflow-scrolling:touch; }
+.gfv-slide { height:100%; width:100%; scroll-snap-align:start; scroll-snap-stop:always; position:relative; display:flex; align-items:center; justify-content:center; }
+.gfv-slide img { max-width:100%; max-height:100%; object-fit:contain; -webkit-user-select:none; user-select:none; touch-action:manipulation; }
+.gfv-pinned { position:absolute; left:0; right:0; bottom:0; padding:16px 18px 26px; background:linear-gradient(to top, rgba(0,0,0,0.75), transparent); z-index:2; }
+.gfv-pinned-attr { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.gfv-pinned-caption { font-family:'Caveat',cursive; color:#fff; font-size:17px; }
+.gfv-close { position:fixed; top:16px; right:16px; z-index:5; background:rgba(255,255,255,0.15); border:none; color:#fff; width:36px; height:36px; border-radius:50%; font-size:16px; cursor:pointer; }
+.gfv-like-count { position:absolute; bottom:96px; right:18px; z-index:2; color:#fff; font-family:'Inter',sans-serif; font-size:13px; font-weight:700; background:rgba(0,0,0,0.5); padding:5px 12px; border-radius:14px; display:flex; align-items:center; gap:5px; }
+.gfv-heart-burst {
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(0);
+    font-size:90px; color:#fff; pointer-events:none; z-index:3;
+    text-shadow:0 0 20px rgba(0,0,0,0.5); opacity:0;
+    transition: transform 0.25s ease, opacity 0.4s ease;
+}
+.gfv-heart-burst.burst { transform:translate(-50%,-50%) scale(1.15); opacity:1; }
         
         /* ══════════════════════════════
            MAIN CONTENT & HERO HEADER
@@ -566,6 +617,10 @@
         <div id="galleryLoading" class="gallery-empty-msg">Loading photos...</div>
         <div class="gallery-grid" id="galleryGrid" style="display:none;"></div>
         <div class="gallery-empty-msg" id="galleryEmptyMsg" style="display:none;">No photos yet — be the first to add one.</div>
+        <div class="gallery-fullscreen-viewer" id="galleryFullscreenViewer">
+        <button class="gfv-close" onclick="closePostViewer()">✕</button>
+        <div class="gfv-scroller" id="gfvScroller"></div>
+</div>
     </div>
 </main>
 
@@ -735,15 +790,36 @@ async function loadGallery() {
     renderGalleryGrid();
 }
 
+const GALLERY_GROUP_WINDOW_MS = 60 * 1000; // photos from same uploader+caption within 60s = one post
+
+function groupPhotosIntoPosts(photos) {
+    const sorted = [...photos].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    const groups = [];
+    let current = null;
+
+    sorted.forEach(p => {
+        const key = `${p.uploaded_by_type}_${p.uploaded_by_student_id || 'dos'}_${p.caption || ''}`;
+        const t = new Date(p.created_at).getTime();
+        if (current && current.key === key && (t - current.lastTime) <= GALLERY_GROUP_WINDOW_MS) {
+            current.photos.push(p);
+            current.lastTime = t;
+        } else {
+            current = { key, photos: [p], lastTime: t, meta: p };
+            groups.push(current);
+        }
+    });
+
+    return groups.reverse(); // newest post first
+}
+
 function renderGalleryGrid() {
     const grid  = document.getElementById('galleryGrid');
     const empty = document.getElementById('galleryEmptyMsg');
 
     empty.style.display = 'none';
-    grid.style.display = 'grid';
+    grid.style.display = 'flex';
     grid.innerHTML = '';
 
-    // Always show the upload card first, department-scoped uploads only.
     const addCard = document.createElement('div');
     addCard.className = 'gallery-add-card';
     addCard.onclick = openGalleryUploadModal;
@@ -759,39 +835,192 @@ function renderGalleryGrid() {
     let mySessionId = null;
     if (raw) { try { mySessionId = JSON.parse(raw).id; } catch(e) {} }
 
-    galleryPhotosGlobal.forEach(p => {
-        const wrap = document.createElement('div');
-        wrap.className = 'gallery-item-wrap';
+    const posts = groupPhotosIntoPosts(galleryPhotosGlobal);
 
-        const uploader = p.uploader || null;
-        const name = (p.uploaded_by_type === 'dos')
-            ? (p.uploaded_by_name || 'DOS')
-            : (uploader?.full_name || p.uploaded_by_name || 'Anonymous');
+    posts.forEach(group => {
+        const meta = group.meta;
+        const uploader = meta.uploader || null;
+        const name = (meta.uploaded_by_type === 'dos')
+            ? (meta.uploaded_by_name || 'DOS')
+            : (uploader?.full_name || meta.uploaded_by_name || 'Anonymous');
         const initials = (name || '?').trim().charAt(0).toUpperCase();
-        const avatarHTML = uploader?.avatar_url
-            ? `<img src="${uploader.avatar_url}" alt="${name}">`
-            : initials;
+        const avatarHTML = uploader?.avatar_url ? `<img src="${uploader.avatar_url}" alt="${name}">` : initials;
+        const isMine = mySessionId && meta.uploaded_by_student_id === mySessionId;
 
-        const isMine = mySessionId && p.uploaded_by_student_id === mySessionId;
-        const deleteHTML = isMine
-            ? `<button class="gallery-own-delete" title="Delete your photo" onclick="deleteOwnGalleryPhoto(event, '${p.id}')">✕</button>`
-            : '';
+        const post = document.createElement('div');
+        post.className = 'gallery-post';
 
-        wrap.innerHTML = `
-            <div class="gallery-attribution">
+        const captionHTML = meta.caption ? `<div class="gallery-post-caption">${meta.caption}</div>` : '';
+
+        post.innerHTML = `
+            <div class="gallery-post-attribution">
                 <div class="gallery-avatar">${avatarHTML}</div>
-                <span class="gallery-contributor-name">${name}</span>
-                ${deleteHTML}
+                <span class="gallery-contributor-name">${name}${meta.uploaded_by_type === 'dos' ? ' <span class="gallery-dos-tag">DOS</span>' : ''}</span>
+                ${isMine ? `<button class="gallery-own-delete" title="Delete your photo" onclick="deleteOwnGalleryPhoto(event, '${meta.id}')">✕</button>` : ''}
             </div>
-            <div class="gallery-item" data-photo-id="${p.id}">
-                <img src="${p.image_url}" alt="${p.caption || ''}" loading="lazy">
-                <span class="gallery-item-tag">${p.uploaded_by_type === 'dos' ? 'DOS' : 'STUDENT'}</span>
-                <span class="gallery-item-likes">♥ ${p.likes_count || 0}</span>
+            ${captionHTML}
+        `;
+
+        const mediaWrap = document.createElement('div');
+        if (group.photos.length >= 3) {
+            mediaWrap.className = 'gallery-collage-3';
+            const shown = group.photos.slice(0, 3);
+            const extra = group.photos.length - 3;
+            mediaWrap.innerHTML = `
+                <div class="gc-main" data-idx="0"><img src="${shown[0].image_url}" loading="lazy"></div>
+                <div class="gc-top"  data-idx="1"><img src="${shown[1].image_url}" loading="lazy"></div>
+                <div class="gc-bot"  data-idx="2"><img src="${shown[2].image_url}" loading="lazy">
+                    ${extra > 0 ? `<div class="gallery-collage-more">+${extra}</div>` : ''}
+                </div>
+            `;
+            mediaWrap.querySelectorAll('[data-idx]').forEach(el => {
+                el.addEventListener('click', () => openPostViewer(group.photos, parseInt(el.dataset.idx)));
+            });
+        } else {
+            mediaWrap.className = 'gallery-post-media simple';
+            mediaWrap.style.setProperty('--cols', group.photos.length);
+            group.photos.forEach((p, i) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.innerHTML = `<img src="${p.image_url}" loading="lazy"><span class="gallery-item-likes">♥ ${p.likes_count || 0}</span>`;
+                item.onclick = () => openPostViewer(group.photos, i);
+                mediaWrap.appendChild(item);
+            });
+        }
+        post.appendChild(mediaWrap);
+        grid.appendChild(post);
+    });
+}
+
+// ── FULL-SCREEN VIEWER ──────────────────────────────────────────────────────
+let gfvPhotos = [];
+
+function openPostViewer(photos, startIndex) {
+    gfvPhotos = photos;
+    const scroller = document.getElementById('gfvScroller');
+    scroller.innerHTML = '';
+
+    photos.forEach(p => {
+        const slide = document.createElement('div');
+        slide.className = 'gfv-slide';
+        slide.dataset.photoId = p.id;
+        slide.dataset.liked = '0';
+        slide.innerHTML = `
+            <img src="${p.image_url}" alt="">
+            <div class="gfv-heart-burst">♥</div>
+            <div class="gfv-like-count"><span class="gfv-heart-icon">♡</span><span class="gfv-like-num">${p.likes_count || 0}</span></div>
+            <div class="gfv-pinned">
+                <div class="gfv-pinned-attr">
+                    <div class="gallery-avatar" style="width:28px;height:28px;">${
+                        p.uploaded_by_type === 'dos'
+                            ? 'D'
+                            : (p.uploader?.avatar_url ? `<img src="${p.uploader.avatar_url}">` : (p.uploader?.full_name || '?').charAt(0).toUpperCase())
+                    }</div>
+                    <span class="gallery-contributor-name" style="color:#fff;">${p.uploaded_by_type === 'dos' ? (p.uploaded_by_name || 'DOS') : (p.uploader?.full_name || 'Anonymous')}</span>
+                </div>
+                ${p.caption ? `<div class="gfv-pinned-caption">${p.caption}</div>` : ''}
             </div>
         `;
-        wrap.querySelector('.gallery-item').onclick = () => openGalleryLightbox(p);
-        grid.appendChild(wrap);
+        _bindDoubleTapLike(slide, p);
+        scroller.appendChild(slide);
     });
+
+    document.getElementById('galleryFullscreenViewer').classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    requestAnimationFrame(() => {
+        const target = scroller.children[startIndex];
+        if (target) target.scrollIntoView({ block: 'start' });
+    });
+
+    _seedGalleryLikeStates();
+}
+
+function closePostViewer() {
+    document.getElementById('galleryFullscreenViewer').classList.remove('active');
+    document.getElementById('gfvScroller').innerHTML = '';
+    document.body.style.overflow = '';
+    gfvPhotos = [];
+}
+
+document.getElementById('galleryFullscreenViewer')?.addEventListener('click', (e) => {
+    if (e.target.id === 'galleryFullscreenViewer') closePostViewer();
+});
+
+// ── DOUBLE-TAP LIKE ──────────────────────────────────────────────────────────
+function _galleryAnonId() {
+    let id = localStorage.getItem('znode_anon_id');
+    if (!id) {
+        id = 'anon_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem('znode_anon_id', id);
+    }
+    return id;
+}
+function _currentGalleryUserId() {
+    const raw = localStorage.getItem('znodeStudentProfile');
+    if (raw) { try { const s = JSON.parse(raw); if (s.id) return s.id; } catch(e) {} }
+    return _galleryAnonId();
+}
+
+function _bindDoubleTapLike(slide, photo) {
+    let lastTap = 0;
+    let tapTimeout = null;
+    const img = slide.querySelector('img');
+    img.addEventListener('click', () => {
+        const now = Date.now();
+        if (now - lastTap < 300) {
+            clearTimeout(tapTimeout);
+            lastTap = 0;
+            toggleGalleryPhotoLike(slide, photo);
+        } else {
+            lastTap = now;
+            tapTimeout = setTimeout(() => { lastTap = 0; }, 300);
+        }
+    });
+}
+
+async function _seedGalleryLikeStates() {
+    const userId = _currentGalleryUserId();
+    const ids = gfvPhotos.map(p => p.id);
+    if (!ids.length) return;
+    try {
+        const { data, error } = await _db.from('gallery_likes').select('photo_id').eq('user_id', userId).in('photo_id', ids);
+        if (error) throw error;
+        const likedSet = new Set((data || []).map(r => r.photo_id));
+        document.querySelectorAll('#gfvScroller .gfv-slide').forEach(slide => {
+            const pid = slide.dataset.photoId;
+            const heartIcon = slide.querySelector('.gfv-heart-icon');
+            if (likedSet.has(pid)) { heartIcon.textContent = '♥'; slide.dataset.liked = '1'; }
+            else { heartIcon.textContent = '♡'; slide.dataset.liked = '0'; }
+        });
+    } catch (e) { console.error('Gallery like seed failed', e); }
+}
+
+async function toggleGalleryPhotoLike(slide, photo) {
+    const userId    = _currentGalleryUserId();
+    const heartIcon = slide.querySelector('.gfv-heart-icon');
+    const countEl   = slide.querySelector('.gfv-like-num');
+    const burst     = slide.querySelector('.gfv-heart-burst');
+    const wasLiked  = slide.dataset.liked === '1';
+    let count = parseInt(countEl.textContent) || 0;
+
+    burst.classList.remove('burst');
+    void burst.offsetWidth;
+    burst.classList.add('burst');
+    setTimeout(() => burst.classList.remove('burst'), 450);
+
+    if (wasLiked) { slide.dataset.liked = '0'; heartIcon.textContent = '♡'; count = Math.max(0, count - 1); }
+    else          { slide.dataset.liked = '1'; heartIcon.textContent = '♥'; count++; }
+    countEl.textContent = count;
+
+    try {
+        if (wasLiked) await _db.from('gallery_likes').delete().eq('photo_id', photo.id).eq('user_id', userId);
+        else await _db.from('gallery_likes').insert({ photo_id: photo.id, user_id: userId });
+
+        await _db.from('gallery_photos').update({ likes_count: count }).eq('id', photo.id);
+        const mem = galleryPhotosGlobal.find(p => p.id === photo.id);
+        if (mem) mem.likes_count = count;
+    } catch (e) { console.error('Gallery like toggle failed', e); }
 }
 
 async function deleteOwnGalleryPhoto(e, photoId) {
