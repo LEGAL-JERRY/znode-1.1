@@ -599,39 +599,48 @@ async function jyNextStep(){
 function initiatePaystackPayment(){
   const email = document.getElementById('jyEmail').value.trim();
   if(!email || !email.includes('@')){ showToast('Valid email required for payment.','error'); return; }
+
+  if (typeof PaystackPop === 'undefined') {
+    showToast('Payment system failed to load — disable any ad blocker or VPN and refresh the page.', 'error');
+    console.error('[Z-NODE] PaystackPop is undefined — js.paystack.co/v1/inline.js did not load.');
+    return;
+  }
+
   const fullName = document.getElementById('jyFullName').value.trim();
   const ref = `ZN-SIGNUP-${Date.now()}`;
-  const handler = PaystackPop.setup({
-    key:      PAYSTACK_KEY,
-    email,
-    amount:   PRICE_KOBO,
-    currency: 'NGN',
-    ref,
-    metadata: { full_name: fullName, email },
-    callback: async () => {
-      showToast('Payment confirmed — logging payment...');
-      // Log the payment BEFORE attempting account creation. student_id is null
-      // because the account doesn't exist yet — this row is the permanent,
-      // searchable record that the charge happened, independent of whether
-      // account creation below succeeds or fails.
-      try{
-        await _db.from('payments').insert({
-          student_id: null,
-          amount: PRICE_KOBO / 100,
-          paystack_ref: ref,
-          gateway: 'paystack',
-          status: 'SUCCESS',
-          paid_at: new Date().toISOString()
-        });
-      }catch(logErr){
-        console.error('Payment logging failed — proceeding anyway:', logErr);
-      }
-      window._znodeLastPaymentRef = ref;
-      submitJoinYearbook();
-    },
-    onClose: () => showToast('Payment cancelled. Complete payment to join the yearbook.','error')
-  });
-  handler.openIframe();
+
+  try {
+    const handler = PaystackPop.setup({
+      key:      PAYSTACK_KEY,
+      email,
+      amount:   PRICE_KOBO,
+      currency: 'NGN',
+      ref,
+      metadata: { full_name: fullName, email },
+      callback: async () => {
+        showToast('Payment confirmed — logging payment...');
+        try{
+          await _db.from('payments').insert({
+            student_id: null,
+            amount: PRICE_KOBO / 100,
+            paystack_ref: ref,
+            gateway: 'paystack',
+            status: 'SUCCESS',
+            paid_at: new Date().toISOString()
+          });
+        }catch(logErr){
+          console.error('Payment logging failed — proceeding anyway:', logErr);
+        }
+        window._znodeLastPaymentRef = ref;
+        submitJoinYearbook();
+      },
+      onClose: () => showToast('Payment cancelled. Complete payment to join the yearbook.','error')
+    });
+    handler.openIframe();
+  } catch (err) {
+    console.error('[Z-NODE] Paystack setup threw:', err);
+    showToast('Could not open payment window: ' + err.message, 'error');
+  }
 }
 
 async function redeemJyVoucher(){
