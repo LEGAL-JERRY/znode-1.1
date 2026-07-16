@@ -596,6 +596,24 @@ async function jyNextStep(){
   // Last step: jyBtnNext is hidden — user picks Paystack or Voucher from jyPaymentOptions instead.
 }
 
+    async function handlePaystackCallback(ref){
+  showToast('Payment confirmed — logging payment...');
+  try{
+    await _db.from('payments').insert({
+      student_id: null,
+      amount: PRICE_KOBO / 100,
+      paystack_ref: ref,
+      gateway: 'paystack',
+      status: 'SUCCESS',
+      paid_at: new Date().toISOString()
+    });
+  }catch(logErr){
+    console.error('Payment logging failed — proceeding anyway:', logErr);
+  }
+  window._znodeLastPaymentRef = ref;
+  submitJoinYearbook();
+}
+
 function initiatePaystackPayment(){
   const email = document.getElementById('jyEmail').value.trim();
   if(!email || !email.includes('@')){ showToast('Valid email required for payment.','error'); return; }
@@ -617,23 +635,15 @@ function initiatePaystackPayment(){
       currency: 'NGN',
       ref,
       metadata: { full_name: fullName, email },
-      callback: async () => {
-        showToast('Payment confirmed — logging payment...');
-        try{
-          await _db.from('payments').insert({
-            student_id: null,
-            amount: PRICE_KOBO / 100,
-            paystack_ref: ref,
-            gateway: 'paystack',
-            status: 'SUCCESS',
-            paid_at: new Date().toISOString()
-          });
-        }catch(logErr){
-          console.error('Payment logging failed — proceeding anyway:', logErr);
-        }
-        window._znodeLastPaymentRef = ref;
-        submitJoinYearbook();
+      callback: function(response){
+        // Must stay non-async — Paystack's inline.js validator rejects
+        // async functions (constructor is AsyncFunction, not Function)
+        // and throws the misleading "callback must be a valid function" error.
+        handlePaystackCallback(ref);
       },
+
+
+        
       onClose: () => showToast('Payment cancelled. Complete payment to join the yearbook.','error')
     });
     handler.openIframe();
