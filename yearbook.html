@@ -144,16 +144,20 @@
 
      * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { max-width: 100%; overflow-x: hidden; }
-body { background: var(--paper); color: var(--text-main); min-height: 100vh; font-family: 'Inter', sans-serif; transition: background 0.4s var(--ease), color 0.4s var(--ease); }
-        /* ══════════════════════════════
+body { background: var(--paper); color: var(--text-main); min-height: 100vh; font-family: 'Inter', sans-serif; transition: background 0.4s var(--ease), color 0.4s var(--ease); scroll-snap-type: y mandatory; scroll-behavior: smooth; }        /* ══════════════════════════════
            TOP BAR & EXPANDABLE SEARCH
         ══════════════════════════════ */
-       .top-bar {
-            position: sticky; top: 0; z-index: 50;
+     .site-header-sticky { position: sticky; top: 0; z-index: 50; background: var(--paper); }
+        .top-bar {
             display: flex; align-items: center; justify-content: space-between;
             padding: 12px 16px; background: var(--paper);
-            border-bottom: 1px dashed var(--paper-dark); gap: 8px;
+            gap: 8px;
             min-height: 56px;
+        }
+        .tab-switch-row {
+            display: flex; justify-content: center;
+            padding: 0 16px 10px; background: var(--paper);
+            border-bottom: 1px dashed var(--paper-dark);
         }
         .back-btn, .search-toggle-btn, .view-tab-btn, .user-avatar {
             min-height: 40px;
@@ -220,9 +224,8 @@ body { background: var(--paper); color: var(--text-main); min-height: 100vh; fon
         /* ══════════════════════════════
            VIEW TABS
         ══════════════════════════════ */
-        .view-tab-dock { display:flex; gap:4px; background: var(--paper-mid); padding:4px; border-radius:20px; border:1px solid var(--paper-dark); flex-shrink:0; }
-        .view-tab-btn { background:none; border:none; cursor:pointer; font-family:'Inter',sans-serif; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; padding:8px 16px; border-radius:16px; color:var(--text-muted); transition: all 0.2s; display:flex; align-items:center; }.view-tab-btn.active { background: var(--navy); color: var(--paper); }
-
+        .view-tab-dock { display:flex; gap:4px; background: var(--paper-mid); padding:4px; border-radius:20px; border:1px solid var(--paper-dark); width:100%; max-width:340px; }
+        .view-tab-btn { background:none; border:none; cursor:pointer; font-family:'Inter',sans-serif; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; padding:8px 16px; border-radius:16px; color:var(--text-muted); transition: all 0.2s; display:flex; align-items:center; justify-content:center; flex:1; }.view-tab-btn.active { background: var(--navy); color: var(--paper); }
         /* ══════════════════════════════
            GALLERY
         ══════════════════════════════ */
@@ -417,8 +420,38 @@ body { background: var(--paper); color: var(--text-main); min-height: 100vh; fon
         /* ══════════════════════════════
            STUDENT ENTRY & GRID
         ══════════════════════════════ */
-        #studentGrid { background: var(--paper); }
-        .student-grid-active { display: flex; flex-direction: column; }
+        #studentFeed { background: var(--paper); }
+        .feed-active { display: flex; flex-direction: column; }
+
+        /* ══════════════════════════════
+           FULL-BLEED PROFILE FEED (snap scroll)
+        ══════════════════════════════ */
+        .feed-card {
+            position: relative;
+            display: flex; flex-direction: column;
+            min-height: 100vh; min-height: 100dvh;
+            scroll-snap-align: start; scroll-snap-stop: always;
+            background: var(--paper);
+            border-bottom: 1px solid var(--paper-mid);
+        }
+        .feed-card-archive-banner { background: var(--gold); color:#fff; font-size:11px; font-weight:700; padding:10px 16px; text-transform:uppercase; letter-spacing:0.05em; text-align:center; }
+        .feed-card-media { position: relative; flex: 1 1 0; min-height: 340px; overflow: hidden; background: var(--paper-mid); }
+        .feed-card-img { width:100%; height:100%; object-fit:cover; display:block; }
+        .feed-card-img-empty { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:64px; background:var(--paper-mid); color:var(--text-faint); }
+        .feed-card-fade { position:absolute; inset:0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.55) 32%, transparent 65%); pointer-events:none; }
+        .feed-card-hero-text { position:absolute; left:0; right:0; bottom:0; padding: 18px 22px 22px; }
+        .feed-card-name { font-family:'Bebas Neue',sans-serif; font-size:38px; line-height:1; color:#fff; letter-spacing:1px; margin-bottom:6px; word-break:break-word; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+        .feed-card-crown { color: var(--gold); font-size: 22px; line-height:1; }
+        .feed-card-quote { font-family:'Caveat',cursive; font-size:19px; font-weight:700; color:rgba(255,255,255,0.92); line-height:1.3; }
+        .feed-card-body { flex: 0 0 auto; padding: 20px 22px 30px; display:flex; flex-direction:column; gap:10px; background: var(--paper); }
+        .feed-card-dept { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:var(--gold); }
+        .feed-card-handle { font-size:10px; font-weight:700; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.06em; margin-top:-6px; }
+        .feed-card-skills, .feed-card-socials { display:flex; flex-wrap:wrap; gap:6px; }
+        .feed-card-actions { display:flex; gap:10px; justify-content:center; margin-top:6px; flex-wrap:wrap; }
+        @media (min-width: 800px) {
+            .feed-card { max-width: 560px; margin: 0 auto; min-height: auto; }
+            .feed-card-media { min-height: 480px; }
+        }
         .student-entry { display: flex; align-items: flex-start; gap: 20px; padding: 40px 18px 32px; position: relative; border-bottom: 1px solid var(--paper-mid); flex-wrap: wrap; cursor: pointer; transition: background 0.2s var(--ease); max-width: 100%; }.student-entry:hover { background: var(--paper-mid); }
         .entry-r .photo-col { order: 2; } .entry-r .info-col  { order: 3; }
         .entry-l .photo-col { order: 3; } .entry-l .info-col  { order: 2; }
@@ -556,16 +589,12 @@ body { background: var(--paper); color: var(--text-main); min-height: 100vh; fon
 </head>
 <body>
 
+<div class="site-header-sticky">
 <header class="top-bar">
     <button class="back-btn" onclick="window.location.href='app.html'">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back
     </button>
 <span class="top-brand" id="topBrand">ARCHIVE</span>
-
- <div class="view-tab-dock" id="viewTabDock">
-        <button class="view-tab-btn active" data-tab="yearbook" onclick="switchTopTab('yearbook', this)">Yearbook</button>
-        <button class="view-tab-btn" data-tab="gallery" onclick="switchTopTab('gallery', this)">Gallery</button>
-    </div>
 
     <div class="header-search-container" id="headerSearchContainer">
         <div class="search-input-wrapper">
@@ -585,6 +614,13 @@ body { background: var(--paper); color: var(--text-main); min-height: 100vh; fon
         <span id="navUsername"></span>
     </div>
 </header>
+<div class="tab-switch-row">
+    <div class="view-tab-dock" id="viewTabDock">
+        <button class="view-tab-btn active" data-tab="yearbook" onclick="switchTopTab('yearbook', this)">Yearbook</button>
+        <button class="view-tab-btn" data-tab="gallery" onclick="switchTopTab('gallery', this)">Gallery</button>
+    </div>
+</div>
+</div>
 
 <main class="page-content">
     <div class="view-tab-panel" id="tabYearbook">
@@ -612,7 +648,7 @@ body { background: var(--paper); color: var(--text-main); min-height: 100vh; fon
         <p>Fetching student memories from the archive.</p>
     </div>
 
-    <div id="studentGrid" style="display:none;"></div>
+    <div id="studentFeed" style="display:none;"></div>
 
     <div class="state-panel" id="emptyState" style="display:none;">
         <div class="eyebrow">Z-NODE // NULL RESPONSE</div>
@@ -1434,10 +1470,7 @@ function shareTo(platform) {
     if (finalUrl) window.open(finalUrl, '_blank', 'noopener,noreferrer');
 }
 
-// ── Card Rendering ───────────────────────────────────────────────────────────
-const FRAME_ROTS  = [-2, 2, -1.5, 2.5, -3, 1.5, -2.5, 3];
-const SHADOW_ROTS = [ 3,-3,  2.5,-3.5,  4,-2.5,  3.5,-4];
-const TAPE_ROTS   = [-4, 3, -2,   4,  -3, 2,   -4,   3];
+
 // ── SHARED: SKILLS CHIPS + WHATSAPP CTA (used by base card + expanded profile) ──
 function buildSkillsChipsHTML(skillsRaw, chipClass = 'card-skill-chip') {
     if (!skillsRaw) return '';
@@ -1456,81 +1489,86 @@ function buildWhatsAppButtonHTML(student, btnClass = 'card-wa-btn') {
             Chat on WhatsApp
         </a>`;
 }
-const DECOS       = ['☆', '♡', '⚡', '◇', '✦', '☆', '♡', '⚡'];
-
-function renderCard(student, idx) {
-    const entry = document.createElement('div');
+// ── PROFILE FEED CARD (full-bleed, snap-scroll) ─────────────────────────────
+function renderFeedCard(student, idx) {
+    const card = document.createElement('div');
     const isArchived = student.yearbook_access === false || student.yearbook_access === 'false';
-    
-    entry.className = `student-entry ${idx % 2 === 0 ? 'entry-r' : 'entry-l'} ${isArchived ? 'entry-archived' : ''}`;
-    entry.onclick = () => openProfileModal(student);
-
-    const fr = FRAME_ROTS [idx % FRAME_ROTS.length];
-    const sr = SHADOW_ROTS[idx % SHADOW_ROTS.length];
-    const tr = TAPE_ROTS  [idx % TAPE_ROTS.length];
     const isDOS = student.is_dos === true || student.is_dos === 'true';
 
-    const bannerHTML = isArchived ? `<div class="archive-banner">⚠️ PROFILE ARCHIVED & UNPUBLISHED: Please contact DOS or complete your payment.</div>` : '';
-    const photoHTML = student.avatar_url ? `<img class="student-photo" src="${student.avatar_url}" alt="${student.full_name || ''}" loading="lazy">` : `<div class="photo-empty">👤</div>`;
-    const crownHTML = isDOS ? `<div class="info-crown">♛</div>` : `<div class="info-crown" style="visibility:hidden;">♛</div>`;
-    const statement = student.eternal_statement || '...';
-    const quoteHTML = `<div class="info-quote">"${statement}"</div><div class="info-quote-line"></div>`;
+    card.className = `feed-card ${isArchived ? 'entry-archived' : ''}`;
 
-    const pid = student.matric_number || '';
-    const handleHTML = pid ? `<div class="info-handle">${pid}</div>` : `<div class="info-handle">@${student.username || '—'}</div>`;
-    const decoSide = idx % 2 === 0 ? 'right:14px' : 'left:14px';
+    const bannerHTML = isArchived ? `<div class="feed-card-archive-banner">⚠️ PROFILE ARCHIVED & UNPUBLISHED: Please contact DOS or complete your payment.</div>` : '';
+    const mediaHTML = student.avatar_url
+        ? `<img class="feed-card-img" src="${student.avatar_url}" alt="${student.full_name || ''}" loading="lazy">`
+        : `<div class="feed-card-img-empty">👤</div>`;
+    const crownHTML = isDOS ? `<span class="feed-card-crown">♛</span>` : '';
     const verifiedBadge = (student.yearbook_verified === true || student.yearbook_verified === 'true') ? `<span class="verified-badge" title="Verified Member">✓</span>` : '';
+    const statement = student.eternal_statement || 'No words left behind.';
+    const pid = student.matric_number ? student.matric_number : `@${student.username || '—'}`;
 
-    // Skills chips + WhatsApp CTA — shared builders, also used in the expanded profile view
     const skillsChips = buildSkillsChipsHTML(student.skills_of_student);
-    const skillsHTML = skillsChips ? `<div class="card-skill-chip-group">${skillsChips}</div>` : '';
-    const waHTML = buildWhatsAppButtonHTML(student, 'card-wa-btn');
+    const skillsHTML = skillsChips ? `<div class="feed-card-skills">${skillsChips}</div>` : '';
 
     let socialsHTML = '';
     if (student.socials) {
         try {
             const parsed = typeof student.socials === 'string' ? JSON.parse(student.socials) : student.socials;
             const items = Object.entries(parsed).map(([platform, handle]) => `<span class="social-chip">${platform}: ${handle}</span>`).join('');
-            socialsHTML = `<div class="social-chip-group">${items}</div>`;
-        } catch(e) { socialsHTML = `<div class="social-chip-group"><span class="social-chip">${student.socials}</span></div>`; }
+            socialsHTML = `<div class="feed-card-socials">${items}</div>`;
+        } catch(e) { socialsHTML = `<div class="feed-card-socials"><span class="social-chip">${student.socials}</span></div>`; }
     }
 
+    const waHTML = buildWhatsAppButtonHTML(student, 'card-wa-btn');
     const likes = student.likes_count || 0;
     const hasLiked = !!localStorage.getItem(`znode_liked_${student.id}`);
-    const likeHTML = `
-        <div class="like-section">
-            <button class="like-btn ${hasLiked ? 'liked' : ''}" onclick="toggleLike(event, '${student.id}', this)">
-                <span class="like-heart">${hasLiked ? '♥' : '♡'}</span> <span class="like-counter">${likes}</span>
-            </button>
-        </div>
-    `;
 
-    entry.innerHTML = `
+    card.innerHTML = `
         ${bannerHTML}
-        <div class="onboarding-tag">#${String(idx + 1).padStart(3, '0')} IN DEPT</div>
-        <div class="photo-col">
-            <div class="frame-bg" style="transform:rotate(${sr}deg);"></div>
-            <div class="frame-fg" style="transform:rotate(${fr}deg);">
-                <div class="frame-tape" style="transform:translateX(-50%) rotate(${tr}deg);"></div>
-                ${photoHTML}
+        <div class="feed-card-media">
+            ${mediaHTML}
+            <div class="feed-card-fade"></div>
+            <div class="feed-card-hero-text">
+                <div class="feed-card-name">${crownHTML}${(student.full_name || 'Anonymous').toUpperCase()}${verifiedBadge}</div>
+                <div class="feed-card-quote">"${statement}"</div>
             </div>
         </div>
-        <div class="info-col">
-            ${crownHTML}
-            <div class="info-name">${(student.full_name || 'Anonymous').toUpperCase()}${verifiedBadge}</div>
-            <div class="info-role">${student.department || '—'}</div>
+        <div class="feed-card-body">
+            <div class="feed-card-dept">${student.department || '—'}</div>
+            <div class="feed-card-handle">${pid}</div>
             ${skillsHTML}
-            ${waHTML}
             ${socialsHTML}
-            ${likeHTML}
-            ${quoteHTML}
-            ${handleHTML}
+            ${waHTML}
+            <div class="feed-card-actions">
+                <button class="modal-action-btn like-btn ${hasLiked ? 'liked' : ''}" onclick="toggleLike(event, '${student.id}', this)">
+                    <span class="like-heart">${hasLiked ? '♥' : '♡'}</span>&nbsp;<span class="like-counter">${likes}</span>
+                </button>
+                <button class="modal-action-btn" onclick="shareFeedProfileLink('${student.id}')">🔗 Share Link</button>
+            </div>
         </div>
-        <span class="entry-deco" style="bottom:14px;${decoSide};">${DECOS[idx % DECOS.length]}</span>
     `;
-    return entry;
+    return card;
 }
 
+// Generic profile-link share — feed cards aren't tied to a single "currentViewedProfile"
+function shareFeedProfileLink(studentId) {
+    const student = allStudentsGlobal.find(s => s.id === studentId);
+    if (!student) return;
+    const { dept, year, inst, faculty } = getParams();
+    const base = 'https://znode-1-1.vercel.app/yearbook.html';
+    const params = new URLSearchParams();
+    if (dept) params.set('dept', dept);
+    if (year) params.set('year', year);
+    if (inst) params.set('inst', inst);
+    if (faculty) params.set('faculty', faculty);
+    params.set('profile', student.id);
+    const shareUrl = `${base}?${params.toString()}`;
+    const shareText = `Check out ${student.full_name}'s profile on the Z-NODE Yearbook! 🎓`;
+    if (navigator.share) {
+        navigator.share({ title: 'Z-NODE Profile', text: shareText, url: shareUrl }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(shareUrl).then(() => alert('Profile link copied!\n\n' + shareUrl));
+    }
+}
 
     
 async function loadYearbook(dept, year, inst) {
@@ -1825,12 +1863,13 @@ async function bootstrap() {
     }
 
     // Populate Data Grids
-    const grid = document.getElementById('studentGrid');
-    grid.innerHTML = ''; 
-    allStudentsGlobal.forEach((s, i) => grid.appendChild(renderCard(s, i)));
-    
-    grid.style.display = ''; 
-    grid.classList.add('student-grid-active');
+    // Populate the profile feed
+    const feed = document.getElementById('studentFeed');
+    feed.innerHTML = '';
+    allStudentsGlobal.forEach((s, i) => feed.appendChild(renderFeedCard(s, i)));
+
+    feed.style.display = '';
+    feed.classList.add('feed-active');
     document.getElementById('scrollCta').style.display = 'block';
 
     // Boot Trending Strip
@@ -1871,14 +1910,14 @@ bootstrap();
 window.addEventListener('pageshow', async (event) => {
     if (event.persisted) {
         // Page was restored from bfcache — force a fresh data reload
-        const grid = document.getElementById('studentGrid');
+        const feed = document.getElementById('studentFeed');
         const { dept, year, inst, faculty } = getParams();
         setCohortCoverImage(dept, faculty, inst);
 
         // Reset UI to loading state
-        grid.style.display = 'none';
-        grid.innerHTML = '';
-        grid.classList.remove('student-grid-active');
+        feed.style.display = 'none';
+        feed.innerHTML = '';
+        feed.classList.remove('feed-active');
         document.getElementById('scrollCta').style.display = 'none';
         document.getElementById('trendingWrapper').style.display = 'none';
         document.getElementById('loadingState').style.display = 'block';
@@ -1892,9 +1931,9 @@ window.addEventListener('pageshow', async (event) => {
             return;
         }
 
-        allStudentsGlobal.forEach((s, i) => grid.appendChild(renderCard(s, i)));
-        grid.style.display = '';
-        grid.classList.add('student-grid-active');
+        allStudentsGlobal.forEach((s, i) => feed.appendChild(renderFeedCard(s, i)));
+        feed.style.display = '';
+        feed.classList.add('feed-active');
         document.getElementById('scrollCta').style.display = 'block';
         renderTrending();
     }
